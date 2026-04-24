@@ -66,24 +66,104 @@ infra/
 ---
 
 ## Phase 4: First Azure deployment
-- Create resource group
-- Create Linux App Service plan
-- Create Web App
-- Deploy from zip or GitHub
+
+### Azure App Service deployment via GitHub Actions
+
+#### Output
+- Deployment is automated via GitHub Actions on push to `master`
+- Azure App Service runs with Linux runtime (Node 20)
+- Publish profile is stored as a GitHub secret and used for deployment
+- SCM/Kudu publishing credentials must be enabled for publish profile deployments
+
+#### Deployment steps
+
+1. **Create resource group**
+   ```bash
+   az group create --name <resource-group> --location westeurope
+   ```
+
+2. **Create App Service plan**
+   ```bash
+   az appservice plan create \
+     --name <app-service-plan> \
+     --resource-group <resource-group> \
+     --sku B1 \
+     --is-linux
+   ```
+
+3. **Create web app**
+   ```bash
+   az webapp create \
+     --resource-group <resource-group> \
+     --plan <app-service-plan> \
+     --name <app-name> \
+     --runtime "NODE|20-lts"
+   ```
+
+4. **Enable SCM publishing credentials (if disabled)**
+   ```bash
+   az resource update \
+     --resource-group <resource-group> \
+     --name scm \
+     --namespace Microsoft.Web \
+     --resource-type basicPublishingCredentialsPolicies \
+     --parent sites/<app-name> \
+     --set properties.allow=true
+   ```
+
+5. **Generate publish profile**
+   ```bash
+   az webapp deployment list-publishing-profiles \
+     --resource-group <resource-group> \
+     --name <app-name> \
+     --xml
+   ```
+   Copy the full XML output.
+
+6. **Add publish profile to GitHub**  
+   Repository → **Settings** → **Secrets and variables** → **Actions**  
+   - Secret name: `AZURE_WEBAPP_PUBLISH_PROFILE`  
+   - Paste the full XML.
+
+7. **Configure GitHub Actions workflow**  
+   `.github/workflows/deploy-app-service.yml` (see YAML in the project).
+
+8. **Push code to GitHub**
+   ```bash
+   git add .
+   git commit -m "Setup Azure deployment"
+   git push
+   ```
+
+9. **Verify deployment**
+   ```bash
+   curl https://<app-name>.azurewebsites.net/health
+   ```
+
+#### Notes
+- Deployment triggers on push to `master`
+- Azure runs `npm start` from `package.json`
+- Kudu (SCM) handles deployment internally
 
 ### Verify
 - Public URL works
 - Check logs via Azure CLI
 
-### Output
-- Document deployment steps
+### App URL
+https://devops-tracker-29193.azurewebsites.net
+
+### Verification
+```bash
+curl https://devops-tracker-29193.azurewebsites.net/health
+```
+
 
 ---
 
 ## Phase 5: CI/CD
 - Create GitHub Actions workflow
 
-### On push to main
+### On push to master
 - install dependencies
 - run tests (if present)
 - deploy to Azure App Service

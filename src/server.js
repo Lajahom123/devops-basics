@@ -56,6 +56,14 @@ app.get("/deployments", (_req, res) => {
   res.json([...deployments]);
 });
 
-app.listen(PORT, () => {
-  console.log(`devops-tracker listening on port ${PORT} (${NODE_ENV})`);
-});
+function start() {
+  app.listen(PORT, () => {
+    console.log(`devops-tracker listening on port ${PORT} (${NODE_ENV})`);
+  });
+}
+
+if (require.main === module) {
+  start();
+}
+
+module.exports = { app, start };
