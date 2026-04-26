@@ -106,6 +106,7 @@ resource "azurerm_application_insights" "main" {
   application_type    = "web"
 }
 
+/*
 resource "azuread_application" "github_actions" {
   display_name = "github-${local.name_prefix}-deploy"
 }
@@ -140,3 +141,4 @@ resource "azurerm_role_assignment" "github_rg_contributor" {
   role_definition_name = "Contributor"
   principal_id         = azuread_service_principal.github_actions.object_id
 }
+*/
