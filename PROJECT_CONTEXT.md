@@ -174,6 +174,9 @@ curl https://devops-tracker-29193.azurewebsites.net/health
 ### Verify
 - Automatic deployment works
 
+## Notes
+- do not zip the file as a deployment step, let Azure do it
+
 ---
 
 ## Phase 6: Container registry
@@ -187,6 +190,10 @@ curl https://devops-tracker-29193.azurewebsites.net/health
 
 ### Verify
 - `/version` reflects deployed version
+
+## Notes
+- use managed identity
+- make sure to use the right processor architecture linux/amd64
 
 ---
 
