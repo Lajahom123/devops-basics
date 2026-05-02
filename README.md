@@ -13,7 +13,7 @@ Small Express API used to learn Azure DevOps, containers, CI/CD, and Terraform. 
 Clone the repository and install dependencies:
 
 ```bash
-git clone <your-repo-url>
+git clone git@github.com:Lajahom123/devops-basics.git
 cd devops-tracker
 npm install
 ```

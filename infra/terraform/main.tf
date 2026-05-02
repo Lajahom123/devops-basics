@@ -29,6 +29,10 @@ locals {
 resource "azurerm_resource_group" "main" {
   name     = "rg-${local.name_prefix}"
   location = var.location
+
+  tags = {
+    Owner = var.owner_email
+  }
 }
 
 resource "azurerm_container_registry" "main" {

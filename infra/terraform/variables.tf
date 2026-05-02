@@ -16,6 +16,11 @@ variable "location" {
   default     = "westeurope"
 }
 
+variable "owner_email" {
+  description = "Project owner."
+  type        = string
+}
+
 variable "web_app_name" {
   description = "Globally unique Azure Web App name."
   type        = string
