@@ -94,6 +94,7 @@ resource "azurerm_role_assignment" "web_app_acr_pull" {
   principal_id         = azurerm_linux_web_app.main.identity[0].principal_id
 }
 
+/*
 resource "azurerm_log_analytics_workspace" "main" {
   name                = "log-${local.name_prefix}"
   resource_group_name = azurerm_resource_group.main.name
@@ -110,7 +111,6 @@ resource "azurerm_application_insights" "main" {
   application_type    = "web"
 }
 
-/*
 resource "azuread_application" "github_actions" {
   display_name = "github-${local.name_prefix}-deploy"
 }
