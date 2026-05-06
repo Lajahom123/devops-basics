@@ -1,19 +1,38 @@
-const { randomUUID } = require("crypto");
 const express = require("express");
+const {
+  checkDatabase,
+  createDeployment,
+  getDeployment,
+  getDeploymentStats,
+  initDatabase,
+  listDeployments,
+} = require("./database");
 
 const PORT = Number(process.env.PORT) || 3000;
 const APP_VERSION = process.env.APP_VERSION || "0.0.0";
 const NODE_ENV = process.env.NODE_ENV || "development";
 
-/** @type {Array<{ id: string, service: string, version: string, environment: string, recordedAt: string }>} */
-const deployments = [];
-
 const app = express();
 app.use(express.json());
 
-app.get("/health", (_req, res) => {
-  res.json({
-    status: "ok",
+app.get("/health", async (_req, res) => {
+  let database;
+  try {
+    database = await checkDatabase();
+  } catch (err) {
+    database = {
+      configured: true,
+      error: err.message,
+      status: "error",
+    };
+  }
+
+  const status =
+    database.configured && database.status !== "ok" ? "degraded" : "ok";
+
+  res.status(status === "ok" ? 200 : 503).json({
+    database,
+    status,
     timestamp: new Date().toISOString(),
   });
 });
@@ -25,7 +44,7 @@ app.get("/version", (_req, res) => {
   });
 });
 
-app.post("/deployments", (req, res) => {
+app.post("/deployments", async (req, res) => {
   const { service, version, environment } = req.body ?? {};
   if (
     typeof service !== "string" ||
@@ -41,29 +60,48 @@ app.post("/deployments", (req, res) => {
     });
   }
 
-  const record = {
-    id: randomUUID(),
+  const record = await createDeployment({
     service: service.trim(),
     version: version.trim(),
     environment: environment.trim(),
-    recordedAt: new Date().toISOString(),
-  };
-  deployments.push(record);
+  });
   res.status(201).json(record);
 });
 
-app.get("/deployments", (_req, res) => {
-  res.json([...deployments]);
+app.get("/deployments", async (_req, res) => {
+  res.json(await listDeployments());
 });
 
-function start() {
-  app.listen(PORT, () => {
+app.get("/deployments/stats", async (_req, res) => {
+  res.json(await getDeploymentStats());
+});
+
+app.get("/deployments/:id", async (req, res) => {
+  const record = await getDeployment(req.params.id);
+  if (!record) {
+    return res.status(404).json({ error: "Deployment not found" });
+  }
+
+  res.json(record);
+});
+
+app.use((err, _req, res, _next) => {
+  console.error(err);
+  res.status(500).json({ error: "Internal server error" });
+});
+
+async function start() {
+  await initDatabase();
+  return app.listen(PORT, () => {
     console.log(`devops-tracker listening on port ${PORT} (${NODE_ENV})`);
   });
 }
 
 if (require.main === module) {
-  start();
+  start().catch((err) => {
+    console.error(err);
+    process.exit(1);
+  });
 }
 
 module.exports = { app, start };
