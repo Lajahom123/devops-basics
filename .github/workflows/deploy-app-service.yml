@@ -1,4 +1,4 @@
-name: Build and deploy container
+name: Build and deploy
 
 on:
   push:
@@ -6,53 +6,57 @@ on:
       - master
   workflow_dispatch:
 
+permissions:
+  id-token: write
+  contents: read
+
 env:
-  WEB_APP_NAME: devops-tracker-29193
   ACR_NAME: devopstracker29193
+  ACR_LOGIN_SERVER: devopstracker29193.azurecr.io
   IMAGE_NAME: devops-tracker
-  NODE_VERSION: "20.x"
+  WEBAPP_NAME: devops-tracker-29193
+  RESOURCE_GROUP: rg-devops-tracker-dev
 
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
+      - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
+      - name: Azure login
+        uses: azure/login@v2
         with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: npm
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
-      - name: Install dependencies
-        run: npm ci
+      - name: ACR login
+        run: az acr login --name $ACR_NAME
 
-      - name: Run tests
-        run: npm test
-
-      - name: Log in to ACR
-        run: |
-          echo "${{ secrets.ACR_PASSWORD }}" | docker login $ACR_NAME.azurecr.io \
-            --username "${{ secrets.ACR_USERNAME }}" \
-            --password-stdin
-
-      - name: Build Docker image
+      - name: Build image
         run: |
           docker build \
-            -t $ACR_NAME.azurecr.io/$IMAGE_NAME:${{ github.sha }} \
-            -t $ACR_NAME.azurecr.io/$IMAGE_NAME:latest \
+            -t $ACR_LOGIN_SERVER/$IMAGE_NAME:${{ github.sha }} \
+            -t $ACR_LOGIN_SERVER/$IMAGE_NAME:latest \
             .
 
-      - name: Push Docker image
+      - name: Push image
         run: |
-          docker push $ACR_NAME.azurecr.io/$IMAGE_NAME:${{ github.sha }}
-          docker push $ACR_NAME.azurecr.io/$IMAGE_NAME:latest
+          docker push $ACR_LOGIN_SERVER/$IMAGE_NAME:${{ github.sha }}
+          docker push $ACR_LOGIN_SERVER/$IMAGE_NAME:latest
 
-      - name: Deploy image to Azure Web App
-        uses: azure/webapps-deploy@v3
-        with:
-          app-name: ${{ env.WEB_APP_NAME }}
-          publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
-          images: ${{ env.ACR_NAME }}.azurecr.io/${{ env.IMAGE_NAME }}:${{ github.sha }}
+      - name: Update Web App container image
+        run: |
+          az webapp config container set \
+            --name $WEBAPP_NAME \
+            --resource-group $RESOURCE_GROUP \
+            --container-image-name $ACR_LOGIN_SERVER/$IMAGE_NAME:${{ github.sha }} \
+            --container-registry-url https://$ACR_LOGIN_SERVER
+
+      - name: Restart Web App
+        run: |
+          az webapp restart \
+            --name $WEBAPP_NAME \
+            --resource-group $RESOURCE_GROUP
