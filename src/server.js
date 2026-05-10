@@ -91,10 +91,16 @@ app.use((err, _req, res, _next) => {
 });
 
 async function start() {
-  await initDatabase();
-  return app.listen(PORT, () => {
+  app.listen(PORT, "0.0.0.0", () => {
     console.log(`devops-tracker listening on port ${PORT} (${NODE_ENV})`);
   });
+
+  try {
+    await initDatabase();
+    console.log("database initialized");
+  } catch (err) {
+    console.error("database initialization failed", err);
+  }
 }
 
 if (require.main === module) {
