@@ -5,17 +5,6 @@ locals {
     0,
     24
   )
-  database_url = "postgres://${var.postgres_admin_username}:${random_password.postgres_admin.result}@${azurerm_postgresql_flexible_server.main.fqdn}:5432/${azurerm_postgresql_flexible_server_database.main.name}?sslmode=require"
-
-  app_settings = {
-    DATABASE_SSL                        = "true"
-    DATABASE_SSL_REJECT_UNAUTHORIZED    = "true"
-    DATABASE_URL                        = "@Microsoft.KeyVault(SecretUri=${azurerm_key_vault_secret.database_url.id})"
-    NODE_ENV                            = var.environment
-    PORT                                = var.container_port
-    WEBSITES_ENABLE_APP_SERVICE_STORAGE = "false"
-    WEBSITES_PORT                       = var.container_port
-  }
 }
 
 resource "azurerm_key_vault" "main" {
@@ -29,16 +18,6 @@ resource "azurerm_key_vault" "main" {
   soft_delete_retention_days    = 7
   enable_rbac_authorization     = true
   public_network_access_enabled = true
-}
-
-resource "azurerm_key_vault_secret" "database_url" {
-  name         = "database-url"
-  value        = local.database_url
-  key_vault_id = azurerm_key_vault.main.id
-
-  depends_on = [
-    azurerm_role_assignment.current_user_key_vault_secrets_officer
-  ]
 }
 
 resource "azurerm_role_assignment" "current_user_key_vault_secrets_officer" {

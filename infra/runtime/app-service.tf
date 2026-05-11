@@ -43,7 +43,22 @@ resource "azurerm_linux_web_app" "main" {
     }
   }
 
-  app_settings = local.app_settings
+  app_settings = {
+    DATABASE_SSL                        = "true"
+    DATABASE_SSL_REJECT_UNAUTHORIZED    = "true"
+
+    AZURE_CLIENT_ID = azurerm_user_assigned_identity.web_app.client_id
+
+    POSTGRES_HOST = azurerm_postgresql_flexible_server.main.fqdn
+    POSTGRES_PORT = "5432"
+    POSTGRES_DB   = "devops_tracker"
+    POSTGRES_USER = "id-devops-tracker-webapp"
+
+    NODE_ENV                            = var.environment
+    PORT                                = var.container_port
+    WEBSITES_ENABLE_APP_SERVICE_STORAGE = "false"
+    WEBSITES_PORT                       = var.container_port
+  }
 
   depends_on = [
     azurerm_role_assignment.web_app_acr_pull,
