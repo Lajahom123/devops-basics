@@ -1,191 +1,87 @@
 # DevOps tracker
 
-Small Express API used to learn Azure DevOps, containers, CI/CD, Terraform, and database-backed services. Deployments are stored in PostgreSQL when `DATABASE_URL` is configured; otherwise the app falls back to in-memory storage for lightweight local tests.
+DevOps tracker is a small Express API used as a working system for practicing production-style Azure and DevOps patterns. The application records deployment events and exposes simple read endpoints, but the main engineering value of the repository is the surrounding platform: Terraform-managed Azure infrastructure, container delivery, private database networking, GitHub Actions OIDC, and managed identities.
 
-## Prerequisites
+The project is intentionally small at the application layer so infrastructure and operational decisions remain visible. It is not a product template; it is a focused environment for learning how production Azure systems are usually assembled and reasoned about.
 
-- Node.js 20 or newer (LTS recommended)
-- npm
-- Docker and Docker Compose (optional, for container run)
+## Architecture overview
 
-## Local run
+The cloud architecture centers on an Azure Linux Web App running a container image from Azure Container Registry. The Web App is integrated with a VNet for outbound private access to Azure Database for PostgreSQL Flexible Server. PostgreSQL is deployed without public network access and is reachable through a delegated subnet plus a private DNS zone.
 
-Clone the repository and install dependencies:
+Identity is split by responsibility:
+
+- GitHub Actions authenticates to Azure with OIDC through a long-lived bootstrap identity.
+- GitHub Actions receives Azure RBAC for image push and deployment operations.
+- The Web App uses a user-assigned managed identity to pull images from ACR.
+- The PostgreSQL production authentication target is managed identity to Entra token to PostgreSQL role, avoiding application-owned database passwords.
+
+Terraform is split into separate lifecycle roots:
+
+- `infra/foundation`: persistent resource group, networking, private DNS, managed identities, and GitHub Actions OIDC identity.
+- `infra/runtime`: cost-bearing application resources such as ACR, App Service, PostgreSQL, Key Vault runtime settings, and runtime RBAC.
+
+## High-level deployment flow
+
+```text
+Developer push
+  -> GitHub Actions
+  -> Azure OIDC authentication
+  -> Terraform infrastructure changes
+  -> Docker image build
+  -> Image push to ACR
+  -> Web App container image update
+  -> Web App pulls image using managed identity
+  -> Web App connects privately to PostgreSQL
+  -> Production target: Web App authenticates to PostgreSQL using an Entra token
+```
+
+The current workflow uses `azure/login` with OIDC and `az acr login`; it does not use ACR admin credentials or Web App publish profiles.
+
+## Security overview
+
+The repository is structured around removing long-lived credentials from deployment and runtime paths.
+
+- GitHub does not store Azure client secrets, ACR passwords, or publish profiles.
+- ACR admin credentials are disabled.
+- PostgreSQL is private-only and is not routable from the public internet.
+- App Service reaches PostgreSQL through VNet integration and private DNS.
+- The current transitional database connection string is stored in Key Vault, not directly in App Service settings.
+- The production authentication direction is managed identity based database access, where the app obtains an Entra token and PostgreSQL maps that identity to a database role.
+
+Terraform state can still contain sensitive generated values. Local state files are ignored, and a remote state backend is the expected next hardening step before shared operation.
+
+## Local application development
+
+The API can run without PostgreSQL and falls back to in-memory storage. For container-based local testing, Docker Compose starts both the app and PostgreSQL:
 
 ```bash
-git clone git@github.com:Lajahom123/devops-basics.git
-cd devops-tracker
 npm install
-```
-
-Start the server:
-
-```bash
-npm run dev
-```
-
-For a one-shot run without file watching:
-
-```bash
-npm start
-```
-
-### Environment variables
-
-| Variable       | Default        | Purpose                          |
-| -------------- | -------------- | -------------------------------- |
-| `PORT`         | `3000`         | HTTP port                        |
-| `APP_VERSION`  | `0.0.0`        | Value returned by `GET /version` |
-| `NODE_ENV`     | `development`  | Shown as `environment` on `/version` |
-| `DATABASE_URL` | unset          | PostgreSQL connection string     |
-| `DATABASE_SSL` | `false`        | Set to `true` for SSL DB connections, such as Azure PostgreSQL |
-| `DATABASE_SSL_REJECT_UNAUTHORIZED` | `true` | Keep TLS certificate validation enabled |
-
-Example:
-
-```bash
-PORT=8080 APP_VERSION=1.2.3 NODE_ENV=development npm run dev
-```
-
-The API listens on `http://localhost:<PORT>` (default `http://localhost:3000`).
-
-Without `DATABASE_URL`, the app uses in-memory storage. This keeps `npm test` simple, but container runs should use PostgreSQL.
-
-## Docker Compose with PostgreSQL
-
-Build and start the full local stack:
-
-```bash
+npm test
 docker compose up --build
 ```
 
-Run in the background:
+Core endpoints:
 
-```bash
-docker compose up --build -d
-```
+- `GET /health`
+- `GET /version`
+- `POST /deployments`
+- `GET /deployments`
+- `GET /deployments/:id`
+- `GET /deployments/stats`
 
-Stop:
+## Documentation
 
-```bash
-docker compose down
-```
+- [Architecture overview](docs/architecture/overview.md)
+- [Infrastructure lifecycle](docs/architecture/infrastructure-lifecycle.md)
+- [Private networking](docs/networking/private-networking.md)
+- [PostgreSQL managed identity authentication](docs/security/postgresql-managed-identity.md)
+- [GitHub Actions deployment](docs/deployment/github-actions.md)
+- [Operations and lessons learned](docs/operations/lessons-learned.md)
+- [Cost management](docs/operations/cost-management.md)
 
-Stop and remove the local database volume:
+Architecture decisions:
 
-```bash
-docker compose down -v
-```
-
-Compose starts:
-
-- `app`: Express API on `http://localhost:3000`
-- `db`: PostgreSQL 16 on `localhost:5432`
-
-The app automatically creates the `deployments` table on startup. Local Compose uses this connection string:
-
-```text
-postgres://devops:devops_password@db:5432/devops_tracker
-```
-
-Or build and run the image directly:
-
-```bash
-docker build -t devops-tracker .
-docker run --rm -p 3000:3000 \
-  -e APP_VERSION=1.0.0 \
-  -e NODE_ENV=production \
-  -e DATABASE_URL=postgres://devops:devops_password@host.docker.internal:5432/devops_tracker \
-  devops-tracker
-```
-
-Compose already sets `PORT`, `APP_VERSION`, `NODE_ENV`, `DATABASE_URL`, and `DATABASE_SSL` in `docker-compose.yml`; adjust there or override with `-e` when using `docker run`.
-
-## API examples
-
-Replace the base URL if you use a different host or port.
-
-**Health**
-
-```bash
-curl -s http://localhost:3000/health
-```
-
-When PostgreSQL is configured and reachable, `database.status` is `ok`.
-
-**Version**
-
-```bash
-curl -s http://localhost:3000/version
-```
-
-**Record a deployment**
-
-```bash
-curl -s -X POST http://localhost:3000/deployments \
-  -H "Content-Type: application/json" \
-  -d '{"service":"api","version":"2.1.0","environment":"staging"}'
-```
-
-**List deployments**
-
-```bash
-curl -s http://localhost:3000/deployments
-```
-
-**Get one deployment**
-
-Use an `id` returned by `POST /deployments`.
-
-```bash
-curl -s http://localhost:3000/deployments/<deployment-id>
-```
-
-**Deployment stats**
-
-```bash
-curl -s http://localhost:3000/deployments/stats
-```
-
-Invalid `POST /deployments` bodies (missing or empty `service`, `version`, or `environment`) receive `400` with a JSON error message.
-
-## Azure database notes
-
-Terraform configures the cloud path with private database networking:
-
-- Azure App Service uses regional VNet integration.
-- Azure PostgreSQL Flexible Server is deployed into a delegated private subnet.
-- PostgreSQL public network access is disabled.
-- A private DNS zone resolves the PostgreSQL hostname inside the VNet.
-- The database requires secure transport.
-- `DATABASE_URL` is stored in Azure Key Vault and referenced from App Service.
-- `DATABASE_SSL=true` and `DATABASE_SSL_REJECT_UNAUTHORIZED=true` are set on App Service.
-
-Keep the same API container image and swap only the database connection settings when moving from local Compose to Azure. Do not commit real database passwords or connection strings.
-
-The private networking setup requires an App Service plan tier that supports VNet integration, such as `B1` or higher.
-
-## Repository layout
-
-```
-src/server.js          # Express app and routes
-src/database.js        # PostgreSQL persistence with in-memory fallback
-package.json           # Dependencies and npm scripts
-Dockerfile             # Production-oriented Node image
-docker-compose.yml     # Local app + PostgreSQL container stack
-.github/workflows/     # GitHub Actions (CI/CD added in a later phase)
-infra/                 # Terraform and related infra (later phase)
-```
-
-## Architecture (high level)
-
-- **Runtime:** Node.js with Express; JSON request bodies for `POST /deployments`.
-- **State:** PostgreSQL via `pg` when `DATABASE_URL` is set; in-memory fallback otherwise.
-- **Config:** `PORT`, `APP_VERSION`, `NODE_ENV`, `DATABASE_URL`, and `DATABASE_SSL`; no secrets in the repo.
-
-## Troubleshooting
-
-- **Port already in use:** Set `PORT` to a free port, or stop the other process using 3000.
-- **Docker: cannot connect to daemon:** Start Docker Desktop (or your container engine) and retry `docker compose up --build`.
-- **Database health is degraded:** Check `docker compose ps`, confirm the `db` service is healthy, and verify `DATABASE_URL`.
-- **Empty deployment list after `docker compose down -v`:** Expected; `-v` deletes the PostgreSQL volume.
+- [ADR 0001: Use Terraform](docs/decisions/0001-use-terraform.md)
+- [ADR 0002: Use GitHub OIDC](docs/decisions/0002-use-github-oidc.md)
+- [ADR 0003: Use private PostgreSQL networking](docs/decisions/0003-private-postgresql.md)
+- [ADR 0004: Use managed identity for database authentication](docs/decisions/0004-managed-identity-db-auth.md)

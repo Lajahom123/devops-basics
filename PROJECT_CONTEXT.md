@@ -61,6 +61,8 @@ Dockerfile
 docker-compose.yml
 .github/workflows/
 infra/
+  foundation/
+  runtime/
 
 
 ---
@@ -198,7 +200,9 @@ curl https://devops-tracker-29193.azurewebsites.net/health
 ---
 
 ## Phase 7: Terraform
-- Create `infra/terraform`
+- Create `infra/foundation`
+- Create `infra/runtime`
+- Keep long-lived GitHub Actions OIDC identity, network, and managed identities in `infra/foundation`
 
 ### Provision
 - resource group
