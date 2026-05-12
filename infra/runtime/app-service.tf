@@ -9,12 +9,12 @@ resource "azurerm_service_plan" "main" {
 }
 
 resource "azurerm_linux_web_app" "main" {
-  name                = var.web_app_name
-  resource_group_name = data.azurerm_resource_group.foundation.name
-  location            = var.location
-  service_plan_id     = azurerm_service_plan.main.id
+  name                      = var.web_app_name
+  resource_group_name       = data.azurerm_resource_group.foundation.name
+  location                  = var.location
+  service_plan_id           = azurerm_service_plan.main.id
   virtual_network_subnet_id = data.azurerm_subnet.app_service.id
-  tags                = local.common_tags
+  tags                      = local.common_tags
 
   https_only                      = true
   key_vault_reference_identity_id = data.azurerm_user_assigned_identity.web_app.id
@@ -56,6 +56,10 @@ resource "azurerm_linux_web_app" "main" {
     POSTGRES_PORT = "5432"
     POSTGRES_DB   = "devops_tracker"
     POSTGRES_USER = "id-devops-tracker-webapp"
+
+    APPLICATIONINSIGHTS_CONNECTION_STRING      = azurerm_application_insights.main.connection_string
+    APPINSIGHTS_INSTRUMENTATIONKEY             = azurerm_application_insights.main.instrumentation_key
+    ApplicationInsightsAgent_EXTENSION_VERSION = "~3"
 
     NODE_ENV                            = var.environment
     PORT                                = var.container_port
