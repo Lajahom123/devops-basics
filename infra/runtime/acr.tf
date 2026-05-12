@@ -5,6 +5,7 @@ resource "azurerm_container_registry" "main" {
   sku                 = "Basic"
 
   admin_enabled = false
+  tags          = local.common_tags
 }
 
 resource "azurerm_role_assignment" "web_app_acr_pull" {

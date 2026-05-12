@@ -5,6 +5,9 @@ locals {
     0,
     24
   )
+  common_tags = {
+    Owner = var.owner_email
+  }
 }
 
 resource "azurerm_key_vault" "main" {
@@ -12,6 +15,7 @@ resource "azurerm_key_vault" "main" {
   resource_group_name = data.azurerm_resource_group.foundation.name
   location            = var.location
   tenant_id           = data.azurerm_client_config.current.tenant_id
+  tags                = local.common_tags
 
   sku_name                      = "standard"
   purge_protection_enabled      = true

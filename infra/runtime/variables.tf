@@ -165,3 +165,14 @@ variable "postgres_standby_zone" {
   type    = string
   default = "2"
 }
+
+variable "postgres_admin_password" {
+  description = "PostgreSQL administrator password. Kept only as a bootstrap/fallback credential while password auth remains enabled."
+  type        = string
+  sensitive   = true
+}
+
+variable "postgres_entra_admin_principal_name" {
+  type        = string
+  description = "Display name or UPN of the Microsoft Entra administrator for PostgreSQL."
+}

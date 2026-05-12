@@ -1,11 +1,7 @@
-locals {
-  name_prefix = var.project_name
-}
-
 resource "azurerm_virtual_network" "main" {
   name                = "vnet-${local.name_prefix}"
   resource_group_name = data.azurerm_resource_group.main.name
-  location            = data.azurerm_resource_group.main.location
+  location            = var.location
   address_space       = [var.vnet_address_space]
 
   tags = {
@@ -26,6 +22,10 @@ resource "azurerm_subnet" "app_service" {
 
     service_delegation {
       name = "Microsoft.Web/serverFarms"
+
+      actions = [
+        "Microsoft.Network/virtualNetworks/subnets/action",
+      ]
     }
   }
 }

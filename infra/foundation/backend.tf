@@ -1,5 +1,8 @@
 terraform {
-  backend "local" {
-    path = "terraform.tfstate"
+  backend "azurerm" {
+    resource_group_name  = "rg-devops-tracker-dev"
+    storage_account_name = "stdevopstrackerswn"
+    container_name       = "tfstate"
+    key                  = "foundation.tfstate"
   }
 }

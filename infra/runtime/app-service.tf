@@ -2,6 +2,7 @@ resource "azurerm_service_plan" "main" {
   name                = "plan-${local.name_prefix}"
   resource_group_name = data.azurerm_resource_group.foundation.name
   location            = var.location
+  tags                = local.common_tags
 
   os_type  = "Linux"
   sku_name = var.app_service_sku
@@ -12,6 +13,8 @@ resource "azurerm_linux_web_app" "main" {
   resource_group_name = data.azurerm_resource_group.foundation.name
   location            = var.location
   service_plan_id     = azurerm_service_plan.main.id
+  virtual_network_subnet_id = data.azurerm_subnet.app_service.id
+  tags                = local.common_tags
 
   https_only                      = true
   key_vault_reference_identity_id = data.azurerm_user_assigned_identity.web_app.id
@@ -44,10 +47,10 @@ resource "azurerm_linux_web_app" "main" {
   }
 
   app_settings = {
-    DATABASE_SSL                        = "true"
-    DATABASE_SSL_REJECT_UNAUTHORIZED    = "true"
+    DATABASE_SSL                     = "true"
+    DATABASE_SSL_REJECT_UNAUTHORIZED = "true"
 
-    AZURE_CLIENT_ID = azurerm_user_assigned_identity.web_app.client_id
+    AZURE_CLIENT_ID = data.azurerm_user_assigned_identity.web_app.client_id
 
     POSTGRES_HOST = azurerm_postgresql_flexible_server.main.fqdn
     POSTGRES_PORT = "5432"
