@@ -1,0 +1,14 @@
+project_name        = "devops-tracker"
+environment         = "dev"
+location            = "switzerlandnorth"
+resource_group_name = "rg-devops-tracker-dev"
+owner_email         = "owner@example.com"
+
+vnet_address_space                = "10.20.0.0/16"
+app_service_subnet_address_prefix = "10.20.1.0/24"
+postgres_subnet_address_prefix    = "10.20.2.0/24"
+admin_subnet_address_prefix       = "10.20.3.0/24"
+
+github_owner  = "your-github-owner"
+github_repo   = "your-github-repo"
+github_branch = "master"

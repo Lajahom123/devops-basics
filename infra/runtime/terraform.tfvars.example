@@ -1,0 +1,39 @@
+project_name        = "devops-tracker"
+environment         = "dev"
+location            = "switzerlandnorth"
+resource_group_name = "rg-devops-tracker-dev"
+owner_email         = "owner@example.com"
+
+vnet_name                      = "vnet-devops-tracker"
+app_service_subnet_name        = "snet-web-egress"
+postgres_subnet_name           = "snet-postgres"
+postgres_private_dns_zone_name = "private.postgres.database.azure.com"
+web_app_identity_name          = "id-devops-tracker-webapp"
+github_actions_principal_id    = "00000000-0000-0000-0000-000000000000"
+
+web_app_name = "devops-tracker-12345"
+acr_name     = "devopstracker12345"
+
+app_service_sku   = "B1"
+docker_image_name = "devops-tracker:latest"
+container_port    = "3000"
+
+key_vault_name = "kv-devops-tracker-abc"
+
+postgres_server_name           = "psql-devops-tracker-12345-swn"
+postgres_database_name         = "devops_tracker"
+postgres_admin_username        = "devopsadmin"
+postgres_admin_password        = "replace-with-a-strong-password"
+postgres_version               = "16"
+postgres_sku_name              = "B_Standard_B1ms"
+postgres_storage_mb            = 32768
+postgres_backup_retention_days = 7
+
+postgres_zone                         = "1"
+postgres_geo_redundant_backup_enabled = false
+postgres_maintenance_day_of_week      = 0
+postgres_maintenance_start_hour       = 2
+postgres_maintenance_start_minute     = 0
+postgres_standby_zone                 = "2"
+
+postgres_entra_admin_principal_name = "user@example.com"
