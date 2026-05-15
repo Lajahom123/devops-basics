@@ -58,3 +58,10 @@ resource "azurerm_subnet" "admin" {
   virtual_network_name = azurerm_virtual_network.main.name
   address_prefixes     = [var.admin_subnet_address_prefix]
 }
+
+resource "azurerm_subnet" "container_apps" {
+  name                 = "snet-container-apps"
+  resource_group_name  = data.azurerm_resource_group.main.name
+  virtual_network_name = azurerm_virtual_network.main.name
+  address_prefixes     = [var.container_apps_subnet_address_prefix]
+}

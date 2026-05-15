@@ -34,6 +34,18 @@ output "admin_subnet_name" {
   value = azurerm_subnet.admin.name
 }
 
+output "admin_subnet_id" {
+  value = azurerm_subnet.admin.id
+}
+
+output "container_apps_subnet_name" {
+  value = azurerm_subnet.container_apps.name
+}
+
+output "container_apps_subnet_id" {
+  value = azurerm_subnet.container_apps.id
+}
+
 output "postgres_private_dns_zone_name" {
   value = azurerm_private_dns_zone.postgres.name
 }

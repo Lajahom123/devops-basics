@@ -1,7 +1,7 @@
 locals {
   name_prefix = var.project_name
   common_tags = {
-    Owner       = var.owner_email
+    Owner = var.owner_email
   }
 }
 

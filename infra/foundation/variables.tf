@@ -50,6 +50,12 @@ variable "admin_subnet_address_prefix" {
   default     = "10.20.3.0/24"
 }
 
+variable "container_apps_subnet_address_prefix" {
+  description = "Subnet delegated to container apps."
+  type        = string
+  default     = "10.20.3.0/24"
+}
+
 variable "github_owner" {
   description = "GitHub organization or username."
   type        = string
