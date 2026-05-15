@@ -85,3 +85,15 @@ output "azure_subscription_id" {
 output "github_actions_principal_id" {
   value = azuread_service_principal.github_actions.object_id
 }
+
+output "migration_job_identity_id" {
+  value = azurerm_user_assigned_identity.migration_job.id
+}
+
+output "migration_job_identity_client_id" {
+  value = azurerm_user_assigned_identity.migration_job.client_id
+}
+
+output "migration_job_identity_principal_id" {
+  value = azurerm_user_assigned_identity.migration_job.principal_id
+}
