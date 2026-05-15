@@ -1,6 +1,6 @@
 resource "azurerm_container_registry" "main" {
   name                = var.acr_name
-  resource_group_name = data.azurerm_resource_group.foundation.name
+  resource_group_name = data.terraform_remote_state.foundation.outputs.resource_group_name
   location            = var.location
   sku                 = "Basic"
 
@@ -11,13 +11,13 @@ resource "azurerm_container_registry" "main" {
 resource "azurerm_role_assignment" "web_app_acr_pull" {
   scope                = azurerm_container_registry.main.id
   role_definition_name = "AcrPull"
-  principal_id         = data.azurerm_user_assigned_identity.web_app.principal_id
+  principal_id         = data.terraform_remote_state.foundation.outputs.web_app_identity_principal_id
 }
 
 resource "azurerm_role_assignment" "github_actions_acr_push" {
   scope                = azurerm_container_registry.main.id
   role_definition_name = "AcrPush"
-  principal_id         = var.github_actions_principal_id
+  principal_id         = data.terraform_remote_state.foundation.outputs.github_actions_principal_id
 }
 
 resource "azurerm_role_assignment" "migration_job_acr_pull" {

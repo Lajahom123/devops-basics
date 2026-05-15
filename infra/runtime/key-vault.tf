@@ -12,7 +12,7 @@ locals {
 
 resource "azurerm_key_vault" "main" {
   name                = local.key_vault_name
-  resource_group_name = data.azurerm_resource_group.foundation.name
+  resource_group_name = data.terraform_remote_state.foundation.outputs.resource_group_name
   location            = var.location
   tenant_id           = data.azurerm_client_config.current.tenant_id
   tags                = local.common_tags
@@ -33,5 +33,5 @@ resource "azurerm_role_assignment" "current_user_key_vault_secrets_officer" {
 resource "azurerm_role_assignment" "web_app_key_vault_secrets_user" {
   scope                = azurerm_key_vault.main.id
   role_definition_name = "Key Vault Secrets User"
-  principal_id         = data.azurerm_user_assigned_identity.web_app.principal_id
+  principal_id         = data.terraform_remote_state.foundation.outputs.web_app_identity_principal_id
 }

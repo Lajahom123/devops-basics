@@ -16,6 +16,8 @@ env:
   IMAGE_NAME: devops-tracker
   WEBAPP_NAME: devops-tracker-29193
   RESOURCE_GROUP: rg-devops-tracker-dev
+  MIGRATION_IMAGE: devops-tracker-migrations
+  MIGRATION_JOB_NAME: job-devops-tracker-migrations
 
 jobs:
   build-and-deploy:
@@ -46,6 +48,63 @@ jobs:
         run: |
           docker push $ACR_LOGIN_SERVER/$IMAGE_NAME:${{ github.sha }}
           docker push $ACR_LOGIN_SERVER/$IMAGE_NAME:latest
+
+      - name: Build and push migration image
+        run: |
+          docker buildx build \
+            --platform linux/amd64 \
+            -f Dockerfile.flyway \
+            -t $ACR_LOGIN_SERVER/$MIGRATION_IMAGE:${{ github.sha }} \
+            --push \
+            .
+
+      - name: Update migration job image
+        run: |
+          az containerapp job update \
+            --name $MIGRATION_JOB_NAME \
+            --image $ACR_LOGIN_SERVER/$MIGRATION_IMAGE:${{ github.sha }}
+
+      - name: Start migration job
+        id: start_migration
+        run: |
+          EXECUTION_NAME=$(az containerapp job start \
+            --name $MIGRATION_JOB_NAME \
+            --query name \
+            -o tsv)
+
+          echo "execution_name=$EXECUTION_NAME" >> "$GITHUB_OUTPUT"
+
+      - name: Wait for migration job
+        run: |
+          EXECUTION_NAME="${{ steps.start_migration.outputs.execution_name }}"
+
+          for i in {1..60}; do
+            STATUS=$(az containerapp job execution list \
+              --name $MIGRATION_JOB_NAME \
+              --query "[?name=='$EXECUTION_NAME'].properties.status | [0]" \
+              -o tsv)
+
+            echo "Migration job status: $STATUS"
+
+            if [ "$STATUS" = "Succeeded" ]; then
+              exit 0
+            fi
+
+            if [ "$STATUS" = "Failed" ] || [ "$STATUS" = "Canceled" ]; then
+              az containerapp job logs show \
+                --name $MIGRATION_JOB_NAME
+              exit 1
+            fi
+
+            sleep 10
+          done
+
+          echo "Migration job timed out"
+
+          az containerapp job logs show \
+            --name $MIGRATION_JOB_NAME
+
+          exit 1
 
       - name: Update Web App container image
         run: |

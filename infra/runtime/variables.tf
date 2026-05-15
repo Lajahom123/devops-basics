@@ -10,11 +10,6 @@ variable "environment" {
   default     = "dev"
 }
 
-variable "resource_group_name" {
-  description = "Persistent foundation resource group name."
-  type        = string
-}
-
 variable "location" {
   description = "Azure region."
   type        = string
@@ -23,41 +18,6 @@ variable "location" {
 
 variable "owner_email" {
   description = "Project owner."
-  type        = string
-}
-
-variable "vnet_name" {
-  description = "Foundation virtual network name."
-  type        = string
-  default     = "vnet-devops-tracker"
-}
-
-variable "app_service_subnet_name" {
-  description = "Foundation subnet used for App Service VNet integration."
-  type        = string
-  default     = "snet-web-egress"
-}
-
-variable "postgres_subnet_name" {
-  description = "Foundation subnet delegated to PostgreSQL Flexible Server."
-  type        = string
-  default     = "snet-postgres"
-}
-
-variable "postgres_private_dns_zone_name" {
-  description = "Foundation private DNS zone name for PostgreSQL."
-  type        = string
-  default     = "private.postgres.database.azure.com"
-}
-
-variable "web_app_identity_name" {
-  description = "Foundation user-assigned managed identity used by the Web App."
-  type        = string
-  default     = "id-devops-tracker-webapp"
-}
-
-variable "github_actions_principal_id" {
-  description = "Object ID / principal ID of the GitHub Actions service principal from foundation."
   type        = string
 }
 

@@ -1,6 +1,6 @@
 resource "azurerm_service_plan" "main" {
   name                = "plan-${local.name_prefix}"
-  resource_group_name = data.azurerm_resource_group.foundation.name
+  resource_group_name = data.terraform_remote_state.foundation.outputs.resource_group_name
   location            = var.location
   tags                = local.common_tags
 
@@ -10,19 +10,19 @@ resource "azurerm_service_plan" "main" {
 
 resource "azurerm_linux_web_app" "main" {
   name                      = var.web_app_name
-  resource_group_name       = data.azurerm_resource_group.foundation.name
+  resource_group_name       = data.terraform_remote_state.foundation.outputs.resource_group_name
   location                  = var.location
   service_plan_id           = azurerm_service_plan.main.id
-  virtual_network_subnet_id = data.azurerm_subnet.app_service.id
+  virtual_network_subnet_id = data.terraform_remote_state.foundation.outputs.app_service_subnet_id
   tags                      = local.common_tags
 
   https_only                      = true
-  key_vault_reference_identity_id = data.azurerm_user_assigned_identity.web_app.id
+  key_vault_reference_identity_id = data.terraform_remote_state.foundation.outputs.web_app_identity_id
 
   identity {
     type = "SystemAssigned, UserAssigned"
     identity_ids = [
-      data.azurerm_user_assigned_identity.web_app.id,
+      data.terraform_remote_state.foundation.outputs.web_app_identity_id,
     ]
   }
 
@@ -38,7 +38,7 @@ resource "azurerm_linux_web_app" "main" {
     vnet_route_all_enabled = true
 
     container_registry_use_managed_identity       = true
-    container_registry_managed_identity_client_id = data.azurerm_user_assigned_identity.web_app.client_id
+    container_registry_managed_identity_client_id = data.terraform_remote_state.foundation.outputs.web_app_identity_client_id
 
     application_stack {
       docker_image_name   = var.docker_image_name
@@ -50,7 +50,7 @@ resource "azurerm_linux_web_app" "main" {
     DATABASE_SSL                     = "true"
     DATABASE_SSL_REJECT_UNAUTHORIZED = "true"
 
-    AZURE_CLIENT_ID = data.azurerm_user_assigned_identity.web_app.client_id
+    AZURE_CLIENT_ID = data.terraform_remote_state.foundation.outputs.web_app_identity_client_id
 
     POSTGRES_HOST = azurerm_postgresql_flexible_server.main.fqdn
     POSTGRES_PORT = "5432"
@@ -75,11 +75,11 @@ resource "azurerm_linux_web_app" "main" {
 
 resource "azurerm_app_service_virtual_network_swift_connection" "main" {
   app_service_id = azurerm_linux_web_app.main.id
-  subnet_id      = data.azurerm_subnet.app_service.id
+  subnet_id      = data.terraform_remote_state.foundation.outputs.app_service_subnet_id
 }
 
 resource "azurerm_role_assignment" "github_actions_web_app_contributor" {
   scope                = azurerm_linux_web_app.main.id
   role_definition_name = "Contributor"
-  principal_id         = var.github_actions_principal_id
+  principal_id         = data.terraform_remote_state.foundation.outputs.github_actions_principal_id
 }

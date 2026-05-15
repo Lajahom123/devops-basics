@@ -1,6 +1,6 @@
 resource "azurerm_container_app_job" "migration" {
   name                         = "job-${local.name_prefix}-migrations"
-  resource_group_name          = data.azurerm_resource_group.main.name
+  resource_group_name          = data.terraform_remote_state.foundation.outputs.resource_group_name
   location                     = var.location
   container_app_environment_id = azurerm_container_app_environment.main.id
 
@@ -33,7 +33,7 @@ resource "azurerm_container_app_job" "migration" {
   template {
     container {
       name   = "flyway"
-      image  = "${azurerm_container_registry.main.login_server}/devops-tracker-migrations:manual-1"
+      image  = "${azurerm_container_registry.main.login_server}/devops-tracker-migrations:bootstrap"
       cpu    = 0.5
       memory = "1Gi"
 
@@ -53,5 +53,5 @@ resource "azurerm_container_app_job" "migration" {
     }
   }
 
-  tags = local.tags
+  tags = local.common_tags
 }

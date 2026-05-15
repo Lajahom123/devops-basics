@@ -1,5 +1,5 @@
 output "resource_group_name" {
-  value = data.azurerm_resource_group.foundation.name
+  value = data.terraform_remote_state.foundation.outputs.resource_group_name
 }
 
 output "acr_name" {
