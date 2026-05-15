@@ -61,6 +61,7 @@ jobs:
       - name: Update migration job image
         run: |
           az containerapp job update \
+            --resource-group $RESOURCE_GROUP \
             --name $MIGRATION_JOB_NAME \
             --image $ACR_LOGIN_SERVER/$MIGRATION_IMAGE:${{ github.sha }}
 
@@ -68,6 +69,7 @@ jobs:
         id: start_migration
         run: |
           EXECUTION_NAME=$(az containerapp job start \
+            --resource-group $RESOURCE_GROUP \
             --name $MIGRATION_JOB_NAME \
             --query name \
             -o tsv)
