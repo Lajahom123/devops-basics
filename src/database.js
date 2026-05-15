@@ -73,6 +73,7 @@ function mapDeployment(row) {
     service: row.service,
     version: row.version,
     environment: row.environment,
+    status: row.status,
     recordedAt: row.recorded_at.toISOString(),
   };
 }
@@ -123,11 +124,11 @@ async function createDeployment({ service, version, environment }) {
 
   const result = await db.query(
     `
-      INSERT INTO deployments (id, service, version, environment, recorded_at)
-      VALUES ($1, $2, $3, $4, $5)
-      RETURNING id, service, version, environment, recorded_at
+      INSERT INTO deployments (id, service, version, environment, recorded_at, status)
+      VALUES ($1, $2, $3, $4, $5, $6)
+      RETURNING id, service, version, environment, recorded_at, status
     `,
-    [record.id, service, version, environment, record.recordedAt],
+    [record.id, service, version, environment, record.recordedAt, "success"],
   );
 
   return mapDeployment(result.rows[0]);
