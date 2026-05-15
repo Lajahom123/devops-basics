@@ -82,6 +82,7 @@ jobs:
 
           for i in {1..60}; do
             STATUS=$(az containerapp job execution list \
+              --resource-group $RESOURCE_GROUP \
               --name $MIGRATION_JOB_NAME \
               --query "[?name=='$EXECUTION_NAME'].properties.status | [0]" \
               -o tsv)
@@ -94,6 +95,7 @@ jobs:
 
             if [ "$STATUS" = "Failed" ] || [ "$STATUS" = "Canceled" ]; then
               az containerapp job logs show \
+                --resource-group $RESOURCE_GROUP \
                 --name $MIGRATION_JOB_NAME
               exit 1
             fi
@@ -104,6 +106,7 @@ jobs:
           echo "Migration job timed out"
 
           az containerapp job logs show \
+            --resource-group $RESOURCE_GROUP \
             --name $MIGRATION_JOB_NAME
 
           exit 1
