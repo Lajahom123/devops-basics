@@ -57,9 +57,9 @@ resource "azurerm_container_app_job" "migration" {
 
   lifecycle {
     ignore_changes = [
-        template[0].container[0].image
+      template[0].container[0].image
     ]
-    }
+  }
 
   tags = local.common_tags
 }
