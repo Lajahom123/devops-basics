@@ -124,3 +124,19 @@ jobs:
           az webapp restart \
             --name $WEBAPP_NAME \
             --resource-group $RESOURCE_GROUP
+
+      - name: Verify health endpoint
+        run: |
+          for i in {1..10}; do
+            if curl --fail --silent --show-error \
+              https://$WEBAPP_NAME.azurewebsites.net/health; then
+              echo "Health check passed"
+              exit 0
+            fi
+
+            echo "Waiting for app startup..."
+            sleep 10
+          done
+
+          echo "Health check failed"
+          exit 1
