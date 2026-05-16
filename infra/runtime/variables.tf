@@ -136,3 +136,13 @@ variable "postgres_entra_admin_principal_name" {
   type        = string
   description = "Display name or UPN of the Microsoft Entra administrator for PostgreSQL."
 }
+
+variable "alert_evaluation_frequency" {
+  type    = string
+  default = "PT5M"
+}
+
+variable "alert_window_duration" {
+  type    = string
+  default = "PT5M"
+}

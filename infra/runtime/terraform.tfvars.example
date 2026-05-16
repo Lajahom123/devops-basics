@@ -29,3 +29,6 @@ postgres_maintenance_start_minute     = 0
 postgres_standby_zone                 = "2"
 
 postgres_entra_admin_principal_name = "user@example.com"
+
+alert_evaluation_frequency = "PT5M"
+alert_window_duration      = "PT5M"

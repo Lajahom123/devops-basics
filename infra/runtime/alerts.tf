@@ -17,8 +17,8 @@ resource "azurerm_monitor_scheduled_query_rules_alert_v2" "failed_requests" {
   resource_group_name = data.terraform_remote_state.foundation.outputs.resource_group_name
   location            = var.location
 
-  evaluation_frequency = "P1D"
-  window_duration      = "P1D"
+  evaluation_frequency = var.alert_evaluation_frequency
+  window_duration      = var.alert_window_duration
   scopes               = [azurerm_log_analytics_workspace.main.id]
 
   severity = 2
