@@ -1,0 +1,43 @@
+name: Rollback production
+
+on:
+  workflow_dispatch:
+
+permissions:
+  id-token: write
+  contents: read
+
+env:
+  WEBAPP_NAME: devops-tracker-29193
+  RESOURCE_GROUP: rg-devops-tracker-dev
+  SLOT_NAME: staging
+
+jobs:
+  rollback:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Azure login
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Swap staging back into production
+        run: |
+          az webapp deployment slot swap \
+            --name $WEBAPP_NAME \
+            --resource-group $RESOURCE_GROUP \
+            --slot $SLOT_NAME \
+            --target-slot production
+
+      - name: Verify production health
+        run: |
+          curl --fail --silent --show-error \
+            https://$WEBAPP_NAME.azurewebsites.net/health
+
+      - name: Verify production version
+        run: |
+          curl --fail --silent --show-error \
+            https://$WEBAPP_NAME.azurewebsites.net/version
