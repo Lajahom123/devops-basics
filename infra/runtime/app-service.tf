@@ -1,3 +1,43 @@
+locals {
+  web_app_shared_settings = {
+    DATABASE_SSL                     = "true"
+    DATABASE_SSL_REJECT_UNAUTHORIZED = "true"
+
+    AZURE_CLIENT_ID = data.terraform_remote_state.foundation.outputs.web_app_identity_client_id
+
+    POSTGRES_HOST = azurerm_postgresql_flexible_server.main.fqdn
+    POSTGRES_PORT = "5432"
+    POSTGRES_DB   = "devops_tracker"
+    POSTGRES_USER = "id-devops-tracker-webapp"
+
+    APPLICATIONINSIGHTS_CONNECTION_STRING      = azurerm_application_insights.main.connection_string
+    APPINSIGHTS_INSTRUMENTATIONKEY             = azurerm_application_insights.main.instrumentation_key
+    ApplicationInsightsAgent_EXTENSION_VERSION = "~3"
+
+    PORT                                = var.container_port
+    WEBSITES_ENABLE_APP_SERVICE_STORAGE = "false"
+    WEBSITES_PORT                       = var.container_port
+  }
+
+  web_app_production_overrides = {
+    NODE_ENV = var.environment
+  }
+
+  web_app_staging_overrides = {
+    NODE_ENV = "staging"
+  }
+
+  web_app_production_settings = merge(
+    local.web_app_shared_settings,
+    local.web_app_production_overrides
+  )
+
+  web_app_staging_settings = merge(
+    local.web_app_shared_settings,
+    local.web_app_staging_overrides
+  )
+}
+
 resource "azurerm_service_plan" "main" {
   name                = "plan-${local.name_prefix}"
   resource_group_name = data.terraform_remote_state.foundation.outputs.resource_group_name
@@ -46,25 +86,12 @@ resource "azurerm_linux_web_app" "main" {
     }
   }
 
-  app_settings = {
-    DATABASE_SSL                     = "true"
-    DATABASE_SSL_REJECT_UNAUTHORIZED = "true"
+  app_settings = local.web_app_production_settings
 
-    AZURE_CLIENT_ID = data.terraform_remote_state.foundation.outputs.web_app_identity_client_id
-
-    POSTGRES_HOST = azurerm_postgresql_flexible_server.main.fqdn
-    POSTGRES_PORT = "5432"
-    POSTGRES_DB   = "devops_tracker"
-    POSTGRES_USER = "id-devops-tracker-webapp"
-
-    APPLICATIONINSIGHTS_CONNECTION_STRING      = azurerm_application_insights.main.connection_string
-    APPINSIGHTS_INSTRUMENTATIONKEY             = azurerm_application_insights.main.instrumentation_key
-    ApplicationInsightsAgent_EXTENSION_VERSION = "~3"
-
-    NODE_ENV                            = var.environment
-    PORT                                = var.container_port
-    WEBSITES_ENABLE_APP_SERVICE_STORAGE = "false"
-    WEBSITES_PORT                       = var.container_port
+  sticky_settings {
+    app_setting_names = [
+      "NODE_ENV"
+    ]
   }
 
   depends_on = [

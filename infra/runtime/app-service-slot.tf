@@ -33,7 +33,7 @@ resource "azurerm_linux_web_app_slot" "staging" {
     }
   }
 
-  app_settings = azurerm_linux_web_app.main.app_settings
+  app_settings = local.web_app_staging_settings
 
   tags = local.common_tags
 }
