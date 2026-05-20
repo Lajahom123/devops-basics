@@ -76,3 +76,10 @@ resource "azurerm_subnet" "container_apps" {
     }
   }
 }
+
+resource "azurerm_subnet" "private_endpoints" {
+  name                 = "snet-private-endpoints"
+  resource_group_name  = data.azurerm_resource_group.main.name
+  virtual_network_name = azurerm_virtual_network.main.name
+  address_prefixes     = [var.private_endpoints_subnet_address_prefix]
+}

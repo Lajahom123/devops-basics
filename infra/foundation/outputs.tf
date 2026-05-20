@@ -6,6 +6,8 @@ output "location" {
   value = data.azurerm_resource_group.main.location
 }
 
+# Network 
+
 output "vnet_name" {
   value = azurerm_virtual_network.main.name
 }
@@ -46,6 +48,16 @@ output "container_apps_subnet_id" {
   value = azurerm_subnet.container_apps.id
 }
 
+output "private_endpoints_subnet_name" {
+  value = azurerm_subnet.private_endpoints.name
+}
+
+output "private_endpoints_subnet_id" {
+  value = azurerm_subnet.private_endpoints.id
+}
+
+# DNS
+
 output "postgres_private_dns_zone_name" {
   value = azurerm_private_dns_zone.postgres.name
 }
@@ -53,6 +65,16 @@ output "postgres_private_dns_zone_name" {
 output "postgres_private_dns_zone_id" {
   value = azurerm_private_dns_zone.postgres.id
 }
+
+output "webapp_private_dns_zone_name" {
+  value = azurerm_private_dns_zone.web_app.name
+}
+
+output "webapp_private_dns_zone_id" {
+  value = azurerm_private_dns_zone.web_app.id
+}
+
+# Web app
 
 output "web_app_identity_name" {
   value = azurerm_user_assigned_identity.web_app.name
@@ -70,6 +92,8 @@ output "web_app_identity_principal_id" {
   value = azurerm_user_assigned_identity.web_app.principal_id
 }
 
+# Azure IDs
+
 output "azure_client_id" {
   value = azuread_application.github_actions.client_id
 }
@@ -82,9 +106,13 @@ output "azure_subscription_id" {
   value = data.azurerm_client_config.current.subscription_id
 }
 
+# Github actions
+
 output "github_actions_principal_id" {
   value = azuread_service_principal.github_actions.object_id
 }
+
+# Migration job
 
 output "migration_job_identity_id" {
   value = azurerm_user_assigned_identity.migration_job.id

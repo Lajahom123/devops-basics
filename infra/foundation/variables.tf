@@ -53,7 +53,13 @@ variable "admin_subnet_address_prefix" {
 variable "container_apps_subnet_address_prefix" {
   description = "Subnet delegated to container apps."
   type        = string
-  default     = "10.20.3.0/24"
+  default     = "10.20.4.0/24"
+}
+
+variable "private_endpoints_subnet_address_prefix" {
+  description = "Subnet delegated to private endpoints."
+  type        = string
+  default     = "10.20.5.0/24"
 }
 
 variable "github_owner" {
