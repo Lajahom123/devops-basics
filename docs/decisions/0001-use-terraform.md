@@ -2,7 +2,7 @@
 
 # Context
 
-The project needs repeatable Azure infrastructure for App Service, ACR, PostgreSQL, networking, Key Vault, managed identities, and RBAC. Manual portal changes are difficult to review, reproduce, and reason about after cleanup or failure.
+The project needs repeatable Azure infrastructure for App Service, ACR, PostgreSQL, networking, Key Vault, Container Apps migration jobs, monitoring, managed identities, and RBAC. Manual portal changes are difficult to review, reproduce, and reason about after cleanup or failure.
 
 # Decision
 

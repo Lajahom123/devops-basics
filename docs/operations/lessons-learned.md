@@ -39,11 +39,11 @@ Missing role mapping and missing grants fail differently:
 
 Runbooks should make those checks separate.
 
-## App Service should not block liveness on database initialization
+## Migrations should stay outside App Service startup
 
-The current application initializes a table during startup when a database is configured. That is acceptable while the project is small, but production systems should avoid making process startup depend on schema creation.
+The current architecture runs Flyway migrations through a Container Apps Job before the Web App slot swap. That keeps schema changes out of process startup and makes deployment failures easier to understand.
 
-Prefer:
+Keep this separation as the project grows:
 
 - migrations as a separate deployment step;
 - idempotent migration tooling;
@@ -74,6 +74,17 @@ Production-style options:
 - approved break-glass path documented and audited.
 
 Avoid restoring public database access just to make routine administration easier.
+
+## Slot swaps improve deployment safety but need discipline
+
+The deployment workflow updates the staging slot, verifies `/health` and `/version`, then swaps staging into production. This is safer than updating production directly, but it relies on the staging slot containing a meaningful release candidate.
+
+Operational notes:
+
+- keep sticky settings limited to values that truly differ per slot;
+- verify that staging uses the same private dependencies as production;
+- remember that rollback is another slot swap, so staging must still contain the previously good production version;
+- make migration changes backward compatible when possible because schema changes happen before the app slot swap.
 
 ## Token based auth introduces refresh concerns
 

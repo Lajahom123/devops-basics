@@ -1,8 +1,8 @@
 # PostgreSQL managed identity authentication
 
-The database authentication model is moving from a static password in a connection string to managed identity backed by Microsoft Entra authentication.
+The database authentication model uses managed identity backed by Microsoft Entra authentication for the Web App runtime path.
 
-The infrastructure already enables Entra authentication on Azure Database for PostgreSQL Flexible Server and assigns a user-managed identity to the Web App. The application still contains a transitional `DATABASE_URL` path. This document describes the production target and the operational steps required to complete the migration.
+The infrastructure enables Entra authentication on Azure Database for PostgreSQL Flexible Server and assigns a user-assigned managed identity to the Web App. The application uses Azure Identity to obtain a PostgreSQL access token and passes that token to `pg` as the connection password.
 
 ## Previous flow
 
@@ -20,9 +20,9 @@ This model is easy to bootstrap but has operational drawbacks:
 - the app depends on a long-lived credential;
 - access is harder to reason about through Azure identity and RBAC.
 
-In this repository, the transitional connection string is stored in Key Vault and referenced from App Service, which is better than plain app settings but still not the final model.
+In this repository, the password-based path remains only for PostgreSQL administrator bootstrap and the migration job. The Web App runtime is configured through discrete PostgreSQL host, database, user, SSL, and Azure client ID settings rather than a `DATABASE_URL`.
 
-## Target flow
+## Current Web App flow
 
 ```text
 Application
@@ -36,7 +36,7 @@ The Web App obtains an access token for Azure PostgreSQL from the instance metad
 
 ## Application implementation shape
 
-The Node.js implementation should use `ManagedIdentityCredential` from Azure Identity and pass the token into `pg`.
+The Node.js implementation uses `ManagedIdentityCredential` when `AZURE_CLIENT_ID` is present and falls back to `DefaultAzureCredential` for other environments. It passes the token into `pg`.
 
 Representative shape:
 
@@ -61,7 +61,7 @@ async function createPool() {
 }
 ```
 
-Long-running processes must account for token expiry. A pool created with a token as a static password can outlive the token used to create new connections. Production code should refresh tokens before creating new connections or use a connection factory/pool lifecycle that can rotate credentials.
+Long-running processes must account for token expiry. The current implementation creates a pool with the access token available at pool creation time. A future hardening step should refresh tokens before creating new connections or rotate the pool when tokens approach expiry.
 
 ## PostgreSQL principal mapping
 
@@ -89,20 +89,22 @@ ALTER DEFAULT PRIVILEGES IN SCHEMA public
   GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO "id-devops-tracker-webapp";
 ```
 
+The repository also includes migration SQL that grants schema usage and table permissions for the current `deployments` table.
+
 The exact role name depends on how the principal is created and displayed by PostgreSQL. Validate with:
 
 ```sql
 \du
 ```
 
-## Why password auth may remain temporarily enabled
+## Why password auth remains temporarily enabled
 
-The Terraform configuration currently enables both Entra authentication and password authentication. This is a pragmatic transition state.
+The Terraform configuration currently enables both Entra authentication and password authentication. This is a pragmatic bootstrap state.
 
 Reasons to keep password auth temporarily:
 
 - initial schema/bootstrap tasks may still use administrator credentials;
-- the application code may still use `DATABASE_URL`;
+- the migration job currently uses administrator credentials;
 - recovery access is useful while validating Entra principal creation;
 - Terraform does not cleanly manage all PostgreSQL grants and role mappings over a private endpoint.
 

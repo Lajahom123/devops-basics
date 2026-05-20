@@ -3,7 +3,25 @@
 Persistent, low/no cost infrastructure that should survive normal runtime cleanup.
 
 This layer reads the persistent resource group as data and owns the VNet, subnets, private DNS, user-assigned
-managed identity, GitHub Actions OIDC identity, and foundational RBAC.
+managed identities, GitHub Actions OIDC identity, and foundational RBAC.
+
+Current subnet layout:
+
+- `snet-web-egress` for App Service VNet integration.
+- `snet-postgres` for PostgreSQL Flexible Server private access.
+- `snet-admin` for private operational access patterns.
+- `snet-container-apps` for the Container Apps Environment.
+- `snet-private-endpoints` for private endpoints.
+
+Current private DNS zones:
+
+- `private.postgres.database.azure.com`
+- `privatelink.azurewebsites.net`
+
+Current managed identities:
+
+- Web App runtime identity.
+- Migration job identity.
 
 Do not run `terraform destroy` here during routine cost-management cycles.
 

@@ -10,7 +10,7 @@ Foundation resources are intended to stay deployed:
 - VNet;
 - subnets;
 - private DNS zone and VNet link;
-- user-assigned managed identity;
+- user-assigned managed identities;
 - GitHub OIDC Entra application and service principal;
 - foundational RBAC assignments.
 
@@ -24,10 +24,14 @@ Runtime resources should be reviewed when the environment is idle:
 - App Service plan;
 - Linux Web App;
 - Azure Container Registry;
+- Container Apps Environment and migration job executions;
+- Log Analytics ingestion and retention;
+- Application Insights telemetry;
+- private endpoint;
 - Key Vault operations and stored secrets;
 - temporary admin VMs or jump hosts.
 
-The largest recurring costs are normally PostgreSQL compute and the App Service plan.
+The largest recurring costs are normally PostgreSQL compute and the App Service plan. Log ingestion can also become meaningful if diagnostics are noisy.
 
 ## PostgreSQL stop and start
 
@@ -81,6 +85,29 @@ terraform destroy
 ```
 
 Destroying runtime removes the App Service plan, Web App, PostgreSQL server, and other runtime resources while leaving foundation intact.
+
+The staging slot shares the App Service plan. It does not create a separate plan, but it can add operational surface and logging volume.
+
+## Container Apps migration cost behavior
+
+The migration job runs on the Container Apps consumption workload profile. It should only consume compute while executions are active, but the Container Apps Environment and its diagnostics remain part of runtime.
+
+Operational guidance:
+
+- keep the job manually triggered;
+- investigate failed or stuck executions promptly;
+- avoid adding always-on Container Apps to this environment without revisiting cost expectations.
+
+## Monitoring cost behavior
+
+Log Analytics and Application Insights costs are driven mostly by ingestion and retention. The current retention is 30 days.
+
+Cost controls:
+
+- keep diagnostic categories intentional;
+- reduce noisy application logs before raising retention;
+- watch ingestion after enabling new Azure resources;
+- tune alert queries to avoid unnecessary noise rather than disabling diagnostics entirely.
 
 ## Temporary VM cleanup
 

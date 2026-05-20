@@ -12,8 +12,12 @@ flowchart TD
     APPNET["snet-web-egress"]
     PGNET["snet-postgres"]
     ADMIN["snet-admin"]
-    DNS["Private DNS zone"]
-    ID["User-assigned managed identity"]
+    CANET["snet-container-apps"]
+    PENET["snet-private-endpoints"]
+    PGDNS["PostgreSQL private DNS zone"]
+    WEBDNS["Web App private DNS zone"]
+    WEBID["Web App managed identity"]
+    JOBID["Migration job managed identity"]
     OIDC["GitHub OIDC identity"]
   end
 
@@ -21,27 +25,47 @@ flowchart TD
     ACR["Azure Container Registry"]
     PLAN["App Service Plan"]
     APP["Linux Web App"]
+    SLOT["Staging slot"]
     KV["Key Vault runtime settings"]
     PG["PostgreSQL Flexible Server"]
     DB["PostgreSQL database"]
+    CAE["Container Apps Environment"]
+    JOB["Flyway migration job"]
+    LOG["Log Analytics + Application Insights"]
+    ALERT["Monitor alert + action group"]
+    PE["Web App private endpoint"]
   end
 
   RG --> VNET
   VNET --> APPNET
   VNET --> PGNET
   VNET --> ADMIN
-  VNET --> DNS
+  VNET --> CANET
+  VNET --> PENET
+  VNET --> PGDNS
+  VNET --> WEBDNS
   APP --> PLAN
-  APP --> ID
+  APP --> SLOT
+  APP --> WEBID
   APP --> APPNET
   APP --> ACR
   APP --> KV
   APP --> PG
+  APP --> PE
   PG --> PGNET
-  PG --> DNS
+  PG --> PGDNS
   PG --> DB
+  CAE --> CANET
+  JOB --> CAE
+  JOB --> JOBID
+  JOB --> ACR
+  JOB --> PG
+  PE --> PENET
+  PE --> WEBDNS
+  LOG --> ALERT
   OIDC --> ACR
   OIDC --> APP
+  OIDC --> JOB
 ```
 
 ## Foundation responsibilities
@@ -55,8 +79,12 @@ It owns:
 - App Service integration subnet;
 - PostgreSQL delegated subnet;
 - admin subnet for private operational access patterns;
+- Container Apps delegated subnet;
+- private endpoint subnet;
 - PostgreSQL private DNS zone and VNet link;
+- Web App private endpoint DNS zone and VNet link;
 - user-assigned managed identity for the Web App;
+- user-assigned managed identity for the migration job;
 - GitHub Actions Entra application, service principal, and federated credential;
 - foundational RBAC such as resource group read access for the deployment identity.
 
@@ -71,11 +99,17 @@ It owns:
 - Azure Container Registry;
 - App Service plan;
 - Linux Web App;
+- staging deployment slot;
 - Web App VNet integration;
-- runtime Key Vault and database connection secret;
+- runtime Key Vault configuration;
 - PostgreSQL Flexible Server;
 - PostgreSQL database;
-- runtime RBAC such as `AcrPush`, `AcrPull`, Key Vault access, and Web App contributor access.
+- Container Apps Environment;
+- Flyway migration job;
+- Log Analytics Workspace and Application Insights;
+- diagnostic settings, action group, and failed-request alert;
+- Web App private endpoint;
+- runtime RBAC such as `AcrPush`, `AcrPull`, Key Vault access, migration job contributor access, and Web App contributor access.
 
 These resources carry most of the active cost. Destroying runtime removes the App Service plan and PostgreSQL server while preserving the network and identity backbone.
 
@@ -87,6 +121,7 @@ Keeping identities in foundation preserves:
 
 - PostgreSQL role mappings;
 - Key Vault and ACR RBAC assumptions;
+- migration job ACR pull assumptions;
 - operational audit continuity;
 - deployment identity stability.
 
@@ -101,6 +136,8 @@ Keeping networking in foundation preserves:
 - private DNS zone continuity;
 - delegated subnet configuration;
 - App Service integration subnet identity;
+- Container Apps Environment subnet placement;
+- private endpoint subnet placement;
 - admin subnet availability;
 - a stable place for jump hosts, private runners, or migration jobs.
 

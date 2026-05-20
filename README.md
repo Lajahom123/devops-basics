@@ -6,19 +6,24 @@ The project is intentionally small at the application layer so infrastructure an
 
 ## Architecture overview
 
-The cloud architecture centers on an Azure Linux Web App running a container image from Azure Container Registry. The Web App is integrated with a VNet for outbound private access to Azure Database for PostgreSQL Flexible Server. PostgreSQL is deployed without public network access and is reachable through a delegated subnet plus a private DNS zone.
+The cloud architecture centers on an Azure Linux Web App running a container image from Azure Container Registry. The Web App has production and staging slots, uses a user-assigned managed identity for ACR image pull, and is integrated with a VNet for outbound private access to Azure Database for PostgreSQL Flexible Server. PostgreSQL is deployed without public network access and is reachable through a delegated subnet plus a private DNS zone.
+
+The current platform also includes a Container Apps Environment and a manual Container Apps Job for Flyway migrations. The deployment workflow builds both the application image and the migration image, updates the migration job image, runs migrations, deploys the app image to the staging slot, verifies staging, and swaps staging into production.
+
+Observability is managed through Log Analytics, Application Insights, diagnostic settings, and an Azure Monitor scheduled query alert for failed requests. A private endpoint and private DNS zone are also present for the Web App inbound path inside the VNet.
 
 Identity is split by responsibility:
 
 - GitHub Actions authenticates to Azure with OIDC through a long-lived bootstrap identity.
 - GitHub Actions receives Azure RBAC for image push and deployment operations.
-- The Web App uses a user-assigned managed identity to pull images from ACR.
+- The Web App uses a user-assigned managed identity to pull images from ACR and to authenticate toward runtime dependencies.
+- The migration job uses a separate user-assigned managed identity to pull its Flyway image from ACR.
 - The PostgreSQL production authentication target is managed identity to Entra token to PostgreSQL role, avoiding application-owned database passwords.
 
 Terraform is split into separate lifecycle roots:
 
-- `infra/foundation`: persistent resource group, networking, private DNS, managed identities, and GitHub Actions OIDC identity.
-- `infra/runtime`: cost-bearing application resources such as ACR, App Service, PostgreSQL, Key Vault runtime settings, and runtime RBAC.
+- `infra/foundation`: persistent resource group lookup, networking, PostgreSQL and Web App private DNS, Web App and migration-job managed identities, and GitHub Actions OIDC identity.
+- `infra/runtime`: cost-bearing application resources such as ACR, App Service plan, Web App and staging slot, PostgreSQL, Container Apps Environment, migration job, Key Vault runtime settings, monitoring, alerts, private endpoint, and runtime RBAC.
 
 ## High-level deployment flow
 
@@ -29,7 +34,11 @@ Developer push
   -> Terraform infrastructure changes
   -> Docker image build
   -> Image push to ACR
-  -> Web App container image update
+  -> Flyway migration image build and push
+  -> Container Apps migration job update and run
+  -> Staging slot container image update
+  -> Staging verification
+  -> Slot swap to production
   -> Web App pulls image using managed identity
   -> Web App connects privately to PostgreSQL
   -> Production target: Web App authenticates to PostgreSQL using an Entra token
@@ -45,8 +54,8 @@ The repository is structured around removing long-lived credentials from deploym
 - ACR admin credentials are disabled.
 - PostgreSQL is private-only and is not routable from the public internet.
 - App Service reaches PostgreSQL through VNet integration and private DNS.
-- The current transitional database connection string is stored in Key Vault, not directly in App Service settings.
-- The production authentication direction is managed identity based database access, where the app obtains an Entra token and PostgreSQL maps that identity to a database role.
+- The Web App runtime uses managed identity based database access, where the app obtains an Entra token and PostgreSQL maps that identity to a database role.
+- PostgreSQL password authentication remains enabled for bootstrap and migration operations.
 
 Terraform state can still contain sensitive generated values. Local state files are ignored, and a remote state backend is the expected next hardening step before shared operation.
 
@@ -76,6 +85,8 @@ Core endpoints:
 - [Private networking](docs/networking/private-networking.md)
 - [PostgreSQL managed identity authentication](docs/security/postgresql-managed-identity.md)
 - [GitHub Actions deployment](docs/deployment/github-actions.md)
+- [Migration job bootstrap](docs/migrations/migration-job-bootstrap.md)
+- [Monitoring](docs/monitoring/monitoring.md)
 - [Operations and lessons learned](docs/operations/lessons-learned.md)
 - [Cost management](docs/operations/cost-management.md)
 
@@ -85,3 +96,5 @@ Architecture decisions:
 - [ADR 0002: Use GitHub OIDC](docs/decisions/0002-use-github-oidc.md)
 - [ADR 0003: Use private PostgreSQL networking](docs/decisions/0003-private-postgresql.md)
 - [ADR 0004: Use managed identity for database authentication](docs/decisions/0004-managed-identity-db-auth.md)
+- [ADR 0005: Use Container Apps Job for migrations](docs/decisions/0005-use-container-apps-job-for-migrations.md)
+- [ADR 0006: Use App Service deployment slots](docs/decisions/0006-use-app-service-slots.md)

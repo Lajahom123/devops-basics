@@ -2,6 +2,8 @@
 
 GitHub Actions deploys the application without static Azure credentials, ACR admin credentials, or Web App publish profiles. Authentication is based on GitHub OIDC federation with Microsoft Entra ID.
 
+The current deployment promotes through a staging slot. It builds the application image, builds the Flyway migration image, runs the Container Apps migration job, updates the staging slot, verifies staging, and swaps staging into production.
+
 ## Bootstrap identity
 
 The OIDC identity is managed in `infra/foundation`. This layer creates:
@@ -20,7 +22,7 @@ AZURE_TENANT_ID
 AZURE_SUBSCRIPTION_ID
 ```
 
-The `github_actions_principal_id` output is passed into the infra layer so Terraform can assign Azure RBAC.
+The `github_actions_principal_id` output is consumed by the runtime layer so Terraform can assign Azure RBAC for ACR push, Web App updates, and migration job updates.
 
 ## Workflow authentication
 
@@ -56,21 +58,45 @@ The deployment sequence is:
 1. Check out the repository.
 2. Authenticate to Azure with OIDC.
 3. Log in to ACR with `az acr login`.
-4. Build the Docker image.
-5. Push immutable and `latest` tags to ACR.
-6. Update the Web App container image reference.
-7. Restart the Web App.
-8. App Service pulls the image using its managed identity.
-9. The application connects to PostgreSQL over private networking.
+4. Build the application Docker image.
+5. Push immutable and `latest` application tags to ACR.
+6. Build and push the Flyway migration image.
+7. Update the Container Apps migration job image.
+8. Start the migration job and wait for success.
+9. Update the staging slot container image reference.
+10. Restart and verify the staging slot.
+11. Swap the staging slot into production.
+12. Verify production health and version endpoints.
+13. App Service pulls the image using its managed identity and connects to PostgreSQL over private networking.
 
-The workflow currently updates the Web App container image through Azure CLI:
+The workflow updates the staging slot container image through Azure CLI:
 
 ```bash
 az webapp config container set \
   --name "$WEBAPP_NAME" \
   --resource-group "$RESOURCE_GROUP" \
+  --slot "$SLOT_NAME" \
   --container-image-name "$ACR_LOGIN_SERVER/$IMAGE_NAME:${GITHUB_SHA}" \
   --container-registry-url "https://$ACR_LOGIN_SERVER"
+```
+
+The migration job image is updated before the slot deployment:
+
+```bash
+az containerapp job update \
+  --resource-group "$RESOURCE_GROUP" \
+  --name "$MIGRATION_JOB_NAME" \
+  --image "$ACR_LOGIN_SERVER/$MIGRATION_IMAGE:${GITHUB_SHA}"
+```
+
+After the job succeeds and staging health checks pass, the workflow swaps staging into production:
+
+```bash
+az webapp deployment slot swap \
+  --name "$WEBAPP_NAME" \
+  --resource-group "$RESOURCE_GROUP" \
+  --slot "$SLOT_NAME" \
+  --target-slot production
 ```
 
 ## Terraform deployment flow
@@ -81,15 +107,16 @@ Expected order:
 
 1. Apply `infra/foundation` once to establish the OIDC identity and persistent backbone.
 2. Store bootstrap outputs as GitHub secrets.
-3. Pass `github_actions_principal_id` into `infra/runtime`.
-4. Apply `infra/runtime` to create ACR, App Service, PostgreSQL, Key Vault runtime settings, and runtime RBAC.
-5. Run the application deployment workflow.
+3. Apply `infra/runtime` to create ACR, App Service, PostgreSQL, Container Apps migration infrastructure, Key Vault runtime settings, monitoring, private endpoint, and runtime RBAC.
+4. Run the application deployment workflow.
 
 For production pipelines, Terraform should use remote state and plan/apply controls rather than local state.
 
 ## Managed identity image pull
 
 ACR admin credentials are disabled. The Web App uses a user-assigned managed identity for image pull. Terraform assigns `AcrPull` to that identity on the registry and configures App Service to use the managed identity for container registry access.
+
+The migration job has a separate user-assigned managed identity and also receives `AcrPull` so the Container Apps Job can pull the Flyway image.
 
 GitHub Actions has `AcrPush`, allowing it to publish images, but it is not the runtime image pull identity.
 
@@ -102,6 +129,12 @@ The production database authentication target uses the Web App managed identity 
 - PostgreSQL maps the Web App identity to a database role.
 
 Keeping those identities separate reduces blast radius and makes operational responsibility clearer.
+
+## Rollback workflow
+
+Rollback is currently modeled as a manual slot swap through `.github/workflows/rollback-production.yml`. It authenticates with OIDC, swaps the staging slot back into production, and verifies production health and version endpoints.
+
+Because rollback is slot based, the staging slot must still contain the previously known-good production version for the rollback workflow to be useful.
 
 ## Why OIDC over static GitHub secrets
 
