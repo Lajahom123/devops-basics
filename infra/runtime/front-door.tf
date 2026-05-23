@@ -83,3 +83,22 @@ resource "azurerm_cdn_frontdoor_firewall_policy" "main" {
 
   tags = local.common_tags
 }
+
+resource "azurerm_cdn_frontdoor_security_policy" "main" {
+  name                     = "sp-devops-tracker"
+  cdn_frontdoor_profile_id = azurerm_cdn_frontdoor_profile.main.id
+
+  security_policies {
+    firewall {
+      cdn_frontdoor_firewall_policy_id = azurerm_cdn_frontdoor_firewall_policy.main.id
+
+      association {
+        domain {
+          cdn_frontdoor_domain_id = azurerm_cdn_frontdoor_endpoint.main.id
+        }
+
+        patterns_to_match = ["/*"]
+      }
+    }
+  }
+}
