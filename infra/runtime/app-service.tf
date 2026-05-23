@@ -11,7 +11,6 @@ locals {
     POSTGRES_USER = "id-devops-tracker-webapp"
 
     APPLICATIONINSIGHTS_CONNECTION_STRING      = azurerm_application_insights.main.connection_string
-    APPINSIGHTS_INSTRUMENTATIONKEY             = azurerm_application_insights.main.instrumentation_key
     ApplicationInsightsAgent_EXTENSION_VERSION = "~3"
 
     PORT                                = var.container_port
