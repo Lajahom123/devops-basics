@@ -134,8 +134,8 @@ resource "azurerm_app_service_virtual_network_swift_connection" "main" {
   subnet_id      = data.terraform_remote_state.foundation.outputs.app_service_subnet_id
 }
 
-resource "azurerm_role_assignment" "github_actions_web_app_contributor" {
+resource "azurerm_role_assignment" "github_actions_deploy_web_app_contributor" {
   scope                = azurerm_linux_web_app.main.id
   role_definition_name = "Contributor"
-  principal_id         = data.terraform_remote_state.foundation.outputs.github_actions_principal_id
+  principal_id         = data.terraform_remote_state.foundation.outputs.github_actions_deploy_principal_id
 }

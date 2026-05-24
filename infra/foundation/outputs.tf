@@ -94,8 +94,8 @@ output "web_app_identity_principal_id" {
 
 # Azure IDs
 
-output "azure_client_id" {
-  value = azuread_application.github_actions.client_id
+output "azure_deploy_client_id" {
+  value = azuread_application.github_actions_deploy.client_id
 }
 
 output "azure_tenant_id" {
@@ -108,8 +108,8 @@ output "azure_subscription_id" {
 
 # Github actions
 
-output "github_actions_principal_id" {
-  value = azuread_service_principal.github_actions.object_id
+output "github_actions_deploy_principal_id" {
+  value = azuread_service_principal.github_actions_deploy.object_id
 }
 
 # Migration job

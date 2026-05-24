@@ -17,12 +17,12 @@ The bootstrap layer is intentionally separate from the application infrastructur
 After bootstrap apply, these outputs become GitHub repository secrets:
 
 ```text
-AZURE_CLIENT_ID
+AZURE_DEPLOY_CLIENT_ID
 AZURE_TENANT_ID
 AZURE_SUBSCRIPTION_ID
 ```
 
-The `github_actions_principal_id` output is consumed by the runtime layer so Terraform can assign Azure RBAC for ACR push, Web App updates, and migration job updates.
+The `github_actions_deploy_principal_id` output is consumed by the runtime layer so Terraform can assign Azure RBAC for ACR push, Web App updates, and migration job updates.
 
 ## Workflow authentication
 
@@ -40,7 +40,7 @@ permissions:
 - name: Azure login
   uses: azure/login@v2
   with:
-    client-id: ${{ secrets.AZURE_CLIENT_ID }}
+    client-id: ${{ secrets.AZURE_DEPLOY_CLIENT_ID }}
     tenant-id: ${{ secrets.AZURE_TENANT_ID }}
     subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 ```

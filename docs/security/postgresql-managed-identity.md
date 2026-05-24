@@ -36,7 +36,7 @@ The Web App obtains an access token for Azure PostgreSQL from the instance metad
 
 ## Application implementation shape
 
-The Node.js implementation uses `ManagedIdentityCredential` when `AZURE_CLIENT_ID` is present and falls back to `DefaultAzureCredential` for other environments. It passes the token into `pg`.
+The Node.js implementation uses `ManagedIdentityCredential` when `AZURE_DEPLOY_CLIENT_ID` is present and falls back to `DefaultAzureCredential` for other environments. It passes the token into `pg`.
 
 Representative shape:
 
@@ -44,7 +44,7 @@ Representative shape:
 const { ManagedIdentityCredential } = require("@azure/identity");
 const { Pool } = require("pg");
 
-const credential = new ManagedIdentityCredential(process.env.AZURE_CLIENT_ID);
+const credential = new ManagedIdentityCredential(process.env.AZURE_DEPLOY_CLIENT_ID);
 const scope = "https://ossrdbms-aad.database.windows.net/.default";
 
 async function createPool() {

@@ -14,10 +14,10 @@ resource "azurerm_role_assignment" "web_app_acr_pull" {
   principal_id         = data.terraform_remote_state.foundation.outputs.web_app_identity_principal_id
 }
 
-resource "azurerm_role_assignment" "github_actions_acr_push" {
+resource "azurerm_role_assignment" "github_actions_deploy_acr_push" {
   scope                = azurerm_container_registry.main.id
   role_definition_name = "AcrPush"
-  principal_id         = data.terraform_remote_state.foundation.outputs.github_actions_principal_id
+  principal_id         = data.terraform_remote_state.foundation.outputs.github_actions_deploy_principal_id
 }
 
 resource "azurerm_role_assignment" "migration_job_acr_pull" {

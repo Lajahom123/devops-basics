@@ -64,8 +64,8 @@ resource "azurerm_container_app_job" "migration" {
   tags = local.common_tags
 }
 
-resource "azurerm_role_assignment" "migration_job_github_actions_rg_contributor" {
+resource "azurerm_role_assignment" "migration_job_github_actions_deploy_rg_contributor" {
   scope                = azurerm_container_app_job.migration.id
   role_definition_name = "Contributor"
-  principal_id         = data.terraform_remote_state.foundation.outputs.github_actions_principal_id
+  principal_id         = data.terraform_remote_state.foundation.outputs.github_actions_deploy_principal_id
 }
