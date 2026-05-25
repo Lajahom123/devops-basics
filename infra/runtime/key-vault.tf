@@ -1,15 +1,3 @@
-locals {
-  name_prefix = var.project_name
-  key_vault_name = var.key_vault_name != null ? var.key_vault_name : substr(
-    replace(lower("kv-devops-tracker-swn"), "/[^a-z0-9-]/", ""),
-    0,
-    24
-  )
-  common_tags = {
-    Owner = var.owner_email
-  }
-}
-
 resource "azurerm_key_vault" "main" {
   name                = local.key_vault_name
   resource_group_name = data.terraform_remote_state.foundation.outputs.resource_group_name
