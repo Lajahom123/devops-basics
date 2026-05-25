@@ -41,7 +41,8 @@ if [[ "$POSTGRES_STATE" == "Ready" ]]; then
   run_step "Stop PostgreSQL Flexible Server" \
     az postgres flexible-server stop \
       --resource-group "$RESOURCE_GROUP" \
-      --name "$POSTGRES_SERVER_NAME"
+      --name "$POSTGRES_SERVER_NAME" \
+      --output none
 elif [[ "$POSTGRES_STATE" == "Stopped" ]]; then
   echo "OK: PostgreSQL Flexible Server is already stopped."
 else
@@ -77,7 +78,8 @@ else
     az vm delete \
       --resource-group "$RESOURCE_GROUP" \
       --name "$VM_NAME" \
-      --yes
+      --yes \
+      --output none
 
   for NIC_ID in $NIC_IDS; do
     PUBLIC_IP_IDS=$(az network nic show \
@@ -85,14 +87,16 @@ else
       --query "ipConfigurations[].publicIPAddress.id" \
       --output tsv 2>/dev/null || true)
 
-    run_step "Delete admin VM NIC $NIC_ID" \
+    run_step "Delete admin VM NIC" \
       az network nic delete \
-        --ids "$NIC_ID"
+        --ids "$NIC_ID" \
+        --output none
 
     for PUBLIC_IP_ID in $PUBLIC_IP_IDS; do
-      run_step "Delete admin VM Public IP $PUBLIC_IP_ID" \
+      run_step "Delete admin VM Public IP" \
         az network public-ip delete \
-          --ids "$PUBLIC_IP_ID"
+          --ids "$PUBLIC_IP_ID" \
+          --output none
     done
   done
 
@@ -100,7 +104,8 @@ else
     run_step "Delete admin VM OS disk" \
       az disk delete \
         --ids "$OS_DISK_ID" \
-        --yes
+        --yes \
+        --output none
   fi
 fi
 
@@ -109,7 +114,8 @@ run_step "Disable Front Door endpoint" \
     --resource-group "$RESOURCE_GROUP" \
     --profile-name "$FRONT_DOOR_PROFILE_NAME" \
     --endpoint-name "$FRONT_DOOR_ENDPOINT_NAME" \
-    --enabled-state Disabled
+    --enabled-state Disabled \
+    --output none
 
 if [[ "$FAILED" -ne 0 ]]; then
   echo ""
