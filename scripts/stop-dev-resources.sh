@@ -9,8 +9,6 @@ VM_NAME="vm-devops-db-admin"
 FRONT_DOOR_PROFILE_NAME="fd-devops-tracker-29193"
 FRONT_DOOR_ENDPOINT_NAME="fde-devops-tracker-29193"
 
-APP_SERVICE_PLAN_NAME="plan-devops-tracker"
-
 FAILED=0
 
 run_step() {
@@ -28,28 +26,82 @@ run_step() {
   fi
 }
 
-echo "Stopping PostgreSQL Flexible Server if possible..."
-run_step "Stop PostgreSQL Flexible Server" \
-  az postgres flexible-server stop \
-    --resource-group "$RESOURCE_GROUP" \
-    --name "$POSTGRES_SERVER_NAME"
-
 echo ""
-echo "Finding admin VM related resources..."
+echo "Checking PostgreSQL Flexible Server state..."
 
-VM_IDS=$(az resource list \
+POSTGRES_STATE=$(az postgres flexible-server show \
   --resource-group "$RESOURCE_GROUP" \
-  --query "[?contains(name, '$VM_NAME')].id" \
+  --name "$POSTGRES_SERVER_NAME" \
+  --query "state" \
   --output tsv)
 
-if [[ -n "$VM_IDS" ]]; then
-  echo "Deleting admin VM related resources..."
-  echo "$VM_IDS"
+echo "PostgreSQL state: $POSTGRES_STATE"
 
-  run_step "Delete admin VM related resources" \
-    az resource delete --ids $VM_IDS
+if [[ "$POSTGRES_STATE" == "Ready" ]]; then
+  run_step "Stop PostgreSQL Flexible Server" \
+    az postgres flexible-server stop \
+      --resource-group "$RESOURCE_GROUP" \
+      --name "$POSTGRES_SERVER_NAME"
+elif [[ "$POSTGRES_STATE" == "Stopped" ]]; then
+  echo "OK: PostgreSQL Flexible Server is already stopped."
 else
-  echo "No admin VM related resources found."
+  echo "FAILED: PostgreSQL Flexible Server is in unsupported state: $POSTGRES_STATE"
+  FAILED=1
+fi
+
+echo ""
+echo "Deleting admin VM resources in dependency order..."
+
+VM_ID=$(az vm show \
+  --resource-group "$RESOURCE_GROUP" \
+  --name "$VM_NAME" \
+  --query "id" \
+  --output tsv 2>/dev/null || true)
+
+if [[ -z "$VM_ID" ]]; then
+  echo "OK: Admin VM does not exist."
+else
+  OS_DISK_ID=$(az vm show \
+    --resource-group "$RESOURCE_GROUP" \
+    --name "$VM_NAME" \
+    --query "storageProfile.osDisk.managedDisk.id" \
+    --output tsv)
+
+  NIC_IDS=$(az vm show \
+    --resource-group "$RESOURCE_GROUP" \
+    --name "$VM_NAME" \
+    --query "networkProfile.networkInterfaces[].id" \
+    --output tsv)
+
+  run_step "Delete admin VM" \
+    az vm delete \
+      --resource-group "$RESOURCE_GROUP" \
+      --name "$VM_NAME" \
+      --yes
+
+  for NIC_ID in $NIC_IDS; do
+    PUBLIC_IP_IDS=$(az network nic show \
+      --ids "$NIC_ID" \
+      --query "ipConfigurations[].publicIPAddress.id" \
+      --output tsv 2>/dev/null || true)
+
+    run_step "Delete admin VM NIC $NIC_ID" \
+      az network nic delete \
+        --ids "$NIC_ID"
+
+    for PUBLIC_IP_ID in $PUBLIC_IP_IDS; do
+      run_step "Delete admin VM Public IP $PUBLIC_IP_ID" \
+        az network public-ip delete \
+          --ids "$PUBLIC_IP_ID"
+    done
+  done
+
+  if [[ -n "$OS_DISK_ID" ]]; then
+    run_step "Delete admin VM OS disk" \
+      az disk delete \
+        --ids "$OS_DISK_ID" \
+        --yes
+  fi
 fi
 
 run_step "Disable Front Door endpoint" \
@@ -58,12 +110,6 @@ run_step "Disable Front Door endpoint" \
     --profile-name "$FRONT_DOOR_PROFILE_NAME" \
     --endpoint-name "$FRONT_DOOR_ENDPOINT_NAME" \
     --enabled-state Disabled
-
-run_step "Scale App Service Plan down to B1" \
-  az appservice plan update \
-    --resource-group "$RESOURCE_GROUP" \
-    --name "$APP_SERVICE_PLAN_NAME" \
-    --sku B1
 
 if [[ "$FAILED" -ne 0 ]]; then
   echo ""
