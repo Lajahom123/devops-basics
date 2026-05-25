@@ -23,5 +23,8 @@ jobs:
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
+      - name: Make script executable
+        run: chmod +x ./scripts/start-dev-resources.sh
+
       - name: Start dev resources
         run: ./scripts/start-dev-resources.sh
