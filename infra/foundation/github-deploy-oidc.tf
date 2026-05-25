@@ -1,5 +1,3 @@
-data "azurerm_client_config" "current" {}
-
 resource "azuread_application" "github_actions_deploy" {
   display_name = "github-${var.project_name}-${var.environment}-deploy"
 }

@@ -98,6 +98,10 @@ output "azure_deploy_client_id" {
   value = azuread_application.github_actions_deploy.client_id
 }
 
+output "azure_dev_operator_client_id" {
+  value = azuread_application.github_actions_dev_operator.client_id
+}
+
 output "azure_tenant_id" {
   value = data.azurerm_client_config.current.tenant_id
 }
