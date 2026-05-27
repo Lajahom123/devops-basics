@@ -56,13 +56,25 @@ run_step "Enable Front Door endpoint" \
     --enabled-state Enabled \
     --output none
 
-run_step "Check app health" \
+echo ""
+echo "Resolving Front Door hostname..."
+
+FRONT_DOOR_HOSTNAME=$(az afd endpoint show \
+  --resource-group "$RESOURCE_GROUP" \
+  --profile-name "$FRONT_DOOR_PROFILE_NAME" \
+  --endpoint-name "$FRONT_DOOR_ENDPOINT_NAME" \
+  --query "hostName" \
+  --output tsv)
+
+echo "Front Door hostname: $FRONT_DOOR_HOSTNAME"
+
+run_step "Check app health through Front Door" \
   curl --retry 10 \
     --retry-delay 10 \
     --fail \
     --silent \
     --show-error \
-    "https://devops-tracker-29193.azurewebsites.net/health"
+    "https://${FRONT_DOOR_HOSTNAME}/health"
 
 if [[ "$FAILED" -ne 0 ]]; then
   echo ""
