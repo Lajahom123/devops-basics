@@ -56,6 +56,14 @@ output "private_endpoints_subnet_id" {
   value = azurerm_subnet.private_endpoints.id
 }
 
+output "github_runner_subnet_name" {
+  value = azurerm_subnet.github_runner.name
+}
+
+output "github_runner_subnet_id" {
+  value = azurerm_subnet.github_runner.id
+}
+
 # DNS
 
 output "postgres_private_dns_zone_name" {

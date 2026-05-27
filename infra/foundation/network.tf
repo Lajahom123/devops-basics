@@ -83,3 +83,10 @@ resource "azurerm_subnet" "private_endpoints" {
   virtual_network_name = azurerm_virtual_network.main.name
   address_prefixes     = [var.private_endpoints_subnet_address_prefix]
 }
+
+resource "azurerm_subnet" "github_runner" {
+  name                 = "snet-github-runner"
+  resource_group_name  = data.azurerm_resource_group.main.name
+  virtual_network_name = azurerm_virtual_network.main.name
+  address_prefixes     = [var.github_runner_subnet_address_prefix]
+}

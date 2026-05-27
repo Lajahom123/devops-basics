@@ -62,6 +62,12 @@ variable "private_endpoints_subnet_address_prefix" {
   default     = "10.20.5.0/24"
 }
 
+variable "github_runner_subnet_address_prefix" {
+  description = "Subnet delegated to Github runners."
+  type        = string
+  default     = "10.20.6.0/24"
+}
+
 variable "github_owner" {
   description = "GitHub organization or username."
   type        = string
