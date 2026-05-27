@@ -23,9 +23,11 @@ resource "azurerm_storage_account" "tfstate" {
       days = 7
     }
   }
+
+  tags = local.common_tags
 }
 
-resource "azurerm_storage_container" "tfstate" {
+resource "azurerm_storage_container" "full_infra" {
   name                  = var.container_name
   storage_account_name  = azurerm_storage_account.tfstate.name
   container_access_type = "private"

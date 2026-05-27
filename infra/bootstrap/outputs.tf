@@ -3,5 +3,5 @@ output "storage_account_name" {
 }
 
 output "container_name" {
-  value = azurerm_storage_container.tfstate.name
+  value = azurerm_storage_container.full_infra.name
 }
