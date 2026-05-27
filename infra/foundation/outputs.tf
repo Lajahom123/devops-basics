@@ -124,6 +124,20 @@ output "github_actions_deploy_principal_id" {
   value = azuread_service_principal.github_actions_deploy.object_id
 }
 
+# Github runner
+
+output "github_runner_identity_id" {
+  value = azurerm_user_assigned_identity.github_runner.id
+}
+
+output "github_runner_identity_client_id" {
+  value = azurerm_user_assigned_identity.github_runner.client_id
+}
+
+output "github_runner_identity_principal_id" {
+  value = azurerm_user_assigned_identity.github_runner.principal_id
+}
+
 # Migration job
 
 output "migration_job_identity_id" {

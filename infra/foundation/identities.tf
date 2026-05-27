@@ -11,3 +11,9 @@ resource "azurerm_user_assigned_identity" "migration_job" {
   location            = var.location
   tags                = local.common_tags
 }
+
+resource "azurerm_user_assigned_identity" "github_runner" {
+  name                = "id-${local.name_prefix}-github-runner"
+  location            = var.location
+  resource_group_name = data.azurerm_resource_group.main.name
+}
