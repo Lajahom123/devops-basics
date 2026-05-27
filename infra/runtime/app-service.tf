@@ -10,7 +10,7 @@ locals {
     POSTGRES_DB   = "devops_tracker"
     POSTGRES_USER = "id-devops-tracker-webapp"
 
-    APPLICATIONINSIGHTS_CONNECTION_STRING      = azurerm_application_insights.main.connection_string
+    APPLICATIONINSIGHTS_CONNECTION_STRING      = sensitive(data.terraform_remote_state.foundation.outputs.application_insights_connection_string)
     ApplicationInsightsAgent_EXTENSION_VERSION = "~3"
 
     PORT                                = var.container_port
@@ -72,7 +72,7 @@ resource "azurerm_linux_web_app" "main" {
 
     application_stack {
       docker_image_name   = var.docker_image_name
-      docker_registry_url = "https://${azurerm_container_registry.main.login_server}"
+      docker_registry_url = "https://${data.terraform_remote_state.foundation.outputs.acr_login_server}"
     }
   }
 
@@ -84,10 +84,6 @@ resource "azurerm_linux_web_app" "main" {
     ]
   }
 
-  depends_on = [
-    azurerm_role_assignment.web_app_acr_pull,
-    azurerm_role_assignment.web_app_key_vault_secrets_user,
-  ]
 }
 
 resource "azurerm_linux_web_app_slot" "staging" {
@@ -122,7 +118,7 @@ resource "azurerm_linux_web_app_slot" "staging" {
 
     application_stack {
       docker_image_name   = var.docker_image_name
-      docker_registry_url = "https://${azurerm_container_registry.main.login_server}"
+      docker_registry_url = "https://${data.terraform_remote_state.foundation.outputs.acr_login_server}"
     }
   }
 

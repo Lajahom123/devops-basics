@@ -26,16 +26,13 @@ variable "web_app_name" {
   type        = string
 }
 
-variable "acr_name" {
-  description = "Globally unique Azure Container Registry name. Only letters and numbers."
-  type        = string
-}
-
 variable "app_service_sku" {
   description = "App Service plan SKU. Use Basic or higher for VNet integration."
   type        = string
   default     = "B1"
 }
+
+# Docker
 
 variable "docker_image_name" {
   description = "Docker image name and tag inside ACR."
@@ -49,11 +46,7 @@ variable "container_port" {
   default     = "3000"
 }
 
-variable "key_vault_name" {
-  description = "Globally unique Key Vault name. Leave null to derive one from the project."
-  type        = string
-  default     = null
-}
+# Postgre
 
 variable "postgres_server_name" {
   description = "Globally unique Azure PostgreSQL Flexible Server name."
@@ -137,6 +130,8 @@ variable "postgres_entra_admin_principal_name" {
   description = "Display name or UPN of the Microsoft Entra administrator for PostgreSQL."
 }
 
+# Alers
+
 variable "alert_evaluation_frequency" {
   type    = string
   default = "PT5M"
@@ -145,4 +140,18 @@ variable "alert_evaluation_frequency" {
 variable "alert_window_duration" {
   type    = string
   default = "PT5M"
+}
+
+# Github runner
+
+variable "github_runner_admin_username" {
+  type        = string
+  description = "Admin username for the GitHub runner VM."
+  default     = "azureuser"
+}
+
+variable "github_runner_admin_ssh_public_key_path" {
+  type        = string
+  description = "Path to the SSH public key used for runner VM access."
+  default     = "path/to/public/key"
 }

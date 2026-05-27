@@ -23,7 +23,7 @@ resource "azurerm_container_app_job" "migration" {
   }
 
   registry {
-    server   = azurerm_container_registry.main.login_server
+    server   = data.terraform_remote_state.foundation.outputs.acr_login_server
     identity = data.terraform_remote_state.foundation.outputs.migration_job_identity_id
   }
 
@@ -35,7 +35,7 @@ resource "azurerm_container_app_job" "migration" {
   template {
     container {
       name   = "flyway"
-      image  = "${azurerm_container_registry.main.login_server}/devops-tracker-migrations:bootstrap"
+      image  = "${data.terraform_remote_state.foundation.outputs.acr_login_server}/devops-tracker-migrations:bootstrap"
       cpu    = 0.5
       memory = "1Gi"
 

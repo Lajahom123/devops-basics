@@ -4,13 +4,10 @@ location            = "switzerlandnorth"
 owner_email         = "owner@example.com"
 
 web_app_name = "devops-tracker-12345"
-acr_name     = "devopstracker12345"
 
 app_service_sku   = "B1"
 docker_image_name = "devops-tracker:latest"
 container_port    = "3000"
-
-key_vault_name = "kv-devops-tracker-abc"
 
 postgres_server_name           = "psql-devops-tracker-12345-swn"
 postgres_database_name         = "devops_tracker"

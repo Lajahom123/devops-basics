@@ -26,6 +26,17 @@ variable "resource_group_name" {
   type        = string
 }
 
+variable "key_vault_name" {
+  description = "Globally unique Key Vault name. Leave null to derive one from the project."
+  type        = string
+  default     = null
+}
+
+variable "acr_name" {
+  description = "Globally unique Azure Container Registry name. Only letters and numbers."
+  type        = string
+}
+
 variable "vnet_address_space" {
   description = "Address space for the application virtual network."
   type        = string

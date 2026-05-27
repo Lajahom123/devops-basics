@@ -46,14 +46,6 @@ output "staging_slot_url" {
   value = "https://${azurerm_linux_web_app_slot.staging.default_hostname}"
 }
 
-output "acr_name" {
-  value = azurerm_container_registry.main.name
-}
-
-output "acr_login_server" {
-  value = azurerm_container_registry.main.login_server
-}
-
 output "postgres_server_name" {
   value = azurerm_postgresql_flexible_server.main.name
 }
@@ -63,18 +55,18 @@ output "postgres_fqdn" {
 }
 
 output "key_vault_name" {
-  value = azurerm_key_vault.main.name
+  value = data.terraform_remote_state.foundation.outputs.key_vault_name
 }
 
 output "log_analytics_workspace_name" {
-  value = azurerm_log_analytics_workspace.main.name
+  value = data.terraform_remote_state.foundation.outputs.log_analytics_workspace_name
 }
 
 output "application_insights_name" {
-  value = azurerm_application_insights.main.name
+  value = data.terraform_remote_state.foundation.outputs.application_insights_name
 }
 
 output "application_insights_connection_string" {
-  value     = azurerm_application_insights.main.connection_string
+  value     = data.terraform_remote_state.foundation.outputs.application_insights_connection_string
   sensitive = true
 }

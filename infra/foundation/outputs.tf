@@ -6,6 +6,49 @@ output "location" {
   value = data.azurerm_resource_group.main.location
 }
 
+# ACR
+
+output "acr_name" {
+  value = azurerm_container_registry.main.name
+}
+
+output "acr_login_server" {
+  value = azurerm_container_registry.main.login_server
+}
+
+# Key Vault
+
+output "key_vault_name" {
+  value = azurerm_key_vault.main.name
+}
+
+output "key_vault_id" {
+  value = azurerm_key_vault.main.id
+}
+
+# Monitoring
+
+output "log_analytics_workspace_name" {
+  value = azurerm_log_analytics_workspace.main.name
+}
+
+output "log_analytics_workspace_id" {
+  value = azurerm_log_analytics_workspace.main.id
+}
+
+output "application_insights_name" {
+  value = azurerm_application_insights.main.name
+}
+
+output "application_insights_id" {
+  value = azurerm_application_insights.main.id
+}
+
+output "application_insights_connection_string" {
+  value     = azurerm_application_insights.main.connection_string
+  sensitive = true
+}
+
 # Network 
 
 output "vnet_name" {

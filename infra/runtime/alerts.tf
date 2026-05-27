@@ -19,7 +19,7 @@ resource "azurerm_monitor_scheduled_query_rules_alert_v2" "failed_requests" {
 
   evaluation_frequency = var.alert_evaluation_frequency
   window_duration      = var.alert_window_duration
-  scopes               = [azurerm_log_analytics_workspace.main.id]
+  scopes               = [data.terraform_remote_state.foundation.outputs.log_analytics_workspace_id]
 
   severity = 2
   enabled  = true
