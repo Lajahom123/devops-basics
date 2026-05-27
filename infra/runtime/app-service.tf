@@ -38,12 +38,13 @@ locals {
 }
 
 resource "azurerm_linux_web_app" "main" {
-  name                      = var.web_app_name
-  resource_group_name       = data.terraform_remote_state.foundation.outputs.resource_group_name
-  location                  = var.location
-  service_plan_id           = azurerm_service_plan.main.id
-  virtual_network_subnet_id = data.terraform_remote_state.foundation.outputs.app_service_subnet_id
-  tags                      = local.common_tags
+  name                          = var.web_app_name
+  resource_group_name           = data.terraform_remote_state.foundation.outputs.resource_group_name
+  location                      = var.location
+  service_plan_id               = azurerm_service_plan.main.id
+  virtual_network_subnet_id     = data.terraform_remote_state.foundation.outputs.app_service_subnet_id
+  tags                          = local.common_tags
+  public_network_access_enabled = false
 
   https_only                      = true
   key_vault_reference_identity_id = data.terraform_remote_state.foundation.outputs.web_app_identity_id
@@ -96,6 +97,7 @@ resource "azurerm_linux_web_app_slot" "staging" {
   https_only                      = true
   virtual_network_subnet_id       = data.terraform_remote_state.foundation.outputs.app_service_subnet_id
   key_vault_reference_identity_id = data.terraform_remote_state.foundation.outputs.web_app_identity_id
+  public_network_access_enabled   = false
 
   identity {
     type = "SystemAssigned, UserAssigned"

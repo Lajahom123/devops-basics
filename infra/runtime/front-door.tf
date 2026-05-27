@@ -13,8 +13,8 @@ resource "azurerm_cdn_frontdoor_endpoint" "main" {
   tags = local.common_tags
 }
 
-resource "azurerm_cdn_frontdoor_origin_group" "web_app" {
-  name                     = "og-${var.web_app_name}"
+resource "azurerm_cdn_frontdoor_origin_group" "web_app_private" {
+  name                     = "og-private-${var.web_app_name}"
   cdn_frontdoor_profile_id = azurerm_cdn_frontdoor_profile.main.id
 
   session_affinity_enabled = false
@@ -32,9 +32,9 @@ resource "azurerm_cdn_frontdoor_origin_group" "web_app" {
   }
 }
 
-resource "azurerm_cdn_frontdoor_origin" "web_app" {
-  name                          = "origin-${var.web_app_name}"
-  cdn_frontdoor_origin_group_id = azurerm_cdn_frontdoor_origin_group.web_app.id
+resource "azurerm_cdn_frontdoor_origin" "web_app_private" {
+  name                          = "origin-private-${var.web_app_name}"
+  cdn_frontdoor_origin_group_id = azurerm_cdn_frontdoor_origin_group.web_app_private.id
 
   enabled                        = true
   host_name                      = "${var.web_app_name}.azurewebsites.net"
@@ -45,13 +45,20 @@ resource "azurerm_cdn_frontdoor_origin" "web_app" {
 
   priority = 1
   weight   = 1000
+
+  private_link {
+    request_message        = "Allow Front Door private access to App Service"
+    location               = "westeurope"
+    private_link_target_id = azurerm_linux_web_app.main.id
+    target_type            = "sites"
+  }
 }
 
 resource "azurerm_cdn_frontdoor_route" "web_app" {
   name                          = "route-${var.web_app_name}"
   cdn_frontdoor_endpoint_id     = azurerm_cdn_frontdoor_endpoint.main.id
-  cdn_frontdoor_origin_group_id = azurerm_cdn_frontdoor_origin_group.web_app.id
-  cdn_frontdoor_origin_ids      = [azurerm_cdn_frontdoor_origin.web_app.id]
+  cdn_frontdoor_origin_group_id = azurerm_cdn_frontdoor_origin_group.web_app_private.id
+  cdn_frontdoor_origin_ids      = [azurerm_cdn_frontdoor_origin.web_app_private.id]
 
   enabled = true
 
@@ -63,7 +70,7 @@ resource "azurerm_cdn_frontdoor_route" "web_app" {
   link_to_default_domain = true
 
   depends_on = [
-    azurerm_cdn_frontdoor_origin.web_app
+    azurerm_cdn_frontdoor_origin.web_app_private
   ]
 }
 

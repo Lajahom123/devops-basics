@@ -18,7 +18,7 @@ data "terraform_remote_state" "foundation" {
   config = {
     resource_group_name  = "rg-devops-tracker-dev"
     storage_account_name = "stdevopstrackerswn"
-    container_name       = "tfstate"
+    container_name       = "full-infra"
     key                  = "foundation.tfstate"
   }
 }
