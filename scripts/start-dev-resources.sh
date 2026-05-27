@@ -66,8 +66,6 @@ FRONT_DOOR_HOSTNAME=$(az afd endpoint show \
   --query "hostName" \
   --output tsv)
 
-echo "Front Door hostname: $FRONT_DOOR_HOSTNAME"
-
 run_step "Check app health through Front Door" \
   curl --retry 10 \
     --retry-delay 10 \
