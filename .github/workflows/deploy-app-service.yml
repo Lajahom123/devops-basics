@@ -23,7 +23,6 @@ env:
 jobs:
   deploy-staging:
     runs-on: ubuntu-latest
-    environment: dev
 
     steps:
       - name: Checkout
@@ -132,7 +131,6 @@ jobs:
   validate-staging:
     needs: deploy-staging
     runs-on: [self-hosted, vnet]
-    environment: dev
 
     steps:
       - name: Verify staging slot health endpoint
@@ -159,7 +157,6 @@ jobs:
   swap-production:
     needs: validate-staging
     runs-on: ubuntu-latest
-    environment: dev
 
     steps:
       - name: Azure login
@@ -180,7 +177,6 @@ jobs:
   validate-production:
     needs: swap-production
     runs-on: [self-hosted, vnet]
-    environment: dev
 
     steps:
       - name: Verify production health endpoint
