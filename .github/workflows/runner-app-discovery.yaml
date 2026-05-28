@@ -4,17 +4,38 @@ on:
   workflow_dispatch:
 
 jobs:
-  private-validation:
-    runs-on: [self-hosted, vnet]
+  endpoint-validation:
+    runs-on:
+      - self-hosted
+      - vnet
+
     environment: dev
 
     steps:
-      - name: Validate private app endpoint
+      - name: Check private App Service DNS
+        run: |
+          nslookup devops-tracker-29193.azurewebsites.net
+
+      - name: Validate private App Service health
         env:
           APP_HEALTH_URL: "https://devops-tracker-29193.azurewebsites.net/health"
-        run: curl --fail --silent --show-error "$APP_HEALTH_URL"
+        run: |
+          curl --fail --silent --show-error "$APP_HEALTH_URL"
 
-      - name: Validate public endpoint
+      - name: Validate private App Service version
+        env:
+          APP_VERSION_URL: "https://devops-tracker-29193.azurewebsites.net/version"
+        run: |
+          curl --fail --silent --show-error "$APP_VERSION_URL"
+
+      - name: Validate Front Door health
         env:
           FRONT_DOOR_URL: ${{ secrets.FRONT_DOOR_URL }}
-        run: curl --fail --silent --show-error "${FRONT_DOOR_URL}/health"
+        run: |
+          curl --fail --silent --show-error "${FRONT_DOOR_URL%/}/health"
+
+      - name: Validate Front Door version
+        env:
+          FRONT_DOOR_URL: ${{ secrets.FRONT_DOOR_URL }}
+        run: |
+          curl --fail --silent --show-error "${FRONT_DOOR_URL%/}/version"
