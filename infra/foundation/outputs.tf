@@ -125,6 +125,12 @@ output "webapp_private_dns_zone_id" {
   value = azurerm_private_dns_zone.web_app.id
 }
 
+# NAT
+
+output "nat_public_ip" {
+  value = azurerm_public_ip.nat.ip_address
+}
+
 # Web app
 
 output "web_app_identity_name" {
