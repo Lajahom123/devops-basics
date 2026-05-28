@@ -1,0 +1,12 @@
+private-validation:
+  runs-on:
+    - self-hosted
+    - vnet
+  environment: dev
+
+  steps:
+    - name: Validate private app endpoint
+      run: |
+        curl --fail --silent --show-error "$APP_HEALTH_URL"
+      env:
+        APP_HEALTH_URL: "https://devops-tracker-29193.azurewebsites.net/health"

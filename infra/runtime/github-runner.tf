@@ -52,3 +52,17 @@ resource "azurerm_network_interface" "github_runner" {
     private_ip_address_allocation = "Dynamic"
   }
 }
+
+resource "azurerm_virtual_machine_extension" "github_runner_install" {
+  name                 = "install-github-runner"
+  virtual_machine_id   = azurerm_linux_virtual_machine.github_runner.id
+  publisher            = "Microsoft.Azure.Extensions"
+  type                 = "CustomScript"
+  type_handler_version = "2.1"
+
+  protected_settings = jsonencode({
+    script = base64encode(templatefile("${path.module}/../../scripts/install-github-runner.sh", {
+      key_vault_name = data.terraform_remote_state.foundation.outputs.key_vault_name
+    }))
+  })
+}
