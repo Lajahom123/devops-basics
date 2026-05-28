@@ -3,7 +3,7 @@ locals {
     DATABASE_SSL                     = "true"
     DATABASE_SSL_REJECT_UNAUTHORIZED = "true"
 
-    AZURE_CLIENT_ID = data.terraform_remote_state.foundation.outputs.web_app_identity_client_id
+    APP_CLIENT_ID = data.terraform_remote_state.foundation.outputs.web_app_identity_client_id
 
     POSTGRES_HOST = azurerm_postgresql_flexible_server.main.fqdn
     POSTGRES_PORT = "5432"

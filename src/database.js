@@ -10,7 +10,7 @@ const POSTGRES_HOST = process.env.POSTGRES_HOST;
 const POSTGRES_PORT = Number(process.env.POSTGRES_PORT || 5432);
 const POSTGRES_DB = process.env.POSTGRES_DB;
 const POSTGRES_USER = process.env.POSTGRES_USER;
-const AZURE_DEPLOY_CLIENT_ID = process.env.AZURE_DEPLOY_CLIENT_ID;
+const APP_CLIENT_ID = process.env.APP_CLIENT_ID;
 
 const POSTGRES_TOKEN_SCOPE = "https://ossrdbms-aad.database.windows.net/.default";
 
@@ -23,8 +23,8 @@ function isPostgresConfigured() {
 }
 
 function createCredential() {
-  if (AZURE_DEPLOY_CLIENT_ID) {
-    return new ManagedIdentityCredential(AZURE_DEPLOY_CLIENT_ID);
+  if (APP_CLIENT_ID) {
+    return new ManagedIdentityCredential(APP_CLIENT_ID);
   }
 
   return new DefaultAzureCredential();
