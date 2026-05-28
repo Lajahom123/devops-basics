@@ -1,4 +1,4 @@
-name: Rollback production
+name: Check private app endpoint
 
 on:
   workflow_dispatch:
