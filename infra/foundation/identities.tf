@@ -18,10 +18,3 @@ resource "azurerm_user_assigned_identity" "github_runner" {
   resource_group_name = data.azurerm_resource_group.main.name
   tags                = local.common_tags
 }
-/*
-resource "azurerm_role_assignment" "github_runner_keyvault_secrets_user" {
-  scope                = azurerm_key_vault.main.id
-  role_definition_name = "Key Vault Secrets User"
-  principal_id         = azurerm_user_assigned_identity.github_runner.principal_id
-}
-*/

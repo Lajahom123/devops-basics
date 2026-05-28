@@ -20,10 +20,3 @@ resource "azuread_application_federated_identity_credential" "github_branch_depl
 
   subject = "repo:${var.github_owner}/${var.github_repo}:ref:refs/heads/${var.github_branch}"
 }
-
-# Reader role mainly for testing
-resource "azurerm_role_assignment" "github_resource_deploy_group_reader" {
-  scope                = data.azurerm_resource_group.main.id
-  role_definition_name = "Reader"
-  principal_id         = azuread_service_principal.github_actions_deploy.object_id
-}
