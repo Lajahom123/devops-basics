@@ -36,10 +36,10 @@ resource "azurerm_private_endpoint" "web_app_staging" {
   }
 
   private_dns_zone_group {
-    name                 = "default"
+    name = "default"
     private_dns_zone_ids = [
       data.terraform_remote_state.foundation.outputs.webapp_private_dns_zone_id
-      ]
+    ]
   }
 
   tags = local.common_tags

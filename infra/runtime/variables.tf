@@ -46,6 +46,30 @@ variable "container_port" {
   default     = "3000"
 }
 
+# AKS
+
+variable "aks_cluster_name" {
+  description = "Name of the AKS cluster."
+  type        = string
+}
+
+variable "aks_dns_prefix" {
+  description = "DNS prefix for the AKS cluster."
+  type        = string
+}
+
+variable "aks_node_count" {
+  description = "Initial number of nodes in the AKS default node pool."
+  type        = number
+  default     = 2
+}
+
+variable "aks_node_vm_size" {
+  description = "VM size for the AKS default node pool."
+  type        = string
+  default     = "Standard_B2s"
+}
+
 # Postgre
 
 variable "postgres_server_name" {
