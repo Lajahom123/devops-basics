@@ -5,14 +5,15 @@ on:
 
 jobs:
   private-validation:
-  runs-on:
-    - self-hosted
-    - vnet
-  environment: dev
+    runs-on:
+      - self-hosted
+      - vnet
 
-  steps:
-    - name: Validate private app endpoint
-      run: |
-        curl --fail --silent --show-error "$APP_HEALTH_URL"
-      env:
-        APP_HEALTH_URL: "https://devops-tracker-29193.azurewebsites.net/health"
+    environment: dev
+
+    steps:
+      - name: Validate private app endpoint
+        env:
+          APP_HEALTH_URL: "https://devops-tracker-29193.azurewebsites.net/health"
+        run: |
+          curl --fail --silent --show-error "$APP_HEALTH_URL"
