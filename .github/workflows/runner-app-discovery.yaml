@@ -3,7 +3,8 @@ name: Rollback production
 on:
   workflow_dispatch:
 
-private-validation:
+jobs:
+  private-validation:
   runs-on:
     - self-hosted
     - vnet
