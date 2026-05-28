@@ -1,3 +1,8 @@
+name: Rollback production
+
+on:
+  workflow_dispatch:
+
 private-validation:
   runs-on:
     - self-hosted
