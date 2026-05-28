@@ -9,10 +9,14 @@ Foundation resources are intended to stay deployed:
 - resource group;
 - VNet;
 - subnets;
-- private DNS zone and VNet link;
+- private DNS zones and VNet links;
+- Azure Container Registry;
+- Key Vault;
+- Log Analytics Workspace and Application Insights;
 - user-assigned managed identities;
 - GitHub OIDC Entra application and service principal;
-- foundational RBAC assignments.
+- foundational RBAC assignments;
+- NAT Gateway and its public IP.
 
 These resources preserve identity and networking continuity. Destroying them to save small amounts of cost creates operational risk and usually increases rebuild effort.
 
@@ -23,12 +27,11 @@ Runtime resources should be reviewed when the environment is idle:
 - PostgreSQL Flexible Server;
 - App Service plan;
 - Linux Web App;
-- Azure Container Registry;
 - Container Apps Environment and migration job executions;
-- Log Analytics ingestion and retention;
-- Application Insights telemetry;
+- Front Door;
 - private endpoint;
-- Key Vault operations and stored secrets;
+- workload diagnostics and alerts;
+- self-hosted runner VM;
 - temporary admin VMs or jump hosts.
 
 The largest recurring costs are normally PostgreSQL compute and the App Service plan. Log ingestion can also become meaningful if diagnostics are noisy.
@@ -88,6 +91,12 @@ Destroying runtime removes the App Service plan, Web App, PostgreSQL server, and
 
 The staging slot shares the App Service plan. It does not create a separate plan, but it can add operational surface and logging volume.
 
+## Front Door and runner cost behavior
+
+Front Door Premium and the self-hosted runner VM are runtime resources. The runner is intentionally persistent so private validation can run without recreating registration state, but it should still be reviewed during long idle periods.
+
+Runner outbound traffic uses the foundation NAT Gateway. NAT and its public IP remain deployed with foundation to preserve a stable outbound egress point.
+
 ## Container Apps migration cost behavior
 
 The migration job runs on the Container Apps consumption workload profile. It should only consume compute while executions are active, but the Container Apps Environment and its diagnostics remain part of runtime.
@@ -100,7 +109,7 @@ Operational guidance:
 
 ## Monitoring cost behavior
 
-Log Analytics and Application Insights costs are driven mostly by ingestion and retention. The current retention is 30 days.
+Log Analytics and Application Insights costs are driven mostly by ingestion and retention. They are foundation resources, but runtime diagnostics can drive their usage.
 
 Cost controls:
 
@@ -111,7 +120,7 @@ Cost controls:
 
 ## Temporary VM cleanup
 
-Private PostgreSQL administration may require a temporary VM or jump host in `snet-admin`. These resources are not part of the permanent foundation unless explicitly added later.
+Private PostgreSQL administration may require a temporary VM or jump host in `snet-admin`. The permanent self-hosted runner is primarily for CI validation, not general administration.
 
 Operational guidance:
 

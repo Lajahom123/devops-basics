@@ -4,6 +4,9 @@ location            = "switzerlandnorth"
 resource_group_name = "rg-devops-tracker-dev"
 owner_email         = "owner@example.com"
 
+key_vault_name = "kv-name"
+acr_name       = "devopstrackerdevswn"
+
 vnet_address_space                       = "10.20.0.0/16"
 app_service_subnet_address_prefix        = "10.20.1.0/24"
 postgres_subnet_address_prefix           = "10.20.2.0/24"

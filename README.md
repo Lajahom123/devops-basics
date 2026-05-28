@@ -1,67 +1,83 @@
 # DevOps tracker
 
-DevOps tracker is a small Express API used as a working system for practicing production-style Azure and DevOps patterns. The application records deployment events and exposes simple read endpoints, but the main engineering value of the repository is the surrounding platform: Terraform-managed Azure infrastructure, container delivery, private database networking, GitHub Actions OIDC, and managed identities.
+DevOps tracker is a small Express API used to practice production-inspired Azure and DevOps patterns. The application records deployment events and exposes simple read endpoints, while the main learning surface is the platform around it: Terraform-managed Azure infrastructure, private networking, container delivery, GitHub Actions OIDC, managed identities, and deployment validation.
 
-The project is intentionally small at the application layer so infrastructure and operational decisions remain visible. It is not a product template; it is a focused environment for learning how production Azure systems are usually assembled and reasoned about.
+The target region is `switzerlandnorth`. The current environment is `dev`; the deployment strategy is a staging slot swap. The staging slot is part of the same environment, not a separate environment.
 
 ## Architecture overview
 
-The cloud architecture centers on an Azure Linux Web App running a container image from Azure Container Registry. The Web App has production and staging slots, uses a user-assigned managed identity for ACR image pull, and is integrated with a VNet for outbound private access to Azure Database for PostgreSQL Flexible Server. PostgreSQL is deployed without public network access and is reachable through a delegated subnet plus a private DNS zone.
+The Azure architecture uses Front Door as the public entry point and Azure App Service as the container host. Direct public access to App Service is disabled. Front Door reaches the production App Service through Private Link, while private validation reaches production and staging through App Service private endpoints inside the VNet.
 
-The current platform also includes a Container Apps Environment and a manual Container Apps Job for Flyway migrations. The deployment workflow builds both the application image and the migration image, updates the migration job image, runs migrations, deploys the app image to the staging slot, verifies staging, and swaps staging into production.
+Terraform is split by lifecycle:
 
-Observability is managed through Log Analytics, Application Insights, diagnostic settings, and an Azure Monitor scheduled query alert for failed requests. A private endpoint and private DNS zone are also present for the Web App inbound path inside the VNet.
+- `infra/foundation` owns shared, persistent infrastructure: networking foundations, VNet/subnets, ACR, Key Vault, Log Analytics/Application Insights, private DNS, identities, role assignments, and NAT Gateway.
+- `infra/runtime` owns workload resources: App Service, staging slot, PostgreSQL Flexible Server, Front Door, private endpoints, Container Apps migration job, GitHub self-hosted runner VM, diagnostics, alerts, and workload RBAC.
 
-Identity is split by responsibility:
+Runtime consumes foundation outputs through `terraform_remote_state`. This keeps low/no cost identity and network resources stable while allowing cost-bearing workload resources to be recreated.
 
-- GitHub Actions authenticates to Azure with OIDC through a long-lived bootstrap identity.
-- GitHub Actions receives Azure RBAC for image push and deployment operations.
-- The Web App uses a user-assigned managed identity to pull images from ACR and to authenticate toward runtime dependencies.
-- The migration job uses a separate user-assigned managed identity to pull its Flyway image from ACR.
-- The PostgreSQL production authentication target is managed identity to Entra token to PostgreSQL role, avoiding application-owned database passwords.
+## Current implemented features
 
-Terraform is split into separate lifecycle roots:
+- Azure Linux App Service running a container image from ACR.
+- Staging slot deployment with production slot swap.
+- Front Door Premium with WAF and Private Link origin access.
+- App Service public network access disabled for production and staging.
+- Production and staging App Service private endpoints.
+- Shared App Service private DNS zone: `privatelink.azurewebsites.net`.
+- PostgreSQL Flexible Server on private networking with public access disabled.
+- Container Apps Job for Flyway migrations before slot swap.
+- GitHub OIDC for deployment authentication.
+- GitHub self-hosted runner VM inside the VNet for private validation.
+- NAT Gateway on the runner subnet for centralized outbound internet access.
+- Log Analytics, Application Insights, diagnostics, and failed-request alerting.
 
-- `infra/foundation`: persistent resource group lookup, networking, PostgreSQL and Web App private DNS, Web App and migration-job managed identities, and GitHub Actions OIDC identity.
-- `infra/runtime`: cost-bearing application resources such as ACR, App Service plan, Web App and staging slot, PostgreSQL, Container Apps Environment, migration job, Key Vault runtime settings, monitoring, alerts, private endpoint, and runtime RBAC.
+## Deployment flow
 
-## High-level deployment flow
+The application workflow keeps deployment operations on GitHub-hosted runners where Azure API access is enough, then uses the VNet runner only for private endpoint validation.
 
 ```text
-Developer push
-  -> GitHub Actions
-  -> Azure OIDC authentication
-  -> Terraform infrastructure changes
-  -> Docker image build
-  -> Image push to ACR
-  -> Flyway migration image build and push
-  -> Container Apps migration job update and run
-  -> Staging slot container image update
-  -> Staging verification
-  -> Slot swap to production
-  -> Web App pulls image using managed identity
-  -> Web App connects privately to PostgreSQL
-  -> Production target: Web App authenticates to PostgreSQL using an Entra token
+Build/push
+  -> migrations
+  -> staging deployment
+  -> private staging validation
+  -> slot swap
+  -> private production validation
 ```
 
-The current workflow uses `azure/login` with OIDC and `az acr login`; it does not use ACR admin credentials or Web App publish profiles.
+Deployment authentication uses GitHub OIDC and Azure RBAC. Runner registration is GitHub App based.
 
-## Security overview
+## Networking overview
 
-The repository is structured around removing long-lived credentials from deployment and runtime paths.
+User traffic:
 
-- GitHub does not store Azure client secrets, ACR passwords, or publish profiles.
-- ACR admin credentials are disabled.
-- PostgreSQL is private-only and is not routable from the public internet.
-- App Service reaches PostgreSQL through VNet integration and private DNS.
-- The Web App runtime uses managed identity based database access, where the app obtains an Entra token and PostgreSQL maps that identity to a database role.
-- PostgreSQL password authentication remains enabled for bootstrap and migration operations.
+```text
+User
+  -> Front Door
+  -> Private Link
+  -> App Service
+```
 
-Terraform state can still contain sensitive generated values. Local state files are ignored, and a remote state backend is the expected next hardening step before shared operation.
+CI validation traffic:
+
+```text
+GitHub Actions
+  -> self-hosted runner inside VNet
+  -> private endpoint
+  -> App Service
+```
+
+Runner outbound traffic:
+
+```text
+runner subnet
+  -> NAT Gateway
+  -> internet services
+```
+
+App Service VNet integration gives App Service outbound access into the VNet. Private endpoints give VNet resources a private inbound path to App Service. NAT Gateway is outbound only; it centralizes egress IPs but does not enforce security policy.
 
 ## Local application development
 
-The API can run without PostgreSQL and falls back to in-memory storage. For container-based local testing, Docker Compose starts both the app and PostgreSQL:
+The API can run without PostgreSQL and falls back to in-memory storage. For local testing:
 
 ```bash
 npm install
@@ -78,6 +94,10 @@ Core endpoints:
 - `GET /deployments/:id`
 - `GET /deployments/stats`
 
+## Next planned phase
+
+The next major infrastructure phase is AKS. The existing App Service architecture remains useful as the production-inspired baseline for identity, networking, private ingress, migrations, and deployment validation.
+
 ## Documentation
 
 - [Architecture overview](docs/architecture/overview.md)
@@ -89,12 +109,3 @@ Core endpoints:
 - [Monitoring](docs/monitoring/monitoring.md)
 - [Operations and lessons learned](docs/operations/lessons-learned.md)
 - [Cost management](docs/operations/cost-management.md)
-
-Architecture decisions:
-
-- [ADR 0001: Use Terraform](docs/decisions/0001-use-terraform.md)
-- [ADR 0002: Use GitHub OIDC](docs/decisions/0002-use-github-oidc.md)
-- [ADR 0003: Use private PostgreSQL networking](docs/decisions/0003-private-postgresql.md)
-- [ADR 0004: Use managed identity for database authentication](docs/decisions/0004-managed-identity-db-auth.md)
-- [ADR 0005: Use Container Apps Job for migrations](docs/decisions/0005-use-container-apps-job-for-migrations.md)
-- [ADR 0006: Use App Service deployment slots](docs/decisions/0006-use-app-service-slots.md)

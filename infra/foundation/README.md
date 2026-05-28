@@ -1,37 +1,45 @@
 # Foundation layer
 
-Persistent, low/no cost infrastructure that should survive normal runtime cleanup.
+Persistent shared infrastructure for the `devops-tracker` Azure environment in `switzerlandnorth`.
 
-This layer reads the persistent resource group as data and owns the VNet, subnets, private DNS, user-assigned
-managed identities, GitHub Actions OIDC identity, and foundational RBAC.
+This layer should survive normal runtime cleanup. It owns the network, shared platform services, identities, role assignments, and remote-state outputs that runtime consumes through `terraform_remote_state`.
+
+## Shared infrastructure
+
+- Existing resource group lookup.
+- VNet and service-specific subnets.
+- Azure Container Registry with admin credentials disabled.
+- Key Vault with RBAC authorization.
+- Log Analytics Workspace and Application Insights.
+- PostgreSQL private DNS zone: `private.postgres.database.azure.com`.
+- App Service private DNS zone: `privatelink.azurewebsites.net`.
+- User-assigned identities for App Service, migration job, and GitHub runner.
+- GitHub OIDC deployment and operator identities.
+- Foundational RBAC assignments.
+- NAT Gateway and static public outbound IP for the runner subnet.
+
+## Networking foundations
 
 Current subnet layout:
 
-- `snet-web-egress` for App Service VNet integration.
-- `snet-postgres` for PostgreSQL Flexible Server private access.
-- `snet-admin` for private operational access patterns.
-- `snet-container-apps` for the Container Apps Environment.
-- `snet-private-endpoints` for private endpoints.
+- `snet-web-egress`: App Service regional VNet integration.
+- `snet-postgres`: PostgreSQL Flexible Server delegated subnet.
+- `snet-admin`: reserved private administration subnet.
+- `snet-container-apps`: Container Apps Environment delegated subnet.
+- `snet-private-endpoints`: private endpoint subnet.
+- `snet-github-runner`: self-hosted GitHub runner subnet.
 
-Current private DNS zones:
+The NAT Gateway is associated with `snet-github-runner`. It provides centralized outbound internet access for the runner VM, but it is outbound only and does not apply security policy.
 
-- `private.postgres.database.azure.com`
-- `privatelink.azurewebsites.net`
+## Operational notes
 
-Current managed identities:
-
-- Web App runtime identity.
-- Migration job identity.
-
-Do not run `terraform destroy` here during routine cost-management cycles.
+Apply foundation before runtime. Do not destroy this layer during routine cost-management cycles; recreating it can change identity principal IDs, private DNS links, and runner networking assumptions.
 
 ```bash
 terraform init
-terraform fmt
 terraform validate
 terraform plan
 terraform apply
 ```
 
-If resources already exist in Azure or in a previous monolithic state, import or
-move state before applying to avoid duplicate creation.
+If resources already exist in Azure or in previous state, import or move state before applying.

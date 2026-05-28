@@ -1,104 +1,66 @@
-# Operations and lessons learned
+# Operations notes
 
-This project surfaces several operational details that are easy to miss when a system is still small.
+This project is small enough to reason about, but it already has production-inspired operational boundaries: private DNS, private endpoints, managed identities, slot swaps, and separate foundation/runtime lifecycles.
 
-## Private DNS only resolves inside linked VNets
+## Deploy
 
-Private PostgreSQL is not just PostgreSQL with a firewall rule. The hostname is expected to resolve to a private IP from inside the linked VNet. A laptop outside the VNet cannot rely on the same DNS behavior and cannot route to the private address.
-
-When connectivity fails, verify DNS first:
+Apply foundation first, then runtime:
 
 ```bash
-nslookup <postgres-server>.postgres.database.azure.com
+cd infra/foundation
+terraform init
+terraform apply
+
+cd ../runtime
+terraform init
+terraform apply
 ```
 
-Run that check from the Web App environment, an Azure VM in the VNet, or another approved private access path. Running it locally can produce misleading results.
+Application deployment is handled by GitHub Actions. Deployment operations use GitHub-hosted runners with OIDC. Private endpoint validation runs on the self-hosted runner inside the VNet.
 
-## Terraform does not manage every PostgreSQL concern cleanly
+## Validate private connectivity
 
-Terraform is strong for Azure resource lifecycle, RBAC, and network topology. It is less clean for PostgreSQL database grants and Entra principal setup when the database is private-only.
+Run private checks from the self-hosted runner, an admin VM, or another approved private network path:
 
-Database role setup may require:
+```bash
+nslookup <web-app-name>.azurewebsites.net
+nslookup <web-app-name>-staging.azurewebsites.net
+curl --fail https://<web-app-name>.azurewebsites.net/health
+curl --fail https://<web-app-name>-staging.azurewebsites.net/health
+```
 
-- a jump host or private runner;
-- explicit `psql` execution;
-- migration tooling that runs inside the private network;
-- careful separation between infra provisioning and schema/database authorization.
+These checks should resolve through `privatelink.azurewebsites.net` inside the VNet. A laptop outside the VNet usually cannot perform the same validation.
 
-The operational boundary is: Terraform creates the database service and identities; database-level grants may still need a database administration path.
+## Verify NAT outbound IP
 
-## Managed identity auth still requires PostgreSQL principal creation
+Run this from the self-hosted runner:
 
-Entra authentication on PostgreSQL does not automatically grant application access. The managed identity must be represented as a PostgreSQL principal, and that role must receive schema/table permissions.
+```bash
+curl --fail --silent --show-error https://ifconfig.me
+```
 
-Missing role mapping and missing grants fail differently:
+The result should match the foundation `nat_public_ip` output. NAT Gateway only controls outbound egress for associated subnets; it does not provide inbound access or policy enforcement.
 
-- no mapped principal: login fails;
-- missing table grants: login succeeds, queries fail;
-- expired token: new connections fail after previously working.
+## Common troubleshooting points
 
-Runbooks should make those checks separate.
+- Private DNS: production and staging App Service hostnames must resolve to private endpoint addresses from inside the VNet.
+- App Service access: direct public access is disabled, so hosted runners cannot validate App Service through its public hostname.
+- Front Door: public user traffic should enter through Front Door and reach App Service over Private Link.
+- Runner registration: the VM uses managed identity to read GitHub App configuration from Key Vault, then registers a persistent runner.
+- Runner labels: private validation jobs require the self-hosted VNet labels to land on the runner.
+- PostgreSQL: private networking failures can look like application or authentication failures.
+- Slot swaps: staging must contain a meaningful release candidate before swap, and rollback depends on what remains in staging.
+- Terraform lifecycle: destroy runtime for cost control; do not destroy foundation during routine cleanup.
 
-## Migrations should stay outside App Service startup
+## Database administration
 
-The current architecture runs Flyway migrations through a Container Apps Job before the Web App slot swap. That keeps schema changes out of process startup and makes deployment failures easier to understand.
+Terraform creates the Azure database service and identities, but database-level principal mapping and grants may still need a private administration path.
 
-Keep this separation as the project grows:
+Managed identity auth requires:
 
-- migrations as a separate deployment step;
-- idempotent migration tooling;
-- readiness endpoints for dependency availability;
-- liveness endpoints for process health.
+- Entra authentication enabled on PostgreSQL;
+- PostgreSQL principal mapped to the App Service managed identity;
+- schema and table grants for that principal;
+- token refresh behavior in the application connection path.
 
-An app that fails to start because the database is temporarily unavailable can trigger restart loops and obscure the underlying platform issue.
-
-## Separate liveness and readiness
-
-`/health` currently reports database state. That is useful for learning, but production systems usually separate:
-
-- liveness: is the process alive and able to respond?
-- readiness: can the instance serve traffic with its dependencies?
-
-This distinction matters in App Service health checks and orchestrated environments. A transient database problem should not always imply the process is dead.
-
-## Private networking complicates local administration
-
-Private-only PostgreSQL improves security but removes convenient local access. That is the point, but it changes workflows.
-
-Production-style options:
-
-- private admin VM with just-in-time access;
-- VPN into the VNet;
-- self-hosted runner in the VNet;
-- database migration job running inside Azure;
-- approved break-glass path documented and audited.
-
-Avoid restoring public database access just to make routine administration easier.
-
-## Slot swaps improve deployment safety but need discipline
-
-The deployment workflow updates the staging slot, verifies `/health` and `/version`, then swaps staging into production. This is safer than updating production directly, but it relies on the staging slot containing a meaningful release candidate.
-
-Operational notes:
-
-- keep sticky settings limited to values that truly differ per slot;
-- verify that staging uses the same private dependencies as production;
-- remember that rollback is another slot swap, so staging must still contain the previously good production version;
-- make migration changes backward compatible when possible because schema changes happen before the app slot swap.
-
-## Token based auth introduces refresh concerns
-
-Managed identity database auth removes password rotation but introduces token lifecycle management. Entra tokens expire. Connection pools can hold connections across token boundaries, and new connections may need a fresh token.
-
-Applications should:
-
-- fetch tokens close to connection creation;
-- avoid assuming a token can be reused indefinitely;
-- reconnect gracefully;
-- expose enough logs to distinguish token acquisition failure from database authorization failure.
-
-## Bootstrap state should survive infra cleanup
-
-The GitHub Actions OIDC identity is intentionally separated from the runtime infrastructure. Destroying runtime should not destroy the identity that deploys runtime. Otherwise the next deployment cannot authenticate without manual repair.
-
-Normal cleanup should target `infra/runtime`, not `infra/foundation`.
+Password authentication remains available for bootstrap and migrations. Treat it as privileged operational access.

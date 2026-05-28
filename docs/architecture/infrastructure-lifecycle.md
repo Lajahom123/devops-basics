@@ -1,201 +1,99 @@
 # Infrastructure lifecycle
 
-The Terraform project is split by lifecycle rather than by Azure service type. The goal is to keep low/no cost foundational resources stable while allowing expensive runtime resources to be stopped or destroyed when the system is not actively used.
+Terraform is split by lifecycle rather than by Azure service type. Foundation keeps persistent shared infrastructure stable; runtime contains workload resources that carry most active cost.
 
 ## Lifecycle layers
 
 ```mermaid
 flowchart TD
-  subgraph Foundation["Foundation: persistent"]
-    RG["Resource group"]
-    VNET["VNet"]
-    APPNET["snet-web-egress"]
-    PGNET["snet-postgres"]
-    ADMIN["snet-admin"]
-    CANET["snet-container-apps"]
-    PENET["snet-private-endpoints"]
-    PGDNS["PostgreSQL private DNS zone"]
-    WEBDNS["Web App private DNS zone"]
-    WEBID["Web App managed identity"]
-    JOBID["Migration job managed identity"]
-    OIDC["GitHub OIDC identity"]
+  subgraph Foundation["Foundation: persistent shared infrastructure"]
+    VNET["VNet and subnets"]
+    ACR["ACR"]
+    KV["Key Vault"]
+    MON["Log Analytics + Application Insights"]
+    DNS["Private DNS zones"]
+    IDS["Managed identities"]
+    OIDC["GitHub OIDC identities"]
+    RBAC["Role assignments"]
+    NAT["NAT Gateway"]
   end
 
-  subgraph Runtime["Runtime: cost-bearing"]
-    ACR["Azure Container Registry"]
-    PLAN["App Service Plan"]
-    APP["Linux Web App"]
+  subgraph Runtime["Runtime: workload resources"]
+    PLAN["App Service plan"]
+    APP["App Service production slot"]
     SLOT["Staging slot"]
-    KV["Key Vault runtime settings"]
     PG["PostgreSQL Flexible Server"]
-    DB["PostgreSQL database"]
-    CAE["Container Apps Environment"]
-    JOB["Flyway migration job"]
-    LOG["Log Analytics + Application Insights"]
-    ALERT["Monitor alert + action group"]
-    PE["Web App private endpoint"]
+    CAJ["Container Apps migration job"]
+    FD["Front Door"]
+    PE["Production + staging private endpoints"]
+    RUNNER["GitHub runner VM"]
+    ALERTS["Diagnostics + alerts"]
   end
 
-  RG --> VNET
-  VNET --> APPNET
-  VNET --> PGNET
-  VNET --> ADMIN
-  VNET --> CANET
-  VNET --> PENET
-  VNET --> PGDNS
-  VNET --> WEBDNS
-  APP --> PLAN
-  APP --> SLOT
-  APP --> WEBID
-  APP --> APPNET
-  APP --> ACR
-  APP --> KV
-  APP --> PG
-  APP --> PE
-  PG --> PGNET
-  PG --> PGDNS
-  PG --> DB
-  CAE --> CANET
-  JOB --> CAE
-  JOB --> JOBID
-  JOB --> ACR
-  JOB --> PG
-  PE --> PENET
-  PE --> WEBDNS
-  LOG --> ALERT
-  OIDC --> ACR
-  OIDC --> APP
-  OIDC --> JOB
+  Runtime -->|"terraform_remote_state"| Foundation
+  FD -->|"Private Link"| APP
+  PE --> APP
+  PE --> SLOT
+  APP -->|"VNet integration"| VNET
+  SLOT -->|"VNet integration"| VNET
+  CAJ --> PG
+  RUNNER --> PE
+  RUNNER --> NAT
 ```
 
 ## Foundation responsibilities
 
-The foundation layer lives in `infra/foundation` and is intended to remain deployed.
+`infra/foundation` owns:
 
-It owns:
+- existing resource group lookup;
+- VNet and subnets for App Service egress, PostgreSQL, admin access, Container Apps, private endpoints, and GitHub runner;
+- ACR, Key Vault, Log Analytics, and Application Insights;
+- PostgreSQL and App Service private DNS zones;
+- user-assigned managed identities for App Service, migration job, and GitHub runner;
+- GitHub OIDC deployment/operator identities;
+- role assignments that belong to shared infrastructure;
+- NAT Gateway and static outbound IP for the runner subnet.
 
-- existing resource group, read as data;
-- VNet;
-- App Service integration subnet;
-- PostgreSQL delegated subnet;
-- admin subnet for private operational access patterns;
-- Container Apps delegated subnet;
-- private endpoint subnet;
-- PostgreSQL private DNS zone and VNet link;
-- Web App private endpoint DNS zone and VNet link;
-- user-assigned managed identity for the Web App;
-- user-assigned managed identity for the migration job;
-- GitHub Actions Entra application, service principal, and federated credential;
-- foundational RBAC such as resource group read access for the deployment identity.
-
-These resources are not expensive compared with runtime compute and should not be destroyed during ordinary cost-control cycles.
+Do not destroy this layer during normal cleanup. Recreating it can change identity principal IDs, private DNS links, and the runner network backbone.
 
 ## Runtime responsibilities
 
-The runtime layer lives in `infra/runtime` and is intended to be safe to destroy and recreate.
+`infra/runtime` owns:
 
-It owns:
+- App Service plan, production Web App, and staging slot;
+- PostgreSQL Flexible Server and database;
+- Container Apps Environment and Flyway migration job;
+- Front Door Premium, WAF policy, route, and Private Link origin;
+- production and staging App Service private endpoints;
+- Ubuntu self-hosted GitHub runner VM with no public IP;
+- workload diagnostic settings, alerting, and RBAC.
 
-- Azure Container Registry;
-- App Service plan;
-- Linux Web App;
-- staging deployment slot;
-- Web App VNet integration;
-- runtime Key Vault configuration;
-- PostgreSQL Flexible Server;
-- PostgreSQL database;
-- Container Apps Environment;
-- Flyway migration job;
-- Log Analytics Workspace and Application Insights;
-- diagnostic settings, action group, and failed-request alert;
-- Web App private endpoint;
-- runtime RBAC such as `AcrPush`, `AcrPull`, Key Vault access, migration job contributor access, and Web App contributor access.
-
-These resources carry most of the active cost. Destroying runtime removes the App Service plan and PostgreSQL server while preserving the network and identity backbone.
-
-## Why identities stay in foundation
-
-User-assigned managed identities are lifecycle-sensitive. Recreating a managed identity changes its principal/object ID. PostgreSQL Entra principal mappings and Azure RBAC assignments depend on those IDs.
-
-Keeping identities in foundation preserves:
-
-- PostgreSQL role mappings;
-- Key Vault and ACR RBAC assumptions;
-- migration job ACR pull assumptions;
-- operational audit continuity;
-- deployment identity stability.
-
-Destroying and recreating identities can invalidate PostgreSQL database principals created with `pgaadauth_create_principal`.
-
-## Why networking stays in foundation
-
-Private networking is also lifecycle-sensitive. VNet, subnet, and private DNS changes can affect database name resolution, delegated subnet placement, and future private access paths.
-
-Keeping networking in foundation preserves:
-
-- private DNS zone continuity;
-- delegated subnet configuration;
-- App Service integration subnet identity;
-- Container Apps Environment subnet placement;
-- private endpoint subnet placement;
-- admin subnet availability;
-- a stable place for jump hosts, private runners, or migration jobs.
-
-Runtime can be recreated into the same network boundary without rebuilding the private access model.
+Runtime can be destroyed to remove most active cost while preserving foundation.
 
 ## State separation
 
-Foundation and runtime use separate Terraform roots and separate state files:
+Foundation and runtime use separate Terraform roots and separate state files. Runtime reads foundation outputs through `terraform_remote_state`; it should not hardcode foundation resource IDs.
 
-- foundation state: long-lived, rarely destroyed, but it does not own the resource group lifecycle;
-- runtime state: applied and destroyed more often.
+This split keeps routine workload teardown from removing deployment identity, managed identities, ACR, Key Vault, DNS, NAT, or the VNet.
 
-This avoids a monolithic state where a routine runtime destroy could accidentally remove GitHub OIDC, managed identities, or private DNS.
+## Operating model
 
-The runtime layer uses Azure data sources to discover foundation resources by name. It does not hardcode resource IDs.
-
-## Operational workflows
-
-Initial environment:
+Initial apply order:
 
 ```bash
 cd infra/foundation
 terraform init
-terraform plan
 terraform apply
 
 cd ../runtime
 terraform init
-terraform plan
 terraform apply
 ```
 
-Pause compute without deleting runtime state:
+Cost control:
 
-```bash
-az postgres flexible-server stop \
-  --resource-group rg-devops-tracker-dev \
-  --name psql-devops-tracker-29193-swn
+- stop PostgreSQL and App Service for short idle periods;
+- destroy `infra/runtime` for longer idle periods;
+- keep `infra/foundation` unless retiring the project.
 
-az webapp stop \
-  --resource-group rg-devops-tracker-dev \
-  --name devops-tracker-29193
-```
-
-Remove runtime cost-bearing resources:
-
-```bash
-cd infra/runtime
-terraform destroy
-```
-
-Do not run `terraform destroy` in `infra/foundation` during normal cleanup.
-
-## Cost optimization strategy
-
-There are two cost controls:
-
-- Stop PostgreSQL when the environment may be needed again soon.
-- Destroy runtime when the environment is not needed.
-
-Stopping PostgreSQL stops compute billing but keeps storage and backup billing. Destroying runtime removes the App Service plan and PostgreSQL server. Foundation remains deployed to preserve identity and networking continuity.
+The next planned platform phase is AKS. The current split is intended to remain useful because networking, identity, monitoring, and private ingress foundations can be reused or extended.

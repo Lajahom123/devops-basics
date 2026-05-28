@@ -29,3 +29,6 @@ postgres_entra_admin_principal_name = "user@example.com"
 
 alert_evaluation_frequency = "PT5M"
 alert_window_duration      = "PT5M"
+
+github_runner_admin_username            = "azureuser"
+github_runner_admin_ssh_public_key_path = "path/to/public/key"

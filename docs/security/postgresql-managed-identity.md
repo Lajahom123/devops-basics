@@ -53,7 +53,7 @@ async function createPool() {
   return new Pool({
     host: process.env.POSTGRES_HOST,
     port: 5432,
-    database: process.env.POSTGRES_DATABASE,
+    database: process.env.POSTGRES_DB,
     user: process.env.POSTGRES_USER,
     password: token.token,
     ssl: { rejectUnauthorized: true },

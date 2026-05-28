@@ -1,6 +1,6 @@
 # Monitoring
 
-The project uses Azure Monitor with a Log Analytics Workspace as the central query and storage backend. Monitoring resources live in `infra/runtime` because they are tied to the active application environment and can be recreated with runtime.
+The project uses Azure Monitor with a Log Analytics Workspace as the central query and storage backend. Shared monitoring resources live in `infra/foundation`; workload diagnostic settings and alerts live in `infra/runtime`.
 
 ## Components
 
@@ -83,4 +83,4 @@ AzureDiagnostics
 
 Application health checks currently hit `/health`, which reports dependency status. That is useful while validating the platform, but it means database or network issues may show up as application health failures.
 
-The deployment workflow also uses `/health` and `/version` for staging and production verification. If Web App public access is restricted later, those checks need to run from a private network path.
+The deployment workflow uses `/health` and `/version` for staging and production verification from the self-hosted runner inside the VNet. Front Door validation verifies the public entry point separately.
