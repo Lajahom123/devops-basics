@@ -17,4 +17,4 @@ jobs:
       - name: Validate public endpoint
         env:
           FRONT_DOOR_URL: ${{ secrets.FRONT_DOOR_URL }}
-        run: curl --fail --silent --show-error "$FRONT_DOOR_URL"
+        run: curl --fail --silent --show-error "${FRONT_DOOR_URL}/health"
