@@ -90,3 +90,10 @@ resource "azurerm_subnet" "github_runner" {
   virtual_network_name = azurerm_virtual_network.main.name
   address_prefixes     = [var.github_runner_subnet_address_prefix]
 }
+
+resource "azurerm_subnet" "aks_nodes" {
+  name                 = "snet-aks-nodes"
+  resource_group_name  = data.azurerm_resource_group.main.name
+  virtual_network_name = azurerm_virtual_network.main.name
+  address_prefixes     = [var.aks_subnet_address_prefix]
+}

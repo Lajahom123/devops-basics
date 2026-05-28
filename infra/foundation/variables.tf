@@ -79,6 +79,12 @@ variable "github_runner_subnet_address_prefix" {
   default     = "10.20.6.0/24"
 }
 
+variable "aks_subnet_address_prefix" {
+  description = "Address prefix for the AKS node subnet."
+  type        = string
+  default     = "10.20.64.0/21"
+}
+
 variable "github_owner" {
   description = "GitHub organization or username."
   type        = string

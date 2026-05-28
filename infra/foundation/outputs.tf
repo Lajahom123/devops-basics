@@ -12,6 +12,10 @@ output "acr_name" {
   value = azurerm_container_registry.main.name
 }
 
+output "acr_id" {
+  value = azurerm_container_registry.main.id
+}
+
 output "acr_login_server" {
   value = azurerm_container_registry.main.login_server
 }
@@ -129,6 +133,23 @@ output "webapp_private_dns_zone_id" {
 
 output "nat_public_ip" {
   value = azurerm_public_ip.nat.ip_address
+}
+
+# AKS
+
+output "aks_subnet_id" {
+  description = "ID of the AKS node subnet."
+  value       = azurerm_subnet.aks_nodes.id
+}
+
+output "aks_subnet_name" {
+  description = "Name of the AKS node subnet."
+  value       = azurerm_subnet.aks_nodes.name
+}
+
+output "aks_subnet_address_prefix" {
+  description = "Address prefix of the AKS node subnet."
+  value       = var.aks_subnet_address_prefix
 }
 
 # Web app
