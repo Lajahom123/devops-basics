@@ -1,4 +1,4 @@
-name: Check private app endpoint
+name: Check connectivity to endpoints
 
 on:
   workflow_dispatch:
