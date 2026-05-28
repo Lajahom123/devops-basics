@@ -55,3 +55,8 @@ jobs:
           FRONT_DOOR_URL: ${{ secrets.FRONT_DOOR_URL }}
         run: |
           curl --fail --silent --show-error "${FRONT_DOOR_URL%/}/version"
+
+      - name: Check runner outbound IP
+        run: |
+          curl --fail --silent --show-error https://ifconfig.me
+          echo
