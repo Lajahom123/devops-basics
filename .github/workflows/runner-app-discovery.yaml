@@ -13,3 +13,8 @@ jobs:
         env:
           APP_HEALTH_URL: "https://devops-tracker-29193.azurewebsites.net/health"
         run: curl --fail --silent --show-error "$APP_HEALTH_URL"
+
+      - name: Validate public endpoint
+        env:
+          FRONT_DOOR_URL: ${{ secrets.FRONT_DOOR_URL }}
+        run: curl --fail --silent --show-error "$FRONT_DOOR_URL"
