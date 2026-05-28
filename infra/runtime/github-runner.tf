@@ -59,6 +59,7 @@ resource "azurerm_virtual_machine_extension" "github_runner_install" {
   publisher            = "Microsoft.Azure.Extensions"
   type                 = "CustomScript"
   type_handler_version = "2.1"
+  tags                = local.common_tags
 
   protected_settings = jsonencode({
     script = base64encode(templatefile("${path.module}/../../scripts/install-github-runner.sh", {

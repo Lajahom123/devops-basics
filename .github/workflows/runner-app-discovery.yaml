@@ -28,6 +28,22 @@ jobs:
         run: |
           curl --fail --silent --show-error "$APP_VERSION_URL"
 
+      - name: Check private App Service staging slot DNS
+        run: |
+          nslookup devops-tracker-29193-staging.azurewebsites.net
+
+      - name: Validate private App Service staging slot health
+        env:
+          STAGING_APP_HEALTH_URL: "https://devops-tracker-29193-staging.azurewebsites.net/health"
+        run: |
+          curl --fail --silent --show-error "$STAGING_APP_HEALTH_URL"
+
+      - name: Validate private App Service staging slot version
+        env:
+          STAGING_APP_VERSION_URL: "https://devops-tracker-29193-staging.azurewebsites.net/version"
+        run: |
+          curl --fail --silent --show-error "$STAGING_APP_VERSION_URL"
+
       - name: Validate Front Door health
         env:
           FRONT_DOOR_URL: ${{ secrets.FRONT_DOOR_URL }}
