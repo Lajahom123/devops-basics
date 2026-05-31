@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: devops-tracker
+  namespace: devops-tracker
+spec:
+  replicas: 2
+
+  selector:
+    matchLabels:
+      app: devops-tracker
+
+  template:
+    metadata:
+      labels:
+        app: devops-tracker
+
+    spec:
+      containers:
+        - name: devops-tracker
+          image: devopstracker29193.azurecr.io/devops-tracker:latest
+
+          ports:
+            - containerPort: 3000
+
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 3000
+            initialDelaySeconds: 10
+            periodSeconds: 5
+
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 3000
+            initialDelaySeconds: 30
+            periodSeconds: 10
