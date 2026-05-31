@@ -1,0 +1,16 @@
+controller:
+  replicaCount: 2
+
+  service:
+    type: LoadBalancer
+    externalTrafficPolicy: Local
+
+  ingressClassResource:
+    name: nginx
+    enabled: true
+    default: false
+
+  ingressClass: nginx
+
+  metrics:
+    enabled: true
