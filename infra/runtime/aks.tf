@@ -5,7 +5,8 @@ resource "azurerm_kubernetes_cluster" "main" {
   dns_prefix          = var.aks_dns_prefix
   tags                = local.common_tags
 
-  sku_tier = "Free"
+  oidc_issuer_enabled       = true
+  sku_tier                  = "Free"
 
   default_node_pool {
     name           = "system"
@@ -13,6 +14,9 @@ resource "azurerm_kubernetes_cluster" "main" {
     vm_size        = var.aks_node_vm_size
     vnet_subnet_id = data.terraform_remote_state.foundation.outputs.aks_subnet_id
 
+    upgrade_settings {
+      max_surge = "10%"
+    }
     orchestrator_version = null
   }
 
@@ -42,4 +46,10 @@ resource "azurerm_role_assignment" "aks_acr_pull" {
   scope                = data.terraform_remote_state.foundation.outputs.acr_id
   role_definition_name = "AcrPull"
   principal_id         = azurerm_kubernetes_cluster.main.kubelet_identity[0].object_id
+}
+
+resource "azurerm_role_assignment" "aks_cluster_network_contributor_on_aks_subnet" {
+  scope                = data.terraform_remote_state.foundation.outputs.aks_subnet_id
+  role_definition_name = "Network Contributor"
+  principal_id         = azurerm_kubernetes_cluster.main.identity[0].principal_id
 }
