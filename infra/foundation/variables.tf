@@ -79,6 +79,12 @@ variable "github_runner_subnet_address_prefix" {
   default     = "10.20.6.0/24"
 }
 
+variable "bastion_subnet_address_prefix" {
+  description = "Subnet delegated to Bastion."
+  type        = string
+  default     = "10.20.7.0/24"
+}
+
 variable "aks_subnet_address_prefix" {
   description = "Address prefix for the AKS node subnet."
   type        = string
