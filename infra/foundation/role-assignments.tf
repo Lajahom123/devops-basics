@@ -12,12 +12,6 @@ resource "azurerm_role_assignment" "migration_job_acr_pull" {
   principal_id         = azurerm_user_assigned_identity.migration_job.principal_id
 }
 
-resource "azurerm_role_assignment" "github_actions_deploy_acr_push" {
-  scope                = azurerm_container_registry.main.id
-  role_definition_name = "AcrPush"
-  principal_id         = azuread_service_principal.github_actions_deploy.object_id
-}
-
 # Key Vault
 
 resource "azurerm_role_assignment" "current_user_key_vault_secrets_officer" {
