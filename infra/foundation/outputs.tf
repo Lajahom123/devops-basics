@@ -38,6 +38,21 @@ output "aks_subnet_id" {
   value       = module.network.aks_subnet_id
 }
 
+output "acr_id" {
+  description = "Azure Container Registry ID."
+  value       = module.acr.acr_id
+}
+
+output "acr_name" {
+  description = "Azure Container Registry name."
+  value       = module.acr.acr_name
+}
+
+output "acr_login_server" {
+  description = "Azure Container Registry login server."
+  value       = module.acr.login_server
+}
+
 output "azure_subscription_id" {
   description = "Azure subscription ID for downstream roots."
   value       = data.azurerm_client_config.current.subscription_id

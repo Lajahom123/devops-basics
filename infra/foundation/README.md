@@ -2,7 +2,7 @@
 
 Persistent shared platform infrastructure for the `devops-tracker` Azure student environment.
 
-This layer should stay cheap and stable. It starts with only the platform resource group, VNet, and shared subnets. Add ACR, Key Vault, managed identities, private DNS, and minimal monitoring later as separate modules and applies.
+This layer should stay cheap and stable. It contains the platform resource group, VNet, shared subnets, and the shared Azure Container Registry. Add Key Vault, managed identities, private DNS, and minimal monitoring later as separate modules and applies.
 
 See `DEFERRED.md` for the full inventory of previously removed resources, including the module-ready pieces and the items that should stay in runtime or labs.
 
@@ -11,6 +11,7 @@ See `DEFERRED.md` for the full inventory of previously removed resources, includ
 - Resource group: `rg-devops-tracker-dev-platform`.
 - VNet: `vnet-devops-tracker-dev`.
 - Subnets for private endpoints, PostgreSQL, admin access, labs, GitHub runner, and future AKS nodes.
+- Azure Container Registry using the Basic SKU, public network access enabled, and admin user disabled.
 
 ## Not in foundation yet
 

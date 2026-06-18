@@ -5,8 +5,8 @@ resource "azurerm_kubernetes_cluster" "main" {
   dns_prefix          = var.aks_dns_prefix
   tags                = local.common_tags
 
-  oidc_issuer_enabled       = true
-  sku_tier                  = "Free"
+  oidc_issuer_enabled = true
+  sku_tier            = "Free"
 
   default_node_pool {
     name           = "system"

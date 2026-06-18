@@ -1,5 +1,11 @@
 data "azurerm_client_config" "current" {}
 
+resource "random_string" "foundation_suffix" {
+  length  = 6
+  upper   = false
+  special = false
+}
+
 resource "azurerm_resource_group" "platform" {
   name     = local.resource_group_name
   location = var.location
@@ -17,4 +23,13 @@ module "network" {
   address_space       = ["10.20.0.0/16"]
   subnets             = local.subnets
   tags                = local.common_tags
+}
+
+module "acr" {
+  source = "../modules/acr"
+
+  name                = local.acr_name
+  resource_group_name = azurerm_resource_group.platform.name
+  location            = azurerm_resource_group.platform.location
+  sku                 = "Basic"
 }

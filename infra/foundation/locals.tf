@@ -2,8 +2,8 @@ locals {
   resource_group_name = "rg-${var.project}-${var.environment}-platform"
   vnet_name           = "vnet-${var.project}-${var.environment}"
 
-  unique_suffix = substr(md5("${data.azurerm_client_config.current.subscription_id}-${var.project}-${var.environment}"), 0, 6)
-  acr_name      = substr(replace("${var.project}${var.environment}${local.unique_suffix}", "/[^0-9A-Za-z]/", ""), 0, 50)
+  unique_suffix = random_string.foundation_suffix.result
+  acr_name      = substr(lower(replace("${var.project}${var.environment}${local.unique_suffix}", "/[^0-9A-Za-z]/", "")), 0, 50)
   key_vault_name = substr(
     replace("kv-${var.project}-${var.environment}-${local.unique_suffix}", "/[^0-9A-Za-z-]/", ""),
     0,
