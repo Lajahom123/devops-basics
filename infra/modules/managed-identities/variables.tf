@@ -8,11 +8,9 @@ variable "location" {
   type        = string
 }
 
-variable "identities" {
-  description = "User-assigned identities keyed by logical name."
-  type = map(object({
-    name = string
-  }))
+variable "name_prefix" {
+  description = "Prefix used for managed identity names."
+  type        = string
 }
 
 variable "tags" {

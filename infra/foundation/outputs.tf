@@ -53,6 +53,91 @@ output "acr_login_server" {
   value       = module.acr.login_server
 }
 
+output "managed_identities" {
+  description = "Managed identity details keyed by logical name."
+  value       = module.managed_identities.identities
+}
+
+output "github_actions_deploy_identity_name" {
+  description = "GitHub Actions deploy identity name."
+  value       = module.managed_identities.identities.github_actions_deploy.name
+}
+
+output "github_actions_deploy_identity_id" {
+  description = "GitHub Actions deploy identity resource ID."
+  value       = module.managed_identities.identities.github_actions_deploy.resource_id
+}
+
+output "github_actions_deploy_client_id" {
+  description = "GitHub Actions deploy identity client ID."
+  value       = module.managed_identities.identities.github_actions_deploy.client_id
+}
+
+output "github_actions_deploy_principal_id" {
+  description = "GitHub Actions deploy identity principal ID."
+  value       = module.managed_identities.identities.github_actions_deploy.principal_id
+}
+
+output "aks_workload_identity_name" {
+  description = "AKS workload identity base identity name."
+  value       = module.managed_identities.identities.aks_workload.name
+}
+
+output "aks_workload_identity_id" {
+  description = "AKS workload identity base identity resource ID."
+  value       = module.managed_identities.identities.aks_workload.resource_id
+}
+
+output "aks_workload_identity_client_id" {
+  description = "AKS workload identity base identity client ID."
+  value       = module.managed_identities.identities.aks_workload.client_id
+}
+
+output "aks_workload_identity_principal_id" {
+  description = "AKS workload identity base identity principal ID."
+  value       = module.managed_identities.identities.aks_workload.principal_id
+}
+
+output "migration_job_identity_name" {
+  description = "Migration job identity name."
+  value       = module.managed_identities.identities.migration_job.name
+}
+
+output "migration_job_identity_id" {
+  description = "Migration job identity resource ID."
+  value       = module.managed_identities.identities.migration_job.resource_id
+}
+
+output "migration_job_identity_client_id" {
+  description = "Migration job identity client ID."
+  value       = module.managed_identities.identities.migration_job.client_id
+}
+
+output "migration_job_identity_principal_id" {
+  description = "Migration job identity principal ID."
+  value       = module.managed_identities.identities.migration_job.principal_id
+}
+
+output "private_runner_identity_name" {
+  description = "Private runner identity name."
+  value       = module.managed_identities.identities.private_runner.name
+}
+
+output "private_runner_identity_id" {
+  description = "Private runner identity resource ID."
+  value       = module.managed_identities.identities.private_runner.resource_id
+}
+
+output "private_runner_identity_client_id" {
+  description = "Private runner identity client ID."
+  value       = module.managed_identities.identities.private_runner.client_id
+}
+
+output "private_runner_identity_principal_id" {
+  description = "Private runner identity principal ID."
+  value       = module.managed_identities.identities.private_runner.principal_id
+}
+
 output "azure_subscription_id" {
   description = "Azure subscription ID for downstream roots."
   value       = data.azurerm_client_config.current.subscription_id

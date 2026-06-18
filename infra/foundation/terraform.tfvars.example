@@ -1,6 +1,6 @@
 project     = "devops-tracker"
 environment = "dev"
-location    = "switzerlandnorth"
+location    = "swedencentral"
 
 tags = {
   owner = "owner@example.com"

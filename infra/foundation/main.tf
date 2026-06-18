@@ -33,3 +33,12 @@ module "acr" {
   location            = azurerm_resource_group.platform.location
   sku                 = "Basic"
 }
+
+module "managed_identities" {
+  source = "../modules/managed-identities"
+
+  resource_group_name = azurerm_resource_group.platform.name
+  location            = azurerm_resource_group.platform.location
+  name_prefix         = local.name_prefix
+  tags                = local.common_tags
+}

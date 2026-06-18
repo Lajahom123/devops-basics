@@ -1,4 +1,5 @@
 locals {
+  name_prefix         = "${var.project}-${var.environment}"
   resource_group_name = "rg-${var.project}-${var.environment}-platform"
   vnet_name           = "vnet-${var.project}-${var.environment}"
 

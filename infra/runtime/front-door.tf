@@ -48,7 +48,7 @@ resource "azurerm_cdn_frontdoor_origin" "web_app_private" {
 
   private_link {
     request_message        = "Allow Front Door private access to App Service"
-    location               = "westeurope"
+    location               = var.location
     private_link_target_id = azurerm_linux_web_app.main.id
     target_type            = "sites"
   }
