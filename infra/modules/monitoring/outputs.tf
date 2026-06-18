@@ -9,12 +9,17 @@ output "log_analytics_workspace_name" {
 }
 
 output "application_insights_id" {
-  description = "Application Insights ID, when created."
-  value       = try(azurerm_application_insights.main[0].id, null)
+  description = "Application Insights ID."
+  value       = azurerm_application_insights.main.id
+}
+
+output "application_insights_name" {
+  description = "Application Insights name."
+  value       = azurerm_application_insights.main.name
 }
 
 output "application_insights_connection_string" {
-  description = "Application Insights connection string, when created."
-  value       = try(azurerm_application_insights.main[0].connection_string, null)
+  description = "Application Insights connection string."
+  value       = azurerm_application_insights.main.connection_string
   sensitive   = true
 }

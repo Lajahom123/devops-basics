@@ -58,6 +58,32 @@ output "key_vault_private_dns_zone_id" {
   value       = module.private_dns.zone_ids.key_vault
 }
 
+output "log_analytics_workspace_id" {
+  description = "Log Analytics Workspace ID."
+  value       = module.monitoring.log_analytics_workspace_id
+}
+
+output "log_analytics_workspace_name" {
+  description = "Log Analytics Workspace name."
+  value       = module.monitoring.log_analytics_workspace_name
+}
+
+output "application_insights_id" {
+  description = "Application Insights ID."
+  value       = module.monitoring.application_insights_id
+}
+
+output "application_insights_name" {
+  description = "Application Insights name."
+  value       = module.monitoring.application_insights_name
+}
+
+output "application_insights_connection_string" {
+  description = "Application Insights connection string."
+  value       = module.monitoring.application_insights_connection_string
+  sensitive   = true
+}
+
 output "aks_subnet_id" {
   description = "Subnet ID reserved for future AKS nodes."
   value       = module.network.aks_subnet_id

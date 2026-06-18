@@ -34,6 +34,15 @@ module "private_dns" {
   tags                = local.common_tags
 }
 
+module "monitoring" {
+  source = "../modules/monitoring"
+
+  name_prefix         = local.name_prefix
+  resource_group_name = azurerm_resource_group.platform.name
+  location            = azurerm_resource_group.platform.location
+  tags                = local.common_tags
+}
+
 module "acr" {
   source = "../modules/acr"
 

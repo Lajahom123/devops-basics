@@ -3,13 +3,11 @@ resource "azurerm_log_analytics_workspace" "main" {
   resource_group_name = var.resource_group_name
   location            = var.location
   sku                 = "PerGB2018"
-  retention_in_days   = var.retention_in_days
+  retention_in_days   = 30
   tags                = var.tags
 }
 
 resource "azurerm_application_insights" "main" {
-  count = var.create_application_insights ? 1 : 0
-
   name                = "appi-${var.name_prefix}"
   resource_group_name = var.resource_group_name
   location            = var.location
