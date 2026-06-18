@@ -20,6 +20,17 @@ locals {
 
   common_tags = merge(local.default_tags, var.tags)
 
+  private_dns_zones = {
+    postgres = {
+      name                 = "privatelink.postgres.database.azure.com"
+      virtual_network_link = "link-${local.vnet_name}-postgres"
+    }
+    key_vault = {
+      name                 = "privatelink.vaultcore.azure.net"
+      virtual_network_link = "link-${local.vnet_name}-key-vault"
+    }
+  }
+
   subnets = {
     private_endpoints = {
       name                              = "snet-private-endpoints"

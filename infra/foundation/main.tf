@@ -25,6 +25,15 @@ module "network" {
   tags                = local.common_tags
 }
 
+module "private_dns" {
+  source = "../modules/private-dns"
+
+  resource_group_name = azurerm_resource_group.platform.name
+  vnet_id             = module.network.vnet_id
+  zones               = local.private_dns_zones
+  tags                = local.common_tags
+}
+
 module "acr" {
   source = "../modules/acr"
 

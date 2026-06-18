@@ -33,6 +33,31 @@ output "private_endpoints_subnet_id" {
   value       = module.network.private_endpoints_subnet_id
 }
 
+output "private_dns_zone_ids" {
+  description = "Private DNS zone IDs keyed by logical name."
+  value       = module.private_dns.zone_ids
+}
+
+output "private_dns_zone_names" {
+  description = "Private DNS zone names keyed by logical name."
+  value       = module.private_dns.zone_names
+}
+
+output "private_dns_virtual_network_link_ids" {
+  description = "Private DNS zone virtual network link IDs keyed by logical name."
+  value       = module.private_dns.virtual_network_link_ids
+}
+
+output "postgres_private_dns_zone_id" {
+  description = "PostgreSQL private DNS zone ID."
+  value       = module.private_dns.zone_ids.postgres
+}
+
+output "key_vault_private_dns_zone_id" {
+  description = "Key Vault private DNS zone ID."
+  value       = module.private_dns.zone_ids.key_vault
+}
+
 output "aks_subnet_id" {
   description = "Subnet ID reserved for future AKS nodes."
   value       = module.network.aks_subnet_id
