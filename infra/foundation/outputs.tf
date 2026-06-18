@@ -118,6 +118,26 @@ output "migration_job_identity_principal_id" {
   value       = module.managed_identities.identities.migration_job.principal_id
 }
 
+output "github_runner_identity_name" {
+  description = "GitHub private runner identity name."
+  value       = module.managed_identities.identities.github_runner.name
+}
+
+output "github_runner_identity_id" {
+  description = "GitHub private runner identity resource ID."
+  value       = module.managed_identities.identities.github_runner.resource_id
+}
+
+output "github_runner_identity_client_id" {
+  description = "GitHub private runner identity client ID."
+  value       = module.managed_identities.identities.github_runner.client_id
+}
+
+output "github_runner_identity_principal_id" {
+  description = "GitHub private runner identity principal ID."
+  value       = module.managed_identities.identities.github_runner.principal_id
+}
+
 output "private_runner_identity_name" {
   description = "Private runner identity name."
   value       = module.managed_identities.identities.private_runner.name
@@ -136,6 +156,21 @@ output "private_runner_identity_client_id" {
 output "private_runner_identity_principal_id" {
   description = "Private runner identity principal ID."
   value       = module.managed_identities.identities.private_runner.principal_id
+}
+
+output "key_vault_id" {
+  description = "Key Vault ID."
+  value       = module.key_vault.key_vault_id
+}
+
+output "key_vault_name" {
+  description = "Key Vault name."
+  value       = module.key_vault.key_vault_name
+}
+
+output "key_vault_uri" {
+  description = "Key Vault URI."
+  value       = module.key_vault.vault_uri
 }
 
 output "azure_subscription_id" {

@@ -18,22 +18,9 @@ variable "tenant_id" {
   type        = string
 }
 
-variable "purge_protection_enabled" {
-  description = "Whether purge protection is enabled. Keep false for easy dev cleanup."
-  type        = bool
-  default     = false
-}
-
-variable "soft_delete_retention_days" {
-  description = "Soft delete retention in days."
-  type        = number
-  default     = 7
-}
-
-variable "public_network_access_enabled" {
-  description = "Whether public network access is enabled."
-  type        = bool
-  default     = true
+variable "sku_name" {
+  description = "Key Vault SKU name."
+  type        = string
 }
 
 variable "tags" {

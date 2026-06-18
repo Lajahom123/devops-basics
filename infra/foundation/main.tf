@@ -42,3 +42,14 @@ module "managed_identities" {
   name_prefix         = local.name_prefix
   tags                = local.common_tags
 }
+
+module "key_vault" {
+  source = "../modules/key-vault"
+
+  name                = local.key_vault_name
+  resource_group_name = azurerm_resource_group.platform.name
+  location            = azurerm_resource_group.platform.location
+  tenant_id           = data.azurerm_client_config.current.tenant_id
+  sku_name            = "standard"
+  tags                = local.common_tags
+}
