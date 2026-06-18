@@ -1,223 +1,49 @@
 output "resource_group_name" {
-  value = data.azurerm_resource_group.main.name
+  description = "Platform resource group name."
+  value       = azurerm_resource_group.platform.name
 }
 
 output "location" {
-  value = data.azurerm_resource_group.main.location
+  description = "Azure region used by the foundation."
+  value       = azurerm_resource_group.platform.location
 }
-
-# ACR
-
-output "acr_name" {
-  value = azurerm_container_registry.main.name
-}
-
-output "acr_id" {
-  value = azurerm_container_registry.main.id
-}
-
-output "acr_login_server" {
-  value = azurerm_container_registry.main.login_server
-}
-
-# Key Vault
-
-output "key_vault_name" {
-  value = azurerm_key_vault.main.name
-}
-
-output "key_vault_id" {
-  value = azurerm_key_vault.main.id
-}
-
-# Monitoring
-
-output "log_analytics_workspace_name" {
-  value = azurerm_log_analytics_workspace.main.name
-}
-
-output "log_analytics_workspace_id" {
-  value = azurerm_log_analytics_workspace.main.id
-}
-
-output "application_insights_name" {
-  value = azurerm_application_insights.main.name
-}
-
-output "application_insights_id" {
-  value = azurerm_application_insights.main.id
-}
-
-output "application_insights_connection_string" {
-  value     = azurerm_application_insights.main.connection_string
-  sensitive = true
-}
-
-# Network 
 
 output "vnet_name" {
-  value = azurerm_virtual_network.main.name
+  description = "Foundation VNet name."
+  value       = module.network.vnet_name
 }
 
 output "vnet_id" {
-  value = azurerm_virtual_network.main.id
+  description = "Foundation VNet ID."
+  value       = module.network.vnet_id
 }
 
-output "app_service_subnet_name" {
-  value = azurerm_subnet.app_service.name
-}
-
-output "app_service_subnet_id" {
-  value = azurerm_subnet.app_service.id
-}
-
-output "postgres_subnet_name" {
-  value = azurerm_subnet.postgres.name
+output "subnet_ids" {
+  description = "Subnet IDs keyed by logical subnet name."
+  value       = module.network.subnet_ids
 }
 
 output "postgres_subnet_id" {
-  value = azurerm_subnet.postgres.id
-}
-
-output "admin_subnet_name" {
-  value = azurerm_subnet.admin.name
-}
-
-output "admin_subnet_id" {
-  value = azurerm_subnet.admin.id
-}
-
-output "container_apps_subnet_name" {
-  value = azurerm_subnet.container_apps.name
-}
-
-output "container_apps_subnet_id" {
-  value = azurerm_subnet.container_apps.id
-}
-
-output "private_endpoints_subnet_name" {
-  value = azurerm_subnet.private_endpoints.name
+  description = "Subnet ID reserved for PostgreSQL."
+  value       = module.network.postgres_subnet_id
 }
 
 output "private_endpoints_subnet_id" {
-  value = azurerm_subnet.private_endpoints.id
+  description = "Subnet ID reserved for private endpoints."
+  value       = module.network.private_endpoints_subnet_id
 }
-
-output "github_runner_subnet_name" {
-  value = azurerm_subnet.github_runner.name
-}
-
-output "github_runner_subnet_id" {
-  value = azurerm_subnet.github_runner.id
-}
-
-# DNS
-
-output "postgres_private_dns_zone_name" {
-  value = azurerm_private_dns_zone.postgres.name
-}
-
-output "postgres_private_dns_zone_id" {
-  value = azurerm_private_dns_zone.postgres.id
-}
-
-output "webapp_private_dns_zone_name" {
-  value = azurerm_private_dns_zone.web_app.name
-}
-
-output "webapp_private_dns_zone_id" {
-  value = azurerm_private_dns_zone.web_app.id
-}
-
-# NAT
-
-output "nat_public_ip" {
-  value = azurerm_public_ip.nat.ip_address
-}
-
-# AKS
 
 output "aks_subnet_id" {
-  description = "ID of the AKS node subnet."
-  value       = azurerm_subnet.aks_nodes.id
-}
-
-output "aks_subnet_name" {
-  description = "Name of the AKS node subnet."
-  value       = azurerm_subnet.aks_nodes.name
-}
-
-output "aks_subnet_address_prefix" {
-  description = "Address prefix of the AKS node subnet."
-  value       = var.aks_subnet_address_prefix
-}
-
-# Web app
-
-output "web_app_identity_name" {
-  value = azurerm_user_assigned_identity.web_app.name
-}
-
-output "web_app_identity_id" {
-  value = azurerm_user_assigned_identity.web_app.id
-}
-
-output "web_app_identity_client_id" {
-  value = azurerm_user_assigned_identity.web_app.client_id
-}
-
-output "web_app_identity_principal_id" {
-  value = azurerm_user_assigned_identity.web_app.principal_id
-}
-
-# Azure IDs
-
-output "azure_deploy_client_id" {
-  value = azuread_application.github_actions_deploy.client_id
-}
-
-output "azure_dev_operator_client_id" {
-  value = azuread_application.github_actions_dev_operator.client_id
-}
-
-output "azure_tenant_id" {
-  value = data.azurerm_client_config.current.tenant_id
+  description = "Subnet ID reserved for future AKS nodes."
+  value       = module.network.aks_subnet_id
 }
 
 output "azure_subscription_id" {
-  value = data.azurerm_client_config.current.subscription_id
+  description = "Azure subscription ID for downstream roots."
+  value       = data.azurerm_client_config.current.subscription_id
 }
 
-# Github actions
-
-output "github_actions_deploy_principal_id" {
-  value = azuread_service_principal.github_actions_deploy.object_id
-}
-
-# Github runner
-
-output "github_runner_identity_id" {
-  value = azurerm_user_assigned_identity.github_runner.id
-}
-
-output "github_runner_identity_client_id" {
-  value = azurerm_user_assigned_identity.github_runner.client_id
-}
-
-output "github_runner_identity_principal_id" {
-  value = azurerm_user_assigned_identity.github_runner.principal_id
-}
-
-# Migration job
-
-output "migration_job_identity_id" {
-  value = azurerm_user_assigned_identity.migration_job.id
-}
-
-output "migration_job_identity_client_id" {
-  value = azurerm_user_assigned_identity.migration_job.client_id
-}
-
-output "migration_job_identity_principal_id" {
-  value = azurerm_user_assigned_identity.migration_job.principal_id
+output "azure_tenant_id" {
+  description = "Azure tenant ID for downstream roots."
+  value       = data.azurerm_client_config.current.tenant_id
 }

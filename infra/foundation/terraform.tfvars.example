@@ -1,21 +1,7 @@
-project_name        = "devops-tracker"
-environment         = "dev"
-location            = "swedencentral"
-resource_group_name = "rg-devops-tracker-dev"
-owner_email         = "owner@example.com"
+project     = "devops-tracker"
+environment = "dev"
+location    = "switzerlandnorth"
 
-key_vault_name = "kv-name"
-acr_name       = "devopstrackerdevswn"
-
-vnet_address_space                       = "10.20.0.0/16"
-app_service_subnet_address_prefix        = "10.20.1.0/24"
-postgres_subnet_address_prefix           = "10.20.2.0/24"
-admin_subnet_address_prefix              = "10.20.3.0/24"
-container_apps_subnet_address_prefix     = "10.20.4.0/24"
-private_endpoints_subnet_address_prefix  = "10.20.5.0/24"
-github_runner_subnet_address_prefix      = "10.20.6.0/24"
-aks_subnet_address_prefix                = "10.20.64.0/21"
-
-github_owner  = "your-github-owner"
-github_repo   = "your-github-repo"
-github_branch = "master"
+tags = {
+  owner = "owner@example.com"
+}
