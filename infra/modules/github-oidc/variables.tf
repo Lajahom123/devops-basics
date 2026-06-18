@@ -1,31 +1,19 @@
-variable "project" {
-  description = "Project name used in application display names."
+variable "name" {
+  description = "Federated credential name."
   type        = string
 }
 
-variable "environment" {
-  description = "Environment name used in application display names."
+variable "resource_group_name" {
+  description = "Resource group containing the user-assigned identity."
   type        = string
 }
 
-variable "github_owner" {
-  description = "GitHub organization or username."
+variable "parent_identity_id" {
+  description = "User-assigned identity resource ID that owns the federated credential."
   type        = string
 }
 
-variable "github_repo" {
-  description = "GitHub repository name."
+variable "subject" {
+  description = "GitHub OIDC subject allowed to federate with the identity."
   type        = string
-}
-
-variable "github_branch" {
-  description = "GitHub branch allowed to federate to Azure."
-  type        = string
-  default     = "master"
-}
-
-variable "create_dev_operator" {
-  description = "Whether to create the dev operations OIDC application."
-  type        = bool
-  default     = false
 }

@@ -173,6 +173,21 @@ output "key_vault_uri" {
   value       = module.key_vault.vault_uri
 }
 
+output "github_oidc_federated_credential_id" {
+  description = "GitHub deploy federated identity credential ID."
+  value       = module.github_oidc.federated_credential_id
+}
+
+output "github_oidc_federated_credential_name" {
+  description = "GitHub deploy federated identity credential name."
+  value       = module.github_oidc.federated_credential_name
+}
+
+output "github_oidc_subject" {
+  description = "GitHub OIDC subject allowed to federate as the deploy identity."
+  value       = module.github_oidc.subject
+}
+
 output "azure_subscription_id" {
   description = "Azure subscription ID for downstream roots."
   value       = data.azurerm_client_config.current.subscription_id

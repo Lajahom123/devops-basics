@@ -14,6 +14,7 @@ See `DEFERRED.md` for the full inventory of previously removed resources, includ
 - Azure Container Registry using the Basic SKU, public network access enabled, and admin user disabled.
 - Managed identities for GitHub Actions deploy, AKS workload identity, migration jobs, and optional GitHub private runner reuse.
 - Key Vault with RBAC authorization enabled, public network access enabled, soft delete enabled, and purge protection disabled for dev cleanup.
+- GitHub OIDC federation for the deploy managed identity and a custom ACR build/push role scoped to the registry.
 
 ## Not in foundation yet
 

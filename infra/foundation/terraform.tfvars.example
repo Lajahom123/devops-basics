@@ -2,6 +2,10 @@ project     = "devops-tracker"
 environment = "dev"
 location    = "swedencentral"
 
+github_owner  = "Lajahom123"
+github_repo   = "devops-basics"
+github_branch = "main"
+
 tags = {
   owner = "owner@example.com"
 }

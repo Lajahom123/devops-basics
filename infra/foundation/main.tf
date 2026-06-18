@@ -53,3 +53,12 @@ module "key_vault" {
   sku_name            = "standard"
   tags                = local.common_tags
 }
+
+module "github_oidc" {
+  source = "../modules/github-oidc"
+
+  name                = "github-${var.github_branch}"
+  resource_group_name = azurerm_resource_group.platform.name
+  parent_identity_id  = module.managed_identities.identities.github_actions_deploy.resource_id
+  subject             = local.github_deploy_subject
+}
