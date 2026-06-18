@@ -13,7 +13,7 @@ variable "environment" {
 variable "location" {
   description = "Azure region."
   type        = string
-  default     = "switzerlandnorth"
+  default     = "swedencentral"
 }
 
 variable "owner_email" {

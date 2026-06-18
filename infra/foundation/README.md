@@ -1,6 +1,6 @@
 # Foundation layer
 
-Persistent shared infrastructure for the `devops-tracker` Azure environment in `switzerlandnorth`.
+Persistent shared infrastructure for the `devops-tracker` Azure environment in `swedencentral`.
 
 This layer should survive normal runtime cleanup. It owns the network, shared platform services, identities, role assignments, and remote-state outputs that runtime consumes through `terraform_remote_state`.
 

@@ -1,8 +1,3 @@
-variable "resource_group_name" {
-  type    = string
-  default = "rg-devops-tracker-dev"
-}
-
 variable "project_name" {
   description = "Project name used for resource naming."
   type        = string
@@ -18,7 +13,7 @@ variable "environment" {
 variable "location" {
   description = "Azure region."
   type        = string
-  default     = "switzerlandnorth"
+  default     = "swedencentral"
 }
 
 variable "owner_email" {
@@ -28,7 +23,7 @@ variable "owner_email" {
 
 variable "storage_account_name" {
   type    = string
-  default = "stdevopstrackerswn"
+  default = "stdevopstrackerswedenct"
 }
 
 variable "container_name" {

@@ -2,7 +2,7 @@
 
 DevOps tracker is a containerized Node.js API deployed to Azure App Service. The application is intentionally small; the platform is the learning target. The system models a production-inspired Azure deployment using Terraform, GitHub Actions OIDC, private networking, managed identities, staged deployment, and Azure Monitor.
 
-- Region: `switzerlandnorth`
+- Region: `swedencentral`
 - Environment: `dev`
 - Deployment strategy: staging slot swap
 

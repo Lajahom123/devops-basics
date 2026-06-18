@@ -22,7 +22,7 @@ Build one evolving Azure DevOps learning project that keeps the application smal
 
 ## Current architecture
 
-- Region: `switzerlandnorth`
+- Region: `swedencentral`
 - Environment: `dev`
 - Deployment strategy: staging slot swap
 

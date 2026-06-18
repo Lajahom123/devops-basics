@@ -1,6 +1,6 @@
 project_name        = "devops-tracker"
 environment         = "dev"
-location            = "switzerlandnorth"
+location            = "swedencentral"
 resource_group_name = "rg-devops-tracker-dev"
 owner_email         = "owner@example.com"
 

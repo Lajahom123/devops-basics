@@ -1,6 +1,6 @@
 # Runtime layer
 
-Cost-bearing workload infrastructure for the `devops-tracker` `dev` environment in `switzerlandnorth`.
+Cost-bearing workload infrastructure for the `devops-tracker` `dev` environment in `swedencentral`.
 
 Runtime consumes shared foundation outputs through `terraform_remote_state`. It should not duplicate foundation naming or hardcode resource IDs.
 

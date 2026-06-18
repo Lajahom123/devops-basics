@@ -2,7 +2,7 @@
 
 DevOps tracker is a small Express API used to practice production-inspired Azure and DevOps patterns. The application records deployment events and exposes simple read endpoints, while the main learning surface is the platform around it: Terraform-managed Azure infrastructure, private networking, container delivery, GitHub Actions OIDC, managed identities, and deployment validation.
 
-The target region is `switzerlandnorth`. The current environment is `dev`; the deployment strategy is a staging slot swap. The staging slot is part of the same environment, not a separate environment.
+The target region is `swedencentral`. The current environment is `dev`; the deployment strategy is a staging slot swap. The staging slot is part of the same environment, not a separate environment.
 
 ## Architecture overview
 
