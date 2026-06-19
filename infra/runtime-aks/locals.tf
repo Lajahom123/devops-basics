@@ -54,4 +54,17 @@ locals {
     client_id    = local.foundation.private_runner_identity_client_id
     principal_id = local.foundation.private_runner_identity_principal_id
   }
+
+  postgres_name_suffix = replace(local.acr_name, "devopstrackerdev", "")
+  postgres_server_name = coalesce(var.postgres_server_name, "psql-devops-tracker-${local.postgres_name_suffix}-swn")
+  postgres_app_entra_principal_name = coalesce(
+    var.postgres_app_entra_principal_name,
+    local.aks_workload_identity.name
+  )
+
+  tags = {
+    project     = "devops-tracker"
+    environment = "dev"
+    layer       = "runtime"
+  }
 }

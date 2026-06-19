@@ -1,0 +1,49 @@
+# FUTURE USE ONLY.
+# Do not apply this manifest until AKS, Workload Identity, and an operations
+# image containing Terraform, Azure CLI, psql, and this repository's bootstrap
+# script are available.
+#
+# This is intentionally not referenced by Terraform.
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: postgres-entra-bootstrap
+  namespace: devops-tracker
+  annotations:
+    azure.workload.identity/client-id: "<aks-workload-identity-client-id>"
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: postgres-entra-bootstrap
+  namespace: devops-tracker
+  labels:
+    app.kubernetes.io/name: postgres-entra-bootstrap
+    app.kubernetes.io/part-of: devops-tracker
+  annotations:
+    devops-tracker/future-use: "true"
+spec:
+  backoffLimit: 0
+  template:
+    metadata:
+      labels:
+        azure.workload.identity/use: "true"
+    spec:
+      serviceAccountName: postgres-entra-bootstrap
+      restartPolicy: Never
+      containers:
+        - name: bootstrap
+          image: "<acr-login-server>/devops-tracker-ops:postgres-entra-bootstrap"
+          imagePullPolicy: IfNotPresent
+          workingDir: /workspace/devops-tracker
+          env:
+            - name: TF_IN_AUTOMATION
+              value: "true"
+            - name: AZURE_CONFIG_DIR
+              value: /tmp/.azure
+            - name: POSTGRES_ENTRA_ADMIN_USER
+              value: "<postgres-entra-admin-login>"
+          command:
+            - /bin/bash
+            - -lc
+            - ./scripts/bootstrap-postgres-entra-principal.sh
