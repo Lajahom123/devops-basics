@@ -45,7 +45,7 @@ Stop:
 ```bash
 az postgres flexible-server stop \
   --resource-group rg-devops-tracker-dev \
-  --name psql-devops-tracker-29193-swn
+  --name psql-devops-tracker-29193-swdctr
 ```
 
 Start:
@@ -53,7 +53,7 @@ Start:
 ```bash
 az postgres flexible-server start \
   --resource-group rg-devops-tracker-dev \
-  --name psql-devops-tracker-29193-swn
+  --name psql-devops-tracker-29193-swdctr
 ```
 
 Operational notes:

@@ -17,7 +17,7 @@ variable "postgres_administrator_login" {
 }
 
 variable "postgres_administrator_password" {
-  description = "PostgreSQL administrator password used for bootstrap access. Supply with TF_VAR_postgres_administrator_password or another secure Terraform variable path; move this credential into Key Vault before application use."
+  description = "PostgreSQL administrator password used for bootstrap access."
   type        = string
   sensitive   = true
 }

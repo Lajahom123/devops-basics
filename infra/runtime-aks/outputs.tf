@@ -1,6 +1,11 @@
 output "resource_group_name" {
   description = "Runtime resource group name."
-  value       = local.resource_group_name
+  value       = azurerm_resource_group.runtime.name
+}
+
+output "platform_resource_group_name" {
+  description = "Foundation platform resource group name."
+  value       = local.platform_resource_group_name
 }
 
 output "postgres_server_id" {

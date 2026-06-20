@@ -32,6 +32,16 @@ managed identities are consumed through `data.terraform_remote_state.foundation`
 Do not duplicate those values as runtime variables or recreate foundation-owned
 resources here.
 
+Runtime AKS creates its own runtime resource group:
+
+```text
+rg-devops-tracker-dev-runtime
+```
+
+Cost-bearing runtime resources such as PostgreSQL are created there. Foundation
+continues to own the platform resource group, VNet, delegated subnets, private
+DNS zones, shared identities, and monitoring primitives.
+
 ## Verification
 
 Run from this directory:

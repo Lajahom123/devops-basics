@@ -1,8 +1,12 @@
 locals {
   foundation = data.terraform_remote_state.foundation.outputs
 
-  resource_group_name = local.foundation.resource_group_name
-  location            = local.foundation.location
+  project     = "devops-tracker"
+  environment = "dev"
+
+  platform_resource_group_name = local.foundation.resource_group_name
+  resource_group_name          = "rg-${local.project}-${local.environment}-runtime"
+  location                     = local.foundation.location
 
   vnet_id            = local.foundation.vnet_id
   subnet_ids         = local.foundation.subnet_ids
@@ -63,8 +67,8 @@ locals {
   )
 
   tags = {
-    project     = "devops-tracker"
-    environment = "dev"
+    project     = local.project
+    environment = local.environment
     layer       = "runtime"
   }
 }

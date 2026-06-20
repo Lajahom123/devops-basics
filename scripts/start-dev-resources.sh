@@ -3,7 +3,7 @@ set -euo pipefail
 
 RESOURCE_GROUP="rg-devops-tracker-dev"
 
-POSTGRES_SERVER_NAME="psql-devops-tracker-29193-swn"
+POSTGRES_SERVER_NAME="psql-devops-tracker-29193-swdctr"
 FRONT_DOOR_PROFILE_NAME="fd-devops-tracker-29193"
 FRONT_DOOR_ENDPOINT_NAME="fde-devops-tracker-29193"
 

@@ -1,9 +1,15 @@
+resource "azurerm_resource_group" "runtime" {
+  name     = local.resource_group_name
+  location = local.location
+  tags     = local.tags
+}
+
 module "postgres" {
   source = "../modules/postgres-flexible"
 
   name                = local.postgres_server_name
   location            = local.location
-  resource_group_name = local.resource_group_name
+  resource_group_name = azurerm_resource_group.runtime.name
 
   administrator_login    = var.postgres_administrator_login
   administrator_password = var.postgres_administrator_password
