@@ -40,6 +40,12 @@ variable "postgres_storage_mb" {
   default     = 32768
 }
 
+variable "postgres_zone" {
+  description = "Availability zone for PostgreSQL Flexible Server."
+  type        = string
+  default     = "1"
+}
+
 variable "postgres_backup_retention_days" {
   description = "Backup retention in days."
   type        = number
@@ -92,4 +98,28 @@ variable "postgres_app_entra_principal_name" {
   description = "Microsoft Entra principal name to create in PostgreSQL with pgaadauth_create_principal. Defaults to the AKS workload identity name."
   type        = string
   default     = null
+}
+
+variable "aks_cluster_name" {
+  description = "Name of the AKS cluster. Defaults to a name derived from the foundation suffix."
+  type        = string
+  default     = null
+}
+
+variable "aks_dns_prefix" {
+  description = "DNS prefix for the AKS cluster. Defaults to a name derived from the foundation suffix."
+  type        = string
+  default     = null
+}
+
+variable "aks_node_count" {
+  description = "Initial number of nodes in the AKS default system node pool."
+  type        = number
+  default     = 2
+}
+
+variable "aks_node_vm_size" {
+  description = "VM size for the AKS default system node pool."
+  type        = string
+  default     = "Standard_B2s_v2"
 }

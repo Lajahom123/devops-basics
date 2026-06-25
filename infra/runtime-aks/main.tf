@@ -17,6 +17,7 @@ module "postgres" {
   postgres_version      = var.postgres_version
   sku_name              = var.postgres_sku_name
   storage_mb            = var.postgres_storage_mb
+  zone                  = var.postgres_zone
   backup_retention_days = var.postgres_backup_retention_days
 
   geo_redundant_backup_enabled = var.postgres_geo_redundant_backup_enabled
@@ -32,4 +33,30 @@ module "postgres" {
   entra_administrator_object_id      = var.postgres_entra_administrator_object_id
   entra_administrator_principal_name = var.postgres_entra_administrator_principal_name
   entra_administrator_principal_type = var.postgres_entra_administrator_principal_type
+}
+
+module "aks" {
+  source = "../modules/aks"
+
+  name                = local.aks_cluster_name
+  resource_group_name = azurerm_resource_group.runtime.name
+  location            = local.location
+  dns_prefix          = local.aks_dns_prefix
+  subnet_id           = local.aks_subnet_id
+
+  identity_ids               = [local.aks_identity.resource_id]
+  node_count                 = var.aks_node_count
+  node_vm_size               = var.aks_node_vm_size
+  log_analytics_workspace_id = local.log_analytics_workspace_id
+  tags                       = local.tags
+
+  depends_on = [
+    azurerm_role_assignment.aks_control_plane_network_contributor_on_aks_subnet,
+  ]
+}
+
+resource "azurerm_role_assignment" "aks_control_plane_network_contributor_on_aks_subnet" {
+  scope                = local.aks_subnet_id
+  role_definition_name = "Network Contributor"
+  principal_id         = local.aks_identity.principal_id
 }

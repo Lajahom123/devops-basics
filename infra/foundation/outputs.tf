@@ -109,6 +109,21 @@ output "managed_identities" {
   value       = module.managed_identities.identities
 }
 
+output "aks_identity_id" {
+  description = "AKS control plane user-assigned identity resource ID."
+  value       = module.managed_identities.identities.aks_control_plane.resource_id
+}
+
+output "aks_identity_principal_id" {
+  description = "AKS control plane user-assigned identity principal ID."
+  value       = module.managed_identities.identities.aks_control_plane.principal_id
+}
+
+output "aks_identity_client_id" {
+  description = "AKS control plane user-assigned identity client ID."
+  value       = module.managed_identities.identities.aks_control_plane.client_id
+}
+
 output "github_actions_deploy_identity_name" {
   description = "GitHub Actions deploy identity name."
   value       = module.managed_identities.identities.github_actions_deploy.name

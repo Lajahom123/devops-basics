@@ -24,6 +24,11 @@ locals {
 
   managed_identities = local.foundation.managed_identities
 
+  aks_identity = {
+    resource_id  = local.foundation.aks_identity_id
+    principal_id = local.foundation.aks_identity_principal_id
+  }
+
   github_actions_deploy_identity = {
     name         = local.foundation.github_actions_deploy_identity_name
     resource_id  = local.foundation.github_actions_deploy_identity_id
@@ -60,6 +65,8 @@ locals {
   }
 
   postgres_name_suffix = replace(local.acr_name, "devopstrackerdev", "")
+  aks_cluster_name     = coalesce(var.aks_cluster_name, "aks-${local.project}-${local.environment}-${local.postgres_name_suffix}-swn")
+  aks_dns_prefix       = coalesce(var.aks_dns_prefix, "aks-${local.project}-${local.environment}-${local.postgres_name_suffix}")
   postgres_server_name = coalesce(var.postgres_server_name, "psql-devops-tracker-${local.postgres_name_suffix}-swn")
   postgres_app_entra_principal_name = coalesce(
     var.postgres_app_entra_principal_name,

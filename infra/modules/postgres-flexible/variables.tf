@@ -39,6 +39,12 @@ variable "storage_mb" {
   type        = number
 }
 
+variable "zone" {
+  description = "Availability zone for the PostgreSQL Flexible Server."
+  type        = string
+  default     = "1"
+}
+
 variable "backup_retention_days" {
   description = "Backup retention in days."
   type        = number
