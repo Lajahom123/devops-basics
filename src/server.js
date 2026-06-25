@@ -1,3 +1,4 @@
+const crypto = require("crypto");
 const express = require("express");
 const {
   checkDatabase,
@@ -83,6 +84,27 @@ app.get("/deployments/:id", async (req, res) => {
   }
 
   res.json(record);
+});
+
+app.get("/cpu", (req, res) => {
+  const requestedMs = Number(req.query.workMs ?? 500);
+  const workMs = Math.min(Math.max(requestedMs, 1), 5000);
+
+  const started = Date.now();
+  let iterations = 0;
+  let value = "devops-tracker";
+
+  while (Date.now() - started < workMs) {
+    value = crypto.createHash("sha256").update(value).digest("hex");
+    iterations++;
+  }
+
+  res.json({
+    ok: true,
+    workMs,
+    iterations,
+    durationMs: Date.now() - started,
+  });
 });
 
 app.use((err, _req, res, _next) => {

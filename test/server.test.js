@@ -41,6 +41,28 @@ test("POST /deployments stores and returns a deployment", async () => {
   assert.equal(getRes.body.id, createRes.body.id);
 });
 
+test("GET /cpu returns ok with default workMs", async () => {
+  const res = await request(app).get("/cpu").expect(200);
+  assert.equal(res.body.ok, true);
+  assert.equal(res.body.workMs, 500);
+  assert.ok(res.body.iterations > 0);
+  assert.ok(res.body.durationMs >= 500);
+});
+
+test("GET /cpu respects workMs query parameter", async () => {
+  const res = await request(app).get("/cpu?workMs=100").expect(200);
+  assert.equal(res.body.ok, true);
+  assert.equal(res.body.workMs, 100);
+  assert.ok(res.body.iterations > 0);
+  assert.ok(res.body.durationMs >= 100);
+});
+
+test("GET /cpu clamps workMs to 1 minimum", async () => {
+  const res = await request(app).get("/cpu?workMs=0").expect(200);
+  assert.equal(res.body.workMs, 1);
+  assert.ok(res.body.iterations > 0);
+});
+
 test("GET /deployments/stats groups deployments by environment", async () => {
   await request(app)
     .post("/deployments")
