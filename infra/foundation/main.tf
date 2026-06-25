@@ -22,6 +22,7 @@ module "network" {
   vnet_name           = local.vnet_name
   address_space       = ["10.20.0.0/16"]
   subnets             = local.subnets
+  pip_name_ingress    = local.pip_name_ingress
   tags                = local.common_tags
 }
 

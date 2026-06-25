@@ -58,6 +58,21 @@ output "key_vault_private_dns_zone_id" {
   value       = module.private_dns.zone_ids.key_vault
 }
 
+output "ingress_public_ip_id" {
+  description = "Public IP ID for ingress."
+  value = module.network.ingress_public_ip_id
+}
+
+output "ingress_public_ip_name" {
+  description = "Public IP name for ingress."
+  value = module.network.ingress_public_ip_name
+}
+
+output "ingress_public_ip_address" {
+  description = "Public IP address for ingress."
+  value = module.network.ingress_public_ip_address
+}
+
 output "log_analytics_workspace_id" {
   description = "Log Analytics Workspace ID."
   value       = module.monitoring.log_analytics_workspace_id

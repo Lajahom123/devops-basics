@@ -70,4 +70,5 @@ locals {
       address_prefixes = ["10.20.64.0/22"]
     }
   }
+  pip_name_ingress = "pip-${var.project}-${var.environment}-ingress"
 }

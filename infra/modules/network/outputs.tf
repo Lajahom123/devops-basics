@@ -36,3 +36,15 @@ output "private_endpoints_subnet_id" {
   description = "Private endpoints subnet ID."
   value       = azurerm_subnet.main["private_endpoints"].id
 }
+
+output "ingress_public_ip_id" {
+  value = azurerm_public_ip.ingress.id
+}
+
+output "ingress_public_ip_name" {
+  value = azurerm_public_ip.ingress.name
+}
+
+output "ingress_public_ip_address" {
+  value = azurerm_public_ip.ingress.ip_address
+}

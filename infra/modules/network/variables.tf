@@ -46,6 +46,11 @@ variable "subnets" {
   }))
 }
 
+variable "pip_name_ingress" {
+  description = "Public IP name for ingress."
+  type        = string
+}
+
 variable "tags" {
   description = "Tags applied to network resources."
   type        = map(string)
