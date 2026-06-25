@@ -24,7 +24,7 @@ ACR_LOGIN_SERVER="$ACR_NAME.azurecr.io"
 az acr login --name "$ACR_NAME"
 
 docker buildx build \
-  --platform linux/amd64 \
+  --platform linux/amd64,linux/arm64 \
   -f Dockerfile.flyway \
   -t "$ACR_LOGIN_SERVER/devops-tracker-migrations:bootstrap" \
   --push \

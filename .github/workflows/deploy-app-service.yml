@@ -12,7 +12,7 @@ permissions:
 
 env:
   ACR_NAME: devopstracker29193
-  ACR_LOGIN_SERVER: devopstracker29193.azurecr.io
+  ACR_LOGIN_SERVER: devopstrackerdevvsh6qw.azurecr.io
   IMAGE_NAME: devops-tracker
   WEBAPP_NAME: devops-tracker-29193
   RESOURCE_GROUP: rg-devops-tracker-dev
@@ -53,7 +53,7 @@ jobs:
       - name: Build and push migration image
         run: |
           docker buildx build \
-            --platform linux/amd64 \
+            --platform linux/amd64,linux/arm64 \
             -f Dockerfile.flyway \
             -t "$ACR_LOGIN_SERVER/$MIGRATION_IMAGE:${{ github.sha }}" \
             --push \
