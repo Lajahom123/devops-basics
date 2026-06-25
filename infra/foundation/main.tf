@@ -20,7 +20,7 @@ module "network" {
   project             = var.project
   environment         = var.environment
   vnet_name           = local.vnet_name
-  address_space       = ["10.20.0.0/16"]
+  address_space       = local.v_net_address_space
   subnets             = local.subnets
   pip_name_ingress    = local.pip_name_ingress
   tags                = local.common_tags
@@ -76,7 +76,7 @@ module "key_vault" {
 module "github_oidc" {
   source = "../modules/github-oidc"
 
-  name                = "github-${var.github_branch}"
+  name                = local.githib_oidc_name
   resource_group_name = azurerm_resource_group.platform.name
   parent_identity_id  = module.managed_identities.identities.github_actions_deploy.resource_id
   subject             = local.github_deploy_subject

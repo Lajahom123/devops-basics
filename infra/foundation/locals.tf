@@ -5,6 +5,7 @@ locals {
 
   unique_suffix         = random_string.foundation_suffix.result
   acr_name              = substr(lower(replace("${var.project}${var.environment}${local.unique_suffix}", "/[^0-9A-Za-z]/", "")), 0, 50)
+  githib_oidc_name      = "github-${var.github_branch}"
   github_deploy_subject = "repo:${var.github_owner}/${var.github_repo}:ref:refs/heads/${var.github_branch}"
   key_vault_name = substr(
     replace("kv-${var.project}-${var.environment}-${local.unique_suffix}", "/[^0-9A-Za-z-]/", ""),
@@ -30,6 +31,8 @@ locals {
       virtual_network_link = "link-${local.vnet_name}-key-vault"
     }
   }
+
+  v_net_address_space = ["10.20.0.0/16"]
 
   subnets = {
     private_endpoints = {
