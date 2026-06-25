@@ -5,6 +5,8 @@ controller:
     type: LoadBalancer
     externalTrafficPolicy: Cluster
     annotations:
+      service.beta.kubernetes.io/azure-pip-name: "${ingress_public_ip_name}"
+      service.beta.kubernetes.io/azure-load-balancer-resource-group: "${foundation_resource_group_name}"
       service.beta.kubernetes.io/azure-load-balancer-health-probe-request-path: /healthz
 
   ingressClassResource:
