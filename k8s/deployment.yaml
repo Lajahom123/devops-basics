@@ -1,25 +1,40 @@
 apiVersion: apps/v1
 kind: Deployment
+
 metadata:
-  name: devops-tracker
+  name: devops-tracker-api
   namespace: devops-tracker
+  labels:
+    app: devops-tracker-api
+
 spec:
   replicas: 2
 
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 25%
+      maxSurge: 25%
+
   selector:
     matchLabels:
-      app: devops-tracker
+      app: devops-tracker-api
 
   template:
     metadata:
       labels:
-        app: devops-tracker
+        app: devops-tracker-api
 
     spec:
       containers:
-        - name: devops-tracker
-          image: devopstracker29193.azurecr.io/devops-tracker:latest
- 
+        - name: api
+          image: devopstrackerdevvsh6qw.azurecr.io/devops-tracker:832b0f6
+          imagePullPolicy: IfNotPresent
+
+          ports:
+            - name: http
+              containerPort: 3000
+
           resources:
             requests:
               cpu: "100m"
@@ -28,19 +43,20 @@ spec:
               cpu: "500m"
               memory: "512Mi"
 
-          ports:
-            - containerPort: 3000
-
           readinessProbe:
             httpGet:
               path: /health
-              port: 3000
+              port: http
             initialDelaySeconds: 10
             periodSeconds: 5
+            timeoutSeconds: 2
+            failureThreshold: 3
 
           livenessProbe:
             httpGet:
               path: /health
-              port: 3000
+              port: http
             initialDelaySeconds: 30
             periodSeconds: 10
+            timeoutSeconds: 2
+            failureThreshold: 3

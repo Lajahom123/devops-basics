@@ -47,6 +47,7 @@ module "aks" {
   identity_ids               = [local.aks_identity.resource_id]
   node_count                 = var.aks_node_count
   node_vm_size               = var.aks_node_vm_size
+  acr_id                     = local.acr_id
   log_analytics_workspace_id = local.log_analytics_workspace_id
   tags                       = local.tags
 

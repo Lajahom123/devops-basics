@@ -35,6 +35,11 @@ variable "node_vm_size" {
   default     = "Standard_B2s_v2"
 }
 
+variable "acr_id" {
+  type        = string
+  description = "Resource ID of the Azure Container Registry used by AKS for image pulls."
+}
+
 variable "log_analytics_workspace_id" {
   description = "Log Analytics Workspace ID used by Container Insights."
   type        = string
