@@ -41,8 +41,10 @@ jobs:
           IMAGE_TAG=${{ github.sha }}
           IMAGE="${ACR_NAME}.azurecr.io/${IMAGE_NAME}:${IMAGE_TAG}"
 
-          docker build -t "$IMAGE" .
-          docker push "$IMAGE"
+          az acr build \
+            --registry "$ACR_NAME" \
+            --image "$IMAGE_NAME:$IMAGE_TAG" \
+            .
 
           echo "image=$IMAGE" >> "$GITHUB_OUTPUT"
 
