@@ -2,8 +2,8 @@ name: Stop dev resources
 
 on:
   workflow_dispatch:
-  schedule:
-    - cron: "0 22 * * *"
+  #schedule:
+   # - cron: "0 22 * * *"
 
 permissions:
   id-token: write
