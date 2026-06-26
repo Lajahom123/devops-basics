@@ -31,7 +31,7 @@ variable "github_repo" {
 variable "github_branch" {
   description = "GitHub branch allowed to federate to Azure."
   type        = string
-  default     = "main"
+  default     = "master"
 }
 
 variable "tags" {
