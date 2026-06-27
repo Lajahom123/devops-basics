@@ -14,8 +14,8 @@ resource "azurerm_role_assignment" "current_deployer_key_vault_data_access_admin
 
 # ACR
 
-resource "azurerm_role_assignment" "github_actions_acr_build_executor" {
-  scope              = module.acr.acr_id
-  role_definition_id = "AcrPush"
-  principal_id       = module.managed_identities.identities.github_actions_deploy.principal_id
+resource "azurerm_role_assignment" "github_actions_acr_push" {
+  scope                = module.acr.acr_id
+  role_definition_name = "AcrPush"
+  principal_id         = module.managed_identities.identities.github_actions_deploy.principal_id
 }

@@ -60,17 +60,17 @@ output "key_vault_private_dns_zone_id" {
 
 output "ingress_public_ip_id" {
   description = "Public IP ID for ingress."
-  value = module.network.ingress_public_ip_id
+  value       = module.network.ingress_public_ip_id
 }
 
 output "ingress_public_ip_name" {
   description = "Public IP name for ingress."
-  value = module.network.ingress_public_ip_name
+  value       = module.network.ingress_public_ip_name
 }
 
 output "ingress_public_ip_address" {
   description = "Public IP address for ingress."
-  value = module.network.ingress_public_ip_address
+  value       = module.network.ingress_public_ip_address
 }
 
 output "log_analytics_workspace_id" {
