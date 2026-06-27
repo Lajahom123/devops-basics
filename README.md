@@ -77,7 +77,7 @@ App Service VNet integration gives App Service outbound access into the VNet. Pr
 
 ## Local application development
 
-The API can run without PostgreSQL and falls back to in-memory storage. For local testing:
+Use Node.js `24.18.0` or another compatible Node 24 LTS release. The API can run without PostgreSQL and falls back to in-memory storage. For local testing:
 
 ```bash
 npm install
