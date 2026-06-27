@@ -1,7 +1,18 @@
-name: Deploy to AKS dev
+name: Build and deploy to AKS dev
 
 on:
   workflow_dispatch:
+
+  push:
+    branches:
+      - master
+    paths:
+      - "src/**"
+      - "package.json"
+      - "package-lock.json"
+      - "Dockerfile"
+      - ".dockerignore"
+      - ".github/workflows/build-and-deploy-aks.yml"
 
 permissions:
   id-token: write
