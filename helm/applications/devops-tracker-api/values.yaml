@@ -72,3 +72,6 @@ hpa:
 serviceAccount:
   create: true
   name: ""
+
+rbac:
+  create: true

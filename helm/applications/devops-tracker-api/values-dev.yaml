@@ -2,7 +2,7 @@ namespace: devops-tracker
 
 image:
   repository: devopstrackerdevvsh6qw.azurecr.io/devops-tracker-api
-  tag: "832b0f6"
+  tag: latest
   pullPolicy: IfNotPresent
   
 ingress:
