@@ -126,7 +126,7 @@ output "managed_identities" {
 
 output "aks_identity_id" {
   description = "AKS control plane user-assigned identity resource ID."
-  value       = module.managed_identities.identities.aks_control_plane.resource_id
+  value       = module.managed_identities.identities.aks_control_plane.id
 }
 
 output "aks_identity_principal_id" {
@@ -146,7 +146,7 @@ output "github_actions_deploy_identity_name" {
 
 output "github_actions_deploy_identity_id" {
   description = "GitHub Actions deploy identity resource ID."
-  value       = module.managed_identities.identities.github_actions_deploy.resource_id
+  value       = module.managed_identities.identities.github_actions_deploy.id
 }
 
 output "github_actions_deploy_client_id" {
@@ -166,7 +166,7 @@ output "aks_workload_identity_name" {
 
 output "aks_workload_identity_id" {
   description = "AKS workload identity base identity resource ID."
-  value       = module.managed_identities.identities.aks_workload.resource_id
+  value       = module.managed_identities.identities.aks_workload.id
 }
 
 output "aks_workload_identity_client_id" {
@@ -186,7 +186,7 @@ output "migration_job_identity_name" {
 
 output "migration_job_identity_id" {
   description = "Migration job identity resource ID."
-  value       = module.managed_identities.identities.migration_job.resource_id
+  value       = module.managed_identities.identities.migration_job.id
 }
 
 output "migration_job_identity_client_id" {
@@ -206,7 +206,7 @@ output "github_runner_identity_name" {
 
 output "github_runner_identity_id" {
   description = "GitHub private runner identity resource ID."
-  value       = module.managed_identities.identities.github_runner.resource_id
+  value       = module.managed_identities.identities.github_runner.id
 }
 
 output "github_runner_identity_client_id" {
@@ -226,7 +226,7 @@ output "private_runner_identity_name" {
 
 output "private_runner_identity_id" {
   description = "Private runner identity resource ID."
-  value       = module.managed_identities.identities.private_runner.resource_id
+  value       = module.managed_identities.identities.private_runner.id
 }
 
 output "private_runner_identity_client_id" {

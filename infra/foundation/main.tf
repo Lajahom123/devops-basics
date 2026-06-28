@@ -78,6 +78,6 @@ module "github_oidc" {
 
   name                = local.githib_oidc_name
   resource_group_name = azurerm_resource_group.platform.name
-  parent_identity_id  = module.managed_identities.identities.github_actions_deploy.resource_id
+  parent_identity_id  = module.managed_identities.identities.github_actions_deploy.id
   subject             = local.github_deploy_subject
 }

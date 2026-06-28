@@ -15,6 +15,7 @@ locals {
 
   acr_id           = local.foundation.acr_id
   acr_name         = local.foundation.acr_name
+  acr_name_suffix  = replace(local.acr_name, "devopstrackerdev", "")
   acr_login_server = local.foundation.acr_login_server
 
   key_vault_id   = local.foundation.key_vault_id
@@ -22,52 +23,52 @@ locals {
 
   log_analytics_workspace_id = local.foundation.log_analytics_workspace_id
 
-  managed_identities = local.foundation.managed_identities
-
   aks_identity = {
-    resource_id  = local.foundation.aks_identity_id
+    id           = local.foundation.aks_identity_id
     principal_id = local.foundation.aks_identity_principal_id
   }
 
   github_actions_deploy_identity = {
     name         = local.foundation.github_actions_deploy_identity_name
-    resource_id  = local.foundation.github_actions_deploy_identity_id
+    id           = local.foundation.github_actions_deploy_identity_id
     client_id    = local.foundation.github_actions_deploy_client_id
     principal_id = local.foundation.github_actions_deploy_principal_id
   }
 
   aks_workload_identity = {
     name         = local.foundation.aks_workload_identity_name
-    resource_id  = local.foundation.aks_workload_identity_id
+    id           = local.foundation.aks_workload_identity_id
     client_id    = local.foundation.aks_workload_identity_client_id
     principal_id = local.foundation.aks_workload_identity_principal_id
   }
 
   migration_job_identity = {
     name         = local.foundation.migration_job_identity_name
-    resource_id  = local.foundation.migration_job_identity_id
+    id           = local.foundation.migration_job_identity_id
     client_id    = local.foundation.migration_job_identity_client_id
     principal_id = local.foundation.migration_job_identity_principal_id
   }
 
   github_runner_identity = {
     name         = local.foundation.github_runner_identity_name
-    resource_id  = local.foundation.github_runner_identity_id
+    id           = local.foundation.github_runner_identity_id
     client_id    = local.foundation.github_runner_identity_client_id
     principal_id = local.foundation.github_runner_identity_principal_id
   }
 
   private_runner_identity = {
     name         = local.foundation.private_runner_identity_name
-    resource_id  = local.foundation.private_runner_identity_id
+    id           = local.foundation.private_runner_identity_id
     client_id    = local.foundation.private_runner_identity_client_id
     principal_id = local.foundation.private_runner_identity_principal_id
   }
 
-  postgres_name_suffix = replace(local.acr_name, "devopstrackerdev", "")
-  aks_cluster_name     = coalesce(var.aks_cluster_name, "aks-${local.project}-${local.environment}-${local.postgres_name_suffix}-swn")
-  aks_dns_prefix       = coalesce(var.aks_dns_prefix, "aks-${local.project}-${local.environment}-${local.postgres_name_suffix}")
-  postgres_server_name = coalesce(var.postgres_server_name, "psql-devops-tracker-${local.postgres_name_suffix}-swn")
+  aks_cluster_id      = module.aks.cluster_id
+  aks_oidc_issuer_url = module.aks.oidc_issuer_url
+
+  aks_cluster_name     = coalesce(var.aks_cluster_name, "aks-${local.project}-${local.environment}-${local.acr_name_suffix}-swn")
+  aks_dns_prefix       = coalesce(var.aks_dns_prefix, "aks-${local.project}-${local.environment}-${local.acr_name_suffix}")
+  postgres_server_name = coalesce(var.postgres_server_name, "psql-devops-tracker-${local.acr_name_suffix}-swn")
   postgres_app_entra_principal_name = coalesce(
     var.postgres_app_entra_principal_name,
     local.aks_workload_identity.name
