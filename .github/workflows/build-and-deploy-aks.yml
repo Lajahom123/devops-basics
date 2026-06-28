@@ -12,6 +12,7 @@ on:
       - "package-lock.json"
       - "Dockerfile"
       - ".dockerignore"
+      - "helm/applications/devops-tracker-api/**"
       - ".github/workflows/build-and-deploy-aks.yml"
 
 permissions:
@@ -24,8 +25,7 @@ env:
   AKS_CLUSTER_NAME: aks-devops-tracker-dev-vsh6qw-swn
   RESOURCE_GROUP: rg-devops-tracker-dev-runtime
   NAMESPACE: devops-tracker
-  DEPLOYMENT_NAME: devops-tracker-api
-  CONTAINER_NAME: api
+  HELM_RELEASE_NAME: devops-tracker-api
 
 jobs:
   build:
@@ -33,7 +33,7 @@ jobs:
     runs-on: ubuntu-latest
 
     outputs:
-      image: ${{ steps.image.outputs.image }}
+      image_tag: ${{ steps.image.outputs.image_tag }}
 
     steps:
       - name: Checkout
@@ -50,7 +50,7 @@ jobs:
         run: |
           az acr login --name "$ACR_NAME"
 
-      - name: Build image with Docker and push to ACR
+      - name: Build and push image
         id: image
         run: |
           IMAGE_TAG=${{ github.sha }}
@@ -59,7 +59,7 @@ jobs:
           docker build -t "$IMAGE" .
           docker push "$IMAGE"
 
-          echo "image=$IMAGE" >> "$GITHUB_OUTPUT"
+          echo "image_tag=$IMAGE_TAG" >> "$GITHUB_OUTPUT"
 
   deploy:
     name: Deploy to AKS
@@ -67,6 +67,9 @@ jobs:
     needs: build
 
     steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
       - name: Azure login
         uses: azure/login@v2
         with:
@@ -77,6 +80,9 @@ jobs:
       - name: Install kubectl
         uses: azure/setup-kubectl@v4
 
+      - name: Install helm
+        uses: azure/setup-helm@v4
+
       - name: Get AKS credentials
         run: |
           az aks get-credentials \
@@ -84,28 +90,28 @@ jobs:
             --name "$AKS_CLUSTER_NAME" \
             --overwrite-existing
 
-      - name: Update deployment image
+      - name: Deploy application
+        id: deploy
         run: |
-          kubectl set image deployment/$DEPLOYMENT_NAME \
-            $CONTAINER_NAME=${{ needs.build.outputs.image }} \
-            -n "$NAMESPACE"
+          helm upgrade "$HELM_RELEASE_NAME" helm/applications/devops-tracker-api \
+            --install \
+            --namespace "$NAMESPACE" \
+            --values helm/applications/devops-tracker-api/values-dev.yaml \
+            --set image.tag=${{ needs.build.outputs.image_tag }} \
+            --wait \
+            --timeout 3m
 
-      - name: Wait for rollout
-        id: rollout
+      - name: Rollback on failed deploy
+        if: failure() && steps.deploy.outcome == 'failure'
         run: |
-          kubectl rollout status deployment/$DEPLOYMENT_NAME \
-            -n "$NAMESPACE" \
-            --timeout=180s
-
-      - name: Rollback on failed rollout
-        if: failure() && steps.rollout.outcome == 'failure'
-        run: |
-          kubectl rollout undo deployment/$DEPLOYMENT_NAME \
-            -n "$NAMESPACE"
-
-          kubectl rollout status deployment/$DEPLOYMENT_NAME \
-            -n "$NAMESPACE" \
-            --timeout=180s
+          if helm history "$HELM_RELEASE_NAME" --namespace "$NAMESPACE" | grep -q deployed; then
+            helm rollback "$HELM_RELEASE_NAME" \
+              --namespace "$NAMESPACE" \
+              --wait \
+              --timeout 3m
+          else
+            echo "No previous successful release to roll back to."
+          fi
 
       - name: Verify health through cluster service
         run: |

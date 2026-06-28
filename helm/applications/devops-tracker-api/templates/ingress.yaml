@@ -1,0 +1,23 @@
+{{- if .Values.ingress.enabled }}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+
+metadata:
+  name: {{ include "devops-tracker-api.fullname" . }}
+  namespace: {{ include "devops-tracker-api.namespace" . }}
+
+spec:
+  ingressClassName: {{ .Values.ingress.className }}
+
+  rules:
+    - host: {{ .Values.ingress.host }}
+      http:
+        paths:
+          - path: {{ .Values.ingress.path }}
+            pathType: {{ .Values.ingress.pathType }}
+            backend:
+              service:
+                name: {{ include "devops-tracker-api.fullname" . }}
+                port:
+                  number: {{ .Values.ingress.servicePort }}
+{{- end }}

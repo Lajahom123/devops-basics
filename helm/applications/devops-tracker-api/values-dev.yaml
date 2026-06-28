@@ -1,0 +1,11 @@
+namespace: devops-tracker
+
+image:
+  repository: devopstrackerdevvsh6qw.azurecr.io/devops-tracker-api
+  tag: "832b0f6"
+  pullPolicy: IfNotPresent
+  
+ingress:
+  enabled: true
+  className: nginx
+  host: devops-tracker.local

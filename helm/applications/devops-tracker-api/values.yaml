@@ -1,0 +1,70 @@
+namespace: devops-tracker
+
+# Fixed resource names — must match existing k8s manifests.
+nameOverride: devops-tracker-api
+fullnameOverride: devops-tracker-api
+
+containerName: api
+
+image:
+  repository: devopstrackerdevvsh6qw.azurecr.io/devops-tracker-api
+  tag: latest
+  pullPolicy: Always
+
+replicas: 2
+revisionHistoryLimit: 5
+
+strategy:
+  type: RollingUpdate
+  rollingUpdate:
+    maxUnavailable: 25%
+    maxSurge: 25%
+
+containerPort: 3000
+portName: http
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 128Mi
+  limits:
+    cpu: 500m
+    memory: 512Mi
+
+readinessProbe:
+  httpGet:
+    path: /health
+    port: http
+  initialDelaySeconds: 10
+  periodSeconds: 5
+  timeoutSeconds: 2
+  failureThreshold: 3
+
+livenessProbe:
+  httpGet:
+    path: /health
+    port: http
+  initialDelaySeconds: 30
+  periodSeconds: 10
+  timeoutSeconds: 2
+  failureThreshold: 3
+
+service:
+  type: ClusterIP
+  port: 80
+  targetPort: 3000
+  portName: http
+
+ingress:
+  enabled: true
+  className: nginx
+  host: devops-tracker.local
+  path: /
+  pathType: Prefix
+  servicePort: 80
+
+hpa:
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 5
+  targetCPUUtilizationPercentage: 70

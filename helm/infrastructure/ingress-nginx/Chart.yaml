@@ -1,0 +1,10 @@
+apiVersion: v2
+name: ingress-nginx
+description: |
+  Configuration for the ingress-nginx Helm release managed by Terraform.
+  Upstream chart: https://kubernetes.github.io/ingress-nginx, version 4.15.1.
+  values.yaml and values-dev.yaml are loaded directly by the helm_release
+  resource in infra/runtime-aks/helm_releases.tf.
+type: application
+version: 0.1.0
+appVersion: "4.15.1"

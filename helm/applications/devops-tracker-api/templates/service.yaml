@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+
+metadata:
+  name: {{ include "devops-tracker-api.fullname" . }}
+  namespace: {{ include "devops-tracker-api.namespace" . }}
+
+spec:
+  type: {{ .Values.service.type }}
+  selector:
+    {{- include "devops-tracker-api.selectorLabels" . | nindent 4 }}
+  ports:
+    - name: {{ .Values.service.portName }}
+      port: {{ .Values.service.port }}
+      targetPort: {{ .Values.service.targetPort }}

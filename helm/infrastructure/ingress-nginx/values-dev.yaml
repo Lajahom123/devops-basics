@@ -1,0 +1,5 @@
+controller:
+  service:
+    annotations:
+      service.beta.kubernetes.io/azure-pip-name: pip-devops-tracker-dev-ingress
+      service.beta.kubernetes.io/azure-load-balancer-resource-group: rg-devops-tracker-dev-platform

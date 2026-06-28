@@ -1,0 +1,47 @@
+apiVersion: apps/v1
+kind: Deployment
+
+metadata:
+  name: {{ include "devops-tracker-api.fullname" . }}
+  namespace: {{ include "devops-tracker-api.namespace" . }}
+  labels:
+    {{- include "devops-tracker-api.labels" . | nindent 4 }}
+
+spec:
+  replicas: {{ .Values.replicas }}
+
+  revisionHistoryLimit: {{ .Values.revisionHistoryLimit }}
+
+  strategy:
+    type: {{ .Values.strategy.type }}
+    rollingUpdate:
+      maxUnavailable: {{ .Values.strategy.rollingUpdate.maxUnavailable }}
+      maxSurge: {{ .Values.strategy.rollingUpdate.maxSurge }}
+
+  selector:
+    matchLabels:
+      {{- include "devops-tracker-api.selectorLabels" . | nindent 6 }}
+
+  template:
+    metadata:
+      labels:
+        {{- include "devops-tracker-api.selectorLabels" . | nindent 8 }}
+
+    spec:
+      containers:
+        - name: {{ .Values.containerName }}
+          image: {{ include "devops-tracker-api.image" . }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+
+          ports:
+            - name: {{ .Values.portName }}
+              containerPort: {{ .Values.containerPort }}
+
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+
+          readinessProbe:
+            {{- toYaml .Values.readinessProbe | nindent 12 }}
+
+          livenessProbe:
+            {{- toYaml .Values.livenessProbe | nindent 12 }}
