@@ -1,6 +1,6 @@
 output "resource_group_name" {
   description = "Runtime resource group name."
-  value       = azurerm_resource_group.runtime.name
+  value       = local.resource_group_name
 }
 
 output "platform_resource_group_name" {
@@ -35,7 +35,7 @@ output "postgres_app_entra_principal_name" {
 
 output "aks_cluster_id" {
   description = "AKS cluster resource ID."
-  value       = module.aks.cluster_id
+  value       = local.aks_cluster_id
 }
 
 output "aks_cluster_name" {
@@ -60,5 +60,5 @@ output "aks_node_resource_group" {
 
 output "aks_oidc_issuer_url" {
   description = "AKS OIDC issuer URL."
-  value       = module.aks.oidc_issuer_url
+  value       = local.aks_oidc_issuer_url
 }

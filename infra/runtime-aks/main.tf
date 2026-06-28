@@ -9,7 +9,7 @@ module "postgres" {
 
   name                = local.postgres_server_name
   location            = local.location
-  resource_group_name = azurerm_resource_group.runtime.name
+  resource_group_name = local.resource_group_name
 
   administrator_login    = var.postgres_administrator_login
   administrator_password = var.postgres_administrator_password
@@ -39,12 +39,12 @@ module "aks" {
   source = "../modules/aks"
 
   name                = local.aks_cluster_name
-  resource_group_name = azurerm_resource_group.runtime.name
+  resource_group_name = local.resource_group_name
   location            = local.location
   dns_prefix          = local.aks_dns_prefix
   subnet_id           = local.aks_subnet_id
 
-  identity_ids               = [local.aks_identity.resource_id]
+  identity_ids               = [local.aks_identity.id]
   node_count                 = var.aks_node_count
   node_vm_size               = var.aks_node_vm_size
   acr_id                     = local.acr_id

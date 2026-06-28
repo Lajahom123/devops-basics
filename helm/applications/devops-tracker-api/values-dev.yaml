@@ -9,3 +9,10 @@ ingress:
   enabled: true
   className: nginx
   host: devops-tracker.local
+
+podLabels:
+  azure.workload.identity/use: "true"
+
+serviceAccount:
+  annotations:
+    azure.workload.identity/client-id: "540fdb5f-20fa-42ab-9e1c-725f792f593c"

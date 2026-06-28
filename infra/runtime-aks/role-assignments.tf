@@ -11,7 +11,7 @@ resource "azurerm_role_assignment" "aks_ingress_public_ip_network_contributor" {
 }
 
 resource "azurerm_role_assignment" "github_actions_aks_user" {
-  scope                = module.aks.cluster_id
+  scope                = local.aks_cluster_id
   role_definition_name = "Azure Kubernetes Service Cluster User Role"
   principal_id         = local.foundation.github_actions_deploy_principal_id
 }

@@ -26,6 +26,9 @@ spec:
     metadata:
       labels:
         {{- include "devops-tracker-api.selectorLabels" . | nindent 8 }}
+        {{- with .Values.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
 
     spec:
       serviceAccountName: {{ include "devops-tracker-api.serviceAccountName" . }}
