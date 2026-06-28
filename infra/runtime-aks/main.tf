@@ -55,24 +55,3 @@ module "aks" {
     azurerm_role_assignment.aks_control_plane_network_contributor_on_aks_subnet,
   ]
 }
-
-resource "helm_release" "ingress_nginx" {
-  name             = "ingress-nginx"
-  namespace        = "ingress-nginx"
-  create_namespace = true
-
-  repository = "https://kubernetes.github.io/ingress-nginx"
-  chart      = "ingress-nginx"
-  version    = "4.15.1"
-
-  values = [
-    templatefile("${path.module}/helm-values/ingress-nginx/values-dev.yaml.tpl", {
-      ingress_public_ip_name         = local.foundation.ingress_public_ip_name,
-      foundation_resource_group_name = local.foundation.resource_group_name
-    })
-  ]
-
-  depends_on = [
-    module.aks
-  ]
-}
