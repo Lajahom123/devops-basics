@@ -48,3 +48,10 @@ Fully qualified container image reference.
 {{- define "devops-tracker-api.image" -}}
 {{- printf "%s:%s" .Values.image.repository .Values.image.tag }}
 {{- end }}
+
+{{/*
+Service account name.
+*/}}
+{{- define "devops-tracker-api.serviceAccountName" -}}
+{{- default (include "devops-tracker-api.fullname" .) .Values.serviceAccount.name }}
+{{- end }}

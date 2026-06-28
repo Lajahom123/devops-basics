@@ -28,6 +28,7 @@ spec:
         {{- include "devops-tracker-api.selectorLabels" . | nindent 8 }}
 
     spec:
+      serviceAccountName: {{ include "devops-tracker-api.serviceAccountName" . }}
       containers:
         - name: {{ .Values.containerName }}
           image: {{ include "devops-tracker-api.image" . }}
