@@ -1,6 +1,6 @@
 data "azurerm_client_config" "current" {}
 
-resource "random_string" "foundation_suffix" {
+resource "random_string" "platform_suffix" {
   length  = 6
   upper   = false
   special = false

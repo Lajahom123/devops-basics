@@ -18,7 +18,7 @@ Build one evolving Azure DevOps learning project that keeps the application smal
 - Azure Monitor, Log Analytics, Application Insights, diagnostics, and alerts
 - GitHub Actions with Azure OIDC
 - GitHub self-hosted runner VM for private network validation
-- Terraform split into foundation and runtime roots
+- Terraform split into platform and runtime roots
 
 ## Current architecture
 
@@ -26,11 +26,11 @@ Build one evolving Azure DevOps learning project that keeps the application smal
 - Environment: `dev`
 - Deployment strategy: staging slot swap
 
-`infra/foundation` is persistent and should survive normal cleanup. It owns shared infrastructure: resource group lookup, VNet, subnets, ACR, Key Vault, private DNS, Log Analytics, Application Insights, managed identities, GitHub OIDC identities, role assignments, and NAT Gateway.
+`infra/platform` is persistent and should survive normal cleanup. It owns shared infrastructure: resource group lookup, VNet, subnets, ACR, Key Vault, private DNS, Log Analytics, Application Insights, managed identities, GitHub OIDC identities, role assignments, and NAT Gateway.
 
 `infra/runtime` is destroyable and cost-bearing. It owns workload resources: App Service, staging slot, PostgreSQL Flexible Server, Container Apps migration job, Front Door, production and staging private endpoints, GitHub runner VM, workload diagnostics, alerts, and workload RBAC.
 
-Runtime consumes foundation outputs through `terraform_remote_state`.
+Runtime consumes platform outputs through `terraform_remote_state`.
 
 ## Deployment flow
 
@@ -49,7 +49,7 @@ Runtime consumes foundation outputs through `terraform_remote_state`.
 - The staging slot is not a separate environment.
 - Do not use publish profiles, ACR admin credentials, or Azure client secrets.
 - Runner registration is GitHub App based.
-- Keep `infra/foundation` deployed during ordinary cost-control cycles.
+- Keep `infra/platform` deployed during ordinary cost-control cycles.
 - Destroy `infra/runtime` when removing active cost for a longer idle period.
 - Keep migrations outside Web App startup.
 - Keep GitHub deployment identity, Web App runtime identity, migration job identity, and runner identity separate.

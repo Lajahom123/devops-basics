@@ -1,6 +1,6 @@
 resource "azurerm_monitor_action_group" "main" {
   name                = "ag-devops-tracker"
-  resource_group_name = data.terraform_remote_state.foundation.outputs.resource_group_name
+  resource_group_name = data.terraform_remote_state.platform.outputs.resource_group_name
   short_name          = "devops"
 
   email_receiver {
@@ -14,12 +14,12 @@ resource "azurerm_monitor_action_group" "main" {
 
 resource "azurerm_monitor_scheduled_query_rules_alert_v2" "failed_requests" {
   name                = "alert-failed-requests"
-  resource_group_name = data.terraform_remote_state.foundation.outputs.resource_group_name
+  resource_group_name = data.terraform_remote_state.platform.outputs.resource_group_name
   location            = var.location
 
   evaluation_frequency = var.alert_evaluation_frequency
   window_duration      = var.alert_window_duration
-  scopes               = [data.terraform_remote_state.foundation.outputs.log_analytics_workspace_id]
+  scopes               = [data.terraform_remote_state.platform.outputs.log_analytics_workspace_id]
 
   severity = 2
   enabled  = true

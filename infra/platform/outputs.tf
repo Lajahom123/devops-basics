@@ -4,17 +4,17 @@ output "resource_group_name" {
 }
 
 output "location" {
-  description = "Azure region used by the foundation."
+  description = "Azure region used by the platform."
   value       = azurerm_resource_group.platform.location
 }
 
 output "vnet_name" {
-  description = "Foundation VNet name."
+  description = "Platform VNet name."
   value       = module.network.vnet_name
 }
 
 output "vnet_id" {
-  description = "Foundation VNet ID."
+  description = "Platform VNet ID."
   value       = module.network.vnet_id
 }
 

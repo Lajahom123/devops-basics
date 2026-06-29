@@ -1,6 +1,6 @@
 resource "azurerm_container_app_job" "migration" {
   name                         = "job-${local.name_prefix}-migrations"
-  resource_group_name          = data.terraform_remote_state.foundation.outputs.resource_group_name
+  resource_group_name          = data.terraform_remote_state.platform.outputs.resource_group_name
   location                     = var.location
   container_app_environment_id = azurerm_container_app_environment.main.id
 
@@ -18,13 +18,13 @@ resource "azurerm_container_app_job" "migration" {
     type = "UserAssigned"
 
     identity_ids = [
-      data.terraform_remote_state.foundation.outputs.migration_job_identity_id
+      data.terraform_remote_state.platform.outputs.migration_job_identity_id
     ]
   }
 
   registry {
-    server   = data.terraform_remote_state.foundation.outputs.acr_login_server
-    identity = data.terraform_remote_state.foundation.outputs.migration_job_identity_id
+    server   = data.terraform_remote_state.platform.outputs.acr_login_server
+    identity = data.terraform_remote_state.platform.outputs.migration_job_identity_id
   }
 
   secret {
@@ -35,7 +35,7 @@ resource "azurerm_container_app_job" "migration" {
   template {
     container {
       name   = "flyway"
-      image  = "${data.terraform_remote_state.foundation.outputs.acr_login_server}/devops-tracker-migrations:bootstrap"
+      image  = "${data.terraform_remote_state.platform.outputs.acr_login_server}/devops-tracker-migrations:bootstrap"
       cpu    = 0.5
       memory = "1Gi"
 
@@ -67,5 +67,5 @@ resource "azurerm_container_app_job" "migration" {
 resource "azurerm_role_assignment" "migration_job_github_actions_deploy_rg_contributor" {
   scope                = azurerm_container_app_job.migration.id
   role_definition_name = "Contributor"
-  principal_id         = data.terraform_remote_state.foundation.outputs.github_actions_deploy_principal_id
+  principal_id         = data.terraform_remote_state.platform.outputs.github_actions_deploy_principal_id
 }

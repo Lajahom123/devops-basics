@@ -12,10 +12,10 @@ The staging slot is not a separate environment. It is a deployment slot inside `
 
 Terraform is split into two lifecycle roots:
 
-- `infra/foundation` manages persistent shared infrastructure: VNet/subnets, ACR, Key Vault, monitoring, private DNS zones, managed identities, GitHub OIDC identities, role assignments, and NAT Gateway.
+- `infra/platform` manages persistent shared infrastructure: VNet/subnets, ACR, Key Vault, monitoring, private DNS zones, managed identities, GitHub OIDC identities, role assignments, and NAT Gateway.
 - `infra/runtime` manages workload infrastructure: App Service, staging slot, PostgreSQL Flexible Server, Container Apps migration job, Front Door, private endpoints, GitHub self-hosted runner VM, workload diagnostics, alerts, and workload RBAC.
 
-Runtime reads foundation outputs through `terraform_remote_state`. This preserves network and identity continuity while allowing cost-bearing runtime resources to be recreated.
+Runtime reads platform outputs through `terraform_remote_state`. This preserves network and identity continuity while allowing cost-bearing runtime resources to be recreated.
 
 ## Architecture diagram
 

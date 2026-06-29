@@ -1,4 +1,4 @@
-# Foundation layer
+# Platform layer
 
 Persistent shared platform infrastructure for the `devops-tracker` Azure student environment.
 
@@ -16,7 +16,7 @@ See `DEFERRED.md` for the full inventory of previously removed resources, includ
 - Key Vault with RBAC authorization enabled, public network access enabled, soft delete enabled, and purge protection disabled for dev cleanup.
 - GitHub OIDC federation for the deploy managed identity and a custom ACR build/push role scoped to the registry.
 
-## Not in foundation yet
+## Not in platform yet
 
 Do not deploy cost-bearing or runtime resources from this root:
 
@@ -32,7 +32,7 @@ Do not deploy cost-bearing or runtime resources from this root:
 
 ## Operational notes
 
-Apply foundation before runtime. For the student subscription, add modules in small checkpoints and inspect every plan before applying.
+Apply platform before runtime. For the student subscription, add modules in small checkpoints and inspect every plan before applying.
 
 ```bash
 terraform init

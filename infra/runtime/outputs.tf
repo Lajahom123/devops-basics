@@ -1,5 +1,5 @@
 output "resource_group_name" {
-  value = data.terraform_remote_state.foundation.outputs.resource_group_name
+  value = data.terraform_remote_state.platform.outputs.resource_group_name
 }
 
 # Front door

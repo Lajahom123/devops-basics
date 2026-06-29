@@ -1,6 +1,6 @@
 resource "azurerm_cdn_frontdoor_profile" "main" {
   name                = "fd-${var.web_app_name}"
-  resource_group_name = data.terraform_remote_state.foundation.outputs.resource_group_name
+  resource_group_name = data.terraform_remote_state.platform.outputs.resource_group_name
   sku_name            = "Premium_AzureFrontDoor"
 
   tags = local.common_tags
@@ -76,7 +76,7 @@ resource "azurerm_cdn_frontdoor_route" "web_app" {
 
 resource "azurerm_cdn_frontdoor_firewall_policy" "main" {
   name                = "waf${replace(var.web_app_name, "-", "")}"
-  resource_group_name = data.terraform_remote_state.foundation.outputs.resource_group_name
+  resource_group_name = data.terraform_remote_state.platform.outputs.resource_group_name
   sku_name            = azurerm_cdn_frontdoor_profile.main.sku_name
 
   enabled = true

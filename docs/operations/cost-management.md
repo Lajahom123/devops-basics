@@ -4,7 +4,7 @@ The project is structured so foundational infrastructure can remain deployed whi
 
 ## Low or minimal cost resources
 
-Foundation resources are intended to stay deployed:
+Platform resources are intended to stay deployed:
 
 - resource group;
 - VNet;
@@ -87,7 +87,7 @@ cd infra/runtime
 terraform destroy
 ```
 
-Destroying runtime removes the App Service plan, Web App, PostgreSQL server, and other runtime resources while leaving foundation intact.
+Destroying runtime removes the App Service plan, Web App, PostgreSQL server, and other runtime resources while leaving platform intact.
 
 The staging slot shares the App Service plan. It does not create a separate plan, but it can add operational surface and logging volume.
 
@@ -95,7 +95,7 @@ The staging slot shares the App Service plan. It does not create a separate plan
 
 Front Door Premium and the self-hosted runner VM are runtime resources. The runner is intentionally persistent so private validation can run without recreating registration state, but it should still be reviewed during long idle periods.
 
-Runner outbound traffic uses the foundation NAT Gateway. NAT and its public IP remain deployed with foundation to preserve a stable outbound egress point.
+Runner outbound traffic uses the platform NAT Gateway. NAT and its public IP remain deployed with platform to preserve a stable outbound egress point.
 
 ## Container Apps migration cost behavior
 
@@ -109,7 +109,7 @@ Operational guidance:
 
 ## Monitoring cost behavior
 
-Log Analytics and Application Insights costs are driven mostly by ingestion and retention. They are foundation resources, but runtime diagnostics can drive their usage.
+Log Analytics and Application Insights costs are driven mostly by ingestion and retention. They are platform resources, but runtime diagnostics can drive their usage.
 
 Cost controls:
 
@@ -141,11 +141,11 @@ Short idle period:
 Long idle period:
 
 - destroy `infra/runtime`;
-- keep `infra/foundation`;
+- keep `infra/platform`;
 - keep GitHub OIDC and managed identities intact.
 
 Full teardown:
 
 - destroy runtime first;
-- only destroy foundation when intentionally retiring the project;
+- only destroy platform when intentionally retiring the project;
 - expect identity recreation to require PostgreSQL principal recreation and GitHub secret updates.

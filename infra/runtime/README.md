@@ -2,7 +2,7 @@
 
 Cost-bearing workload infrastructure for the `devops-tracker` `dev` environment in `swedencentral`.
 
-Runtime consumes shared foundation outputs through `terraform_remote_state`. It should not duplicate foundation naming or hardcode resource IDs.
+Runtime consumes shared platform outputs through `terraform_remote_state`. It should not duplicate platform naming or hardcode resource IDs.
 
 ## Workload resources
 
@@ -35,7 +35,7 @@ The runner VM is an Ubuntu VM with no public IP, a dedicated subnet, a managed i
 
 ## Operations
 
-Apply runtime after foundation:
+Apply runtime after platform:
 
 ```bash
 terraform init
@@ -50,4 +50,4 @@ Runtime can be destroyed to remove most active cost:
 terraform destroy
 ```
 
-Keep `infra/foundation` deployed unless the project is being retired.
+Keep `infra/platform` deployed unless the project is being retired.

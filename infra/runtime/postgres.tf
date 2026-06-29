@@ -1,6 +1,6 @@
 resource "azurerm_postgresql_flexible_server" "main" {
   name                = var.postgres_server_name
-  resource_group_name = data.terraform_remote_state.foundation.outputs.resource_group_name
+  resource_group_name = data.terraform_remote_state.platform.outputs.resource_group_name
   location            = var.location
 
   version = var.postgres_version
@@ -8,8 +8,8 @@ resource "azurerm_postgresql_flexible_server" "main" {
   administrator_login    = var.postgres_admin_username
   administrator_password = var.postgres_admin_password
 
-  delegated_subnet_id           = data.terraform_remote_state.foundation.outputs.postgres_subnet_id
-  private_dns_zone_id           = data.terraform_remote_state.foundation.outputs.postgres_private_dns_zone_id
+  delegated_subnet_id           = data.terraform_remote_state.platform.outputs.postgres_subnet_id
+  private_dns_zone_id           = data.terraform_remote_state.platform.outputs.postgres_private_dns_zone_id
   public_network_access_enabled = false
 
   sku_name   = var.postgres_sku_name
@@ -54,7 +54,7 @@ resource "azurerm_postgresql_flexible_server_configuration" "require_secure_tran
 
 resource "azurerm_postgresql_flexible_server_active_directory_administrator" "main" {
   server_name         = azurerm_postgresql_flexible_server.main.name
-  resource_group_name = data.terraform_remote_state.foundation.outputs.resource_group_name
+  resource_group_name = data.terraform_remote_state.platform.outputs.resource_group_name
   tenant_id           = data.azurerm_client_config.current.tenant_id
 
   object_id = data.azurerm_client_config.current.object_id

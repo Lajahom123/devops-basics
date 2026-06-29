@@ -1,14 +1,14 @@
 ff:
-	cd infra/foundation && terraform fmt -recursive
+	cd infra/platform && terraform fmt -recursive
 
 fv:
-	cd infra/foundation && terraform validate
+	cd infra/platform && terraform validate
 
 fp:
-	cd infra/foundation && terraform plan
+	cd infra/platform && terraform plan
 
 fa:
-	cd infra/foundation && terraform apply
+	cd infra/platform && terraform apply
 
 
 rf:

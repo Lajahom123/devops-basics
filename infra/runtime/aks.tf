@@ -1,6 +1,6 @@
 resource "azurerm_kubernetes_cluster" "main" {
   name                = var.aks_cluster_name
-  resource_group_name = data.terraform_remote_state.foundation.outputs.resource_group_name
+  resource_group_name = data.terraform_remote_state.platform.outputs.resource_group_name
   location            = var.location
   dns_prefix          = var.aks_dns_prefix
   tags                = local.common_tags
@@ -12,7 +12,7 @@ resource "azurerm_kubernetes_cluster" "main" {
     name           = "system"
     node_count     = var.aks_node_count
     vm_size        = var.aks_node_vm_size
-    vnet_subnet_id = data.terraform_remote_state.foundation.outputs.aks_subnet_id
+    vnet_subnet_id = data.terraform_remote_state.platform.outputs.aks_subnet_id
 
     upgrade_settings {
       max_surge = "10%"
@@ -38,18 +38,18 @@ resource "azurerm_kubernetes_cluster" "main" {
   }
 
   oms_agent {
-    log_analytics_workspace_id = data.terraform_remote_state.foundation.outputs.log_analytics_workspace_id
+    log_analytics_workspace_id = data.terraform_remote_state.platform.outputs.log_analytics_workspace_id
   }
 }
 
 resource "azurerm_role_assignment" "aks_acr_pull" {
-  scope                = data.terraform_remote_state.foundation.outputs.acr_id
+  scope                = data.terraform_remote_state.platform.outputs.acr_id
   role_definition_name = "AcrPull"
   principal_id         = azurerm_kubernetes_cluster.main.kubelet_identity[0].object_id
 }
 
 resource "azurerm_role_assignment" "aks_cluster_network_contributor_on_aks_subnet" {
-  scope                = data.terraform_remote_state.foundation.outputs.aks_subnet_id
+  scope                = data.terraform_remote_state.platform.outputs.aks_subnet_id
   role_definition_name = "Network Contributor"
   principal_id         = azurerm_kubernetes_cluster.main.identity[0].principal_id
 }

@@ -15,7 +15,7 @@ After bootstrap:
 
 ## Bootstrap command
 
-Use the actual ACR name from `infra/foundation` outputs or `terraform.tfvars`.
+Use the actual ACR name from `infra/platform` outputs or `terraform.tfvars`.
 
 ```bash
 ACR_NAME="devopstracker29193"

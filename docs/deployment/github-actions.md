@@ -9,7 +9,7 @@ The staging slot is not a separate environment. It is a deployment slot used to 
 
 ## Identity model
 
-The foundation layer creates the Entra applications, service principals, and federated credentials used by GitHub Actions. Repository secrets hold identifiers, not Azure passwords:
+The platform layer creates the Entra applications, service principals, and federated credentials used by GitHub Actions. Repository secrets hold identifiers, not Azure passwords:
 
 ```text
 AZURE_DEPLOY_CLIENT_ID

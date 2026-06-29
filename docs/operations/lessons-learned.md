@@ -1,13 +1,13 @@
 # Operations notes
 
-This project is small enough to reason about, but it already has production-inspired operational boundaries: private DNS, private endpoints, managed identities, slot swaps, and separate foundation/runtime lifecycles.
+This project is small enough to reason about, but it already has production-inspired operational boundaries: private DNS, private endpoints, managed identities, slot swaps, and separate platform/runtime lifecycles.
 
 ## Deploy
 
-Apply foundation first, then runtime:
+Apply platform first, then runtime:
 
 ```bash
-cd infra/foundation
+cd infra/platform
 terraform init
 terraform apply
 
@@ -39,7 +39,7 @@ Run this from the self-hosted runner:
 curl --fail --silent --show-error https://ifconfig.me
 ```
 
-The result should match the foundation `nat_public_ip` output. NAT Gateway only controls outbound egress for associated subnets; it does not provide inbound access or policy enforcement.
+The result should match the platform `nat_public_ip` output. NAT Gateway only controls outbound egress for associated subnets; it does not provide inbound access or policy enforcement.
 
 ## Common troubleshooting points
 
@@ -50,7 +50,7 @@ The result should match the foundation `nat_public_ip` output. NAT Gateway only 
 - Runner labels: private validation jobs require the self-hosted VNet labels to land on the runner.
 - PostgreSQL: private networking failures can look like application or authentication failures.
 - Slot swaps: staging must contain a meaningful release candidate before swap, and rollback depends on what remains in staging.
-- Terraform lifecycle: destroy runtime for cost control; do not destroy foundation during routine cleanup.
+- Terraform lifecycle: destroy runtime for cost control; do not destroy platform during routine cleanup.
 
 ## Database administration
 

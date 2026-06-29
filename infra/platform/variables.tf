@@ -35,7 +35,7 @@ variable "github_branch" {
 }
 
 variable "tags" {
-  description = "Additional tags to merge onto foundation resources."
+  description = "Additional tags to merge onto platform resources."
   type        = map(string)
   default     = {}
 }

@@ -7,7 +7,7 @@ data "azurerm_monitor_diagnostic_categories" "web_app" {
 resource "azurerm_monitor_diagnostic_setting" "web_app" {
   name                       = "diag-${azurerm_linux_web_app.main.name}"
   target_resource_id         = azurerm_linux_web_app.main.id
-  log_analytics_workspace_id = data.terraform_remote_state.foundation.outputs.log_analytics_workspace_id
+  log_analytics_workspace_id = data.terraform_remote_state.platform.outputs.log_analytics_workspace_id
 
   dynamic "enabled_log" {
     for_each = toset(data.azurerm_monitor_diagnostic_categories.web_app.log_category_types)
@@ -36,7 +36,7 @@ data "azurerm_monitor_diagnostic_categories" "container_app_environment" {
 resource "azurerm_monitor_diagnostic_setting" "container_app_environment" {
   name                       = "diag-${azurerm_container_app_environment.main.name}"
   target_resource_id         = azurerm_container_app_environment.main.id
-  log_analytics_workspace_id = data.terraform_remote_state.foundation.outputs.log_analytics_workspace_id
+  log_analytics_workspace_id = data.terraform_remote_state.platform.outputs.log_analytics_workspace_id
 
   dynamic "enabled_log" {
     for_each = toset(data.azurerm_monitor_diagnostic_categories.container_app_environment.log_category_types)
@@ -65,7 +65,7 @@ data "azurerm_monitor_diagnostic_categories" "postgresql" {
 resource "azurerm_monitor_diagnostic_setting" "postgresql" {
   name                       = "diag-${azurerm_postgresql_flexible_server.main.name}"
   target_resource_id         = azurerm_postgresql_flexible_server.main.id
-  log_analytics_workspace_id = data.terraform_remote_state.foundation.outputs.log_analytics_workspace_id
+  log_analytics_workspace_id = data.terraform_remote_state.platform.outputs.log_analytics_workspace_id
 
   dynamic "enabled_log" {
     for_each = toset(data.azurerm_monitor_diagnostic_categories.postgresql.log_category_types)
@@ -88,13 +88,13 @@ resource "azurerm_monitor_diagnostic_setting" "postgresql" {
 # Key Vault diagnostics
 
 data "azurerm_monitor_diagnostic_categories" "key_vault" {
-  resource_id = data.terraform_remote_state.foundation.outputs.key_vault_id
+  resource_id = data.terraform_remote_state.platform.outputs.key_vault_id
 }
 
 resource "azurerm_monitor_diagnostic_setting" "key_vault" {
-  name                       = "diag-${data.terraform_remote_state.foundation.outputs.key_vault_name}"
-  target_resource_id         = data.terraform_remote_state.foundation.outputs.key_vault_id
-  log_analytics_workspace_id = data.terraform_remote_state.foundation.outputs.log_analytics_workspace_id
+  name                       = "diag-${data.terraform_remote_state.platform.outputs.key_vault_name}"
+  target_resource_id         = data.terraform_remote_state.platform.outputs.key_vault_id
+  log_analytics_workspace_id = data.terraform_remote_state.platform.outputs.log_analytics_workspace_id
 
   dynamic "enabled_log" {
     for_each = toset(data.azurerm_monitor_diagnostic_categories.key_vault.log_category_types)

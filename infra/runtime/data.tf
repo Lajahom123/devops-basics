@@ -7,13 +7,13 @@ locals {
 
 data "azurerm_client_config" "current" {}
 
-data "terraform_remote_state" "foundation" {
+data "terraform_remote_state" "platform" {
   backend = "azurerm"
 
   config = {
     resource_group_name  = "rg-devops-tracker-dev"
     storage_account_name = "stdevopstrackerswedenct"
     container_name       = "full-infra"
-    key                  = "foundation.tfstate"
+    key                  = "platform.tfstate"
   }
 }

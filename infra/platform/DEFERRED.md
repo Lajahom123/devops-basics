@@ -1,6 +1,6 @@
-# Deferred Foundation Inventory
+# Deferred Platform Inventory
 
-The foundation root is intentionally network-only for the first student-environment apply. These items existed in the previous foundation configuration and are tracked here so they are not forgotten.
+The platform root is intentionally network-only for the first student-environment apply. These items existed in the previous platform configuration and are tracked here so they are not forgotten.
 
 ## Module-ready platform pieces
 
@@ -30,11 +30,11 @@ The foundation root is intentionally network-only for the first student-environm
   - Previous resources: deploy app, deploy service principal, branch federated credential, dev-operator app, dev-operator service principal, environment federated credential.
   - Requires the `azuread` provider in whichever live root calls it.
 
-## Intentionally not in active foundation
+## Intentionally not in active platform
 
 - NAT Gateway: `infra/modules/nat-gateway`
   - Previous resources: NAT public IP, NAT Gateway, public IP association, subnet associations for GitHub runner and AKS nodes.
-  - Keep out of foundation for now because it has a standing cost.
+  - Keep out of platform for now because it has a standing cost.
   - Add later from a lab or runtime-specific root if stable outbound IP is required.
 - Bastion: `infra/modules/bastion`
   - Previous resources: Bastion host and public IP.
@@ -44,9 +44,9 @@ The foundation root is intentionally network-only for the first student-environm
   - Previous assignments included ACR pull for workload identities, Key Vault roles, GitHub reader, ACR build executor, and a custom dev stop/start operator role.
   - Add these next to the resources and principals they connect, after those modules exist in a live root.
 
-## Old runtime-shaped items already outside foundation
+## Old runtime-shaped items already outside platform
 
-Keep these out of foundation and attach them to `runtime-aks`, another runtime root, or a lab when they are intentionally reintroduced:
+Keep these out of platform and attach them to `runtime-aks`, another runtime root, or a lab when they are intentionally reintroduced:
 
 - AKS
 - PostgreSQL Flexible Server

@@ -26,7 +26,7 @@ module "postgres" {
   maintenance_start_minute     = var.postgres_maintenance_start_minute
 
   delegated_subnet_id = local.postgres_subnet_id
-  private_dns_zone_id = local.foundation.postgres_private_dns_zone_id
+  private_dns_zone_id = local.platform.postgres_private_dns_zone_id
   database_name       = var.postgres_database_name
   tags                = local.tags
 

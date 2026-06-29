@@ -3,7 +3,7 @@ locals {
   resource_group_name = "rg-${var.project}-${var.environment}-platform"
   vnet_name           = "vnet-${var.project}-${var.environment}"
 
-  unique_suffix         = random_string.foundation_suffix.result
+  unique_suffix         = random_string.platform_suffix.result
   acr_name              = substr(lower(replace("${var.project}${var.environment}${local.unique_suffix}", "/[^0-9A-Za-z]/", "")), 0, 50)
   githib_oidc_name      = "github-${var.github_branch}"
   github_deploy_subject = "repo:${var.github_owner}/${var.github_repo}:ref:refs/heads/${var.github_branch}"

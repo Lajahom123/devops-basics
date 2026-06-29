@@ -1,5 +1,5 @@
 variable "postgres_server_name" {
-  description = "PostgreSQL Flexible Server name. Defaults to a name derived from the foundation suffix."
+  description = "PostgreSQL Flexible Server name. Defaults to a name derived from the platform suffix."
   type        = string
   default     = null
 }
@@ -101,13 +101,13 @@ variable "postgres_app_entra_principal_name" {
 }
 
 variable "aks_cluster_name" {
-  description = "Name of the AKS cluster. Defaults to a name derived from the foundation suffix."
+  description = "Name of the AKS cluster. Defaults to a name derived from the platform suffix."
   type        = string
   default     = null
 }
 
 variable "aks_dns_prefix" {
-  description = "DNS prefix for the AKS cluster. Defaults to a name derived from the foundation suffix."
+  description = "DNS prefix for the AKS cluster. Defaults to a name derived from the platform suffix."
   type        = string
   default     = null
 }

@@ -1,7 +1,7 @@
 resource "azurerm_linux_virtual_machine" "github_runner" {
   name                = "vm-github-runner-dev"
   location            = var.location
-  resource_group_name = data.terraform_remote_state.foundation.outputs.resource_group_name
+  resource_group_name = data.terraform_remote_state.platform.outputs.resource_group_name
   size                = "Standard_B1s"
   admin_username      = var.github_runner_admin_username
 
@@ -15,7 +15,7 @@ resource "azurerm_linux_virtual_machine" "github_runner" {
     type = "UserAssigned"
 
     identity_ids = [
-      data.terraform_remote_state.foundation.outputs.github_runner_identity_id
+      data.terraform_remote_state.platform.outputs.github_runner_identity_id
     ]
   }
 
@@ -43,12 +43,12 @@ resource "azurerm_linux_virtual_machine" "github_runner" {
 resource "azurerm_network_interface" "github_runner" {
   name                = "nic-github-runner-dev"
   location            = var.location
-  resource_group_name = data.terraform_remote_state.foundation.outputs.resource_group_name
+  resource_group_name = data.terraform_remote_state.platform.outputs.resource_group_name
   tags                = local.common_tags
 
   ip_configuration {
     name                          = "internal"
-    subnet_id                     = data.terraform_remote_state.foundation.outputs.github_runner_subnet_id
+    subnet_id                     = data.terraform_remote_state.platform.outputs.github_runner_subnet_id
     private_ip_address_allocation = "Dynamic"
   }
 }
@@ -63,7 +63,7 @@ resource "azurerm_virtual_machine_extension" "github_runner_install" {
 
   protected_settings = jsonencode({
     script = base64encode(templatefile("${path.module}/../../scripts/install-github-runner.sh", {
-      key_vault_name = data.terraform_remote_state.foundation.outputs.key_vault_name
+      key_vault_name = data.terraform_remote_state.platform.outputs.key_vault_name
     }))
   })
 }

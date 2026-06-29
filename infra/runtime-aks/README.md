@@ -4,32 +4,32 @@ This Terraform root will own the runtime infrastructure for PostgreSQL, AKS,
 and Kubernetes-related resources in `swedencentral`.
 
 The root is intentionally empty for the first checkpoint. It configures backend
-state, providers, and foundation remote state only, so `terraform plan` should
+state, providers, and platform remote state only, so `terraform plan` should
 show no resources to create.
 
 ## State
 
-Runtime AKS uses a separate state file from foundation:
+Runtime AKS uses a separate state file from platform:
 
 ```text
 runtime-aks.tfstate
 ```
 
 The state is stored in the same Terraform state storage account and container as
-the foundation state, but with its own key.
+the platform state, but with its own key.
 
-## Foundation dependency
+## Platform dependency
 
-This root depends on the foundation remote state:
+This root depends on the platform remote state:
 
 ```text
-foundation.tfstate
+platform.tfstate
 ```
 
-Foundation must be applied before this root. Shared platform values such as the
+Platform must be applied before this root. Shared platform values such as the
 VNet, AKS and PostgreSQL subnet IDs, ACR, Key Vault, Log Analytics workspace, and
-managed identities are consumed through `data.terraform_remote_state.foundation`.
-Do not duplicate those values as runtime variables or recreate foundation-owned
+managed identities are consumed through `data.terraform_remote_state.platform`.
+Do not duplicate those values as runtime variables or recreate platform-owned
 resources here.
 
 Runtime AKS creates its own runtime resource group:
@@ -38,7 +38,7 @@ Runtime AKS creates its own runtime resource group:
 rg-devops-tracker-dev-runtime
 ```
 
-Cost-bearing runtime resources such as PostgreSQL are created there. Foundation
+Cost-bearing runtime resources such as PostgreSQL are created there. Platform
 continues to own the platform resource group, VNet, delegated subnets, private
 DNS zones, shared identities, and monitoring primitives.
 
@@ -75,7 +75,7 @@ The script uses Terraform outputs for:
 - database name: `postgres_database_name`
 - target Entra principal name: `postgres_app_entra_principal_name`
 
-By default the application principal is the foundation AKS workload identity
+By default the application principal is the platform AKS workload identity
 name. Override with `POSTGRES_APP_PRINCIPAL_NAME` if a different application
 identity should be mapped.
 

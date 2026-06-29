@@ -1,6 +1,6 @@
 resource "azurerm_service_plan" "main" {
   name                = "plan-${local.name_prefix}"
-  resource_group_name = data.terraform_remote_state.foundation.outputs.resource_group_name
+  resource_group_name = data.terraform_remote_state.platform.outputs.resource_group_name
   location            = var.location
   tags                = local.common_tags
 
@@ -10,7 +10,7 @@ resource "azurerm_service_plan" "main" {
 
 resource "azurerm_monitor_autoscale_setting" "app_service_plan" {
   name                = "autoscale-${azurerm_service_plan.main.name}"
-  resource_group_name = data.terraform_remote_state.foundation.outputs.resource_group_name
+  resource_group_name = data.terraform_remote_state.platform.outputs.resource_group_name
   location            = var.location
   target_resource_id  = azurerm_service_plan.main.id
   enabled             = true

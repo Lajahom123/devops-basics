@@ -1,12 +1,12 @@
 # Infrastructure lifecycle
 
-Terraform is split by lifecycle rather than by Azure service type. Foundation keeps persistent shared infrastructure stable; runtime contains workload resources that carry most active cost.
+Terraform is split by lifecycle rather than by Azure service type. Platform keeps persistent shared infrastructure stable; runtime contains workload resources that carry most active cost.
 
 ## Lifecycle layers
 
 ```mermaid
 flowchart TD
-  subgraph Foundation["Foundation: persistent shared infrastructure"]
+  subgraph Platform["Platform: persistent shared infrastructure"]
     VNET["VNet and subnets"]
     ACR["ACR"]
     KV["Key Vault"]
@@ -30,7 +30,7 @@ flowchart TD
     ALERTS["Diagnostics + alerts"]
   end
 
-  Runtime -->|"terraform_remote_state"| Foundation
+  Runtime -->|"terraform_remote_state"| Platform
   FD -->|"Private Link"| APP
   PE --> APP
   PE --> SLOT
@@ -41,9 +41,9 @@ flowchart TD
   RUNNER --> NAT
 ```
 
-## Foundation responsibilities
+## Platform responsibilities
 
-`infra/foundation` owns:
+`infra/platform` owns:
 
 - existing resource group lookup;
 - VNet and subnets for App Service egress, PostgreSQL, admin access, Container Apps, private endpoints, and GitHub runner;
@@ -68,11 +68,11 @@ Do not destroy this layer during normal cleanup. Recreating it can change identi
 - Ubuntu self-hosted GitHub runner VM with no public IP;
 - workload diagnostic settings, alerting, and RBAC.
 
-Runtime can be destroyed to remove most active cost while preserving foundation.
+Runtime can be destroyed to remove most active cost while preserving platform.
 
 ## State separation
 
-Foundation and runtime use separate Terraform roots and separate state files. Runtime reads foundation outputs through `terraform_remote_state`; it should not hardcode foundation resource IDs.
+Platform and runtime use separate Terraform roots and separate state files. Runtime reads platform outputs through `terraform_remote_state`; it should not hardcode platform resource IDs.
 
 This split keeps routine workload teardown from removing deployment identity, managed identities, ACR, Key Vault, DNS, NAT, or the VNet.
 
@@ -81,7 +81,7 @@ This split keeps routine workload teardown from removing deployment identity, ma
 Initial apply order:
 
 ```bash
-cd infra/foundation
+cd infra/platform
 terraform init
 terraform apply
 
@@ -94,6 +94,6 @@ Cost control:
 
 - stop PostgreSQL and App Service for short idle periods;
 - destroy `infra/runtime` for longer idle periods;
-- keep `infra/foundation` unless retiring the project.
+- keep `infra/platform` unless retiring the project.
 
 The next planned platform phase is AKS. The current split is intended to remain useful because networking, identity, monitoring, and private ingress foundations can be reused or extended.

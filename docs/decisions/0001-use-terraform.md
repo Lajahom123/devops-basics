@@ -6,7 +6,7 @@ The project needs repeatable Azure infrastructure for App Service, ACR, PostgreS
 
 # Decision
 
-Use Terraform for Azure infrastructure as code. Keep persistent foundation resources in `infra/foundation` and cost-bearing application resources in `infra/runtime`.
+Use Terraform for Azure infrastructure as code. Keep persistent platform resources in `infra/platform` and cost-bearing application resources in `infra/runtime`.
 
 # Consequences
 

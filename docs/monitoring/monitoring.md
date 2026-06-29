@@ -1,6 +1,6 @@
 # Monitoring
 
-The project uses Azure Monitor with a Log Analytics Workspace as the central query and storage backend. Shared monitoring resources live in `infra/foundation`; workload diagnostic settings and alerts live in `infra/runtime`.
+The project uses Azure Monitor with a Log Analytics Workspace as the central query and storage backend. Shared monitoring resources live in `infra/platform`; workload diagnostic settings and alerts live in `infra/runtime`.
 
 ## Components
 

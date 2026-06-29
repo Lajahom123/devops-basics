@@ -4,7 +4,7 @@ output "resource_group_name" {
 }
 
 output "platform_resource_group_name" {
-  description = "Foundation platform resource group name."
+  description = "Platform platform resource group name."
   value       = local.platform_resource_group_name
 }
 

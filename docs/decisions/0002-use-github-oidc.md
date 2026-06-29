@@ -6,7 +6,7 @@ The deployment workflow needs Azure access to push images, update App Service, a
 
 # Decision
 
-Use GitHub Actions OIDC federation with Microsoft Entra ID. Manage the Entra application, service principal, and federated credential in `infra/foundation`.
+Use GitHub Actions OIDC federation with Microsoft Entra ID. Manage the Entra application, service principal, and federated credential in `infra/platform`.
 
 # Consequences
 

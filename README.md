@@ -10,10 +10,10 @@ The Azure architecture uses Front Door as the public entry point and Azure App S
 
 Terraform is split by lifecycle:
 
-- `infra/foundation` owns shared, persistent infrastructure: networking foundations, VNet/subnets, ACR, Key Vault, Log Analytics/Application Insights, private DNS, identities, role assignments, and NAT Gateway.
+- `infra/platform` owns shared, persistent infrastructure: networking foundations, VNet/subnets, ACR, Key Vault, Log Analytics/Application Insights, private DNS, identities, role assignments, and NAT Gateway.
 - `infra/runtime` owns workload resources: App Service, staging slot, PostgreSQL Flexible Server, Front Door, private endpoints, Container Apps migration job, GitHub self-hosted runner VM, diagnostics, alerts, and workload RBAC.
 
-Runtime consumes foundation outputs through `terraform_remote_state`. This keeps low/no cost identity and network resources stable while allowing cost-bearing workload resources to be recreated.
+Runtime consumes platform outputs through `terraform_remote_state`. This keeps low/no cost identity and network resources stable while allowing cost-bearing workload resources to be recreated.
 
 ## Current implemented features
 
