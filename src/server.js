@@ -1,6 +1,7 @@
 const {
   initApplicationInsights,
 } = require("./telemetry/applicationInsights");
+// make sure to initialize application insights before any other code
 initApplicationInsights();
 
 const crypto = require("crypto");
