@@ -93,10 +93,9 @@ output "application_insights_name" {
   value       = module.monitoring.application_insights_name
 }
 
-output "application_insights_connection_string" {
-  description = "Application Insights connection string."
-  value       = module.monitoring.application_insights_connection_string
-  sensitive   = true
+output "appinsights_kv_secret_name" {
+  description = "Application Insights name."
+  value       = azurerm_key_vault_secret.appinsights_connection_string.name
 }
 
 output "aks_subnet_id" {
