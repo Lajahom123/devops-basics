@@ -42,7 +42,7 @@ readinessProbe:
 
 livenessProbe:
   httpGet:
-    path: /health-broken
+    path: /health
     port: http
   initialDelaySeconds: 30
   periodSeconds: 10
