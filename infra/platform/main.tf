@@ -38,10 +38,13 @@ module "private_dns" {
 module "monitoring" {
   source = "../modules/monitoring"
 
-  name_prefix         = local.name_prefix
-  resource_group_name = azurerm_resource_group.platform.name
-  location            = azurerm_resource_group.platform.location
-  tags                = local.common_tags
+  name_prefix                = local.name_prefix
+  resource_group_name        = azurerm_resource_group.platform.name
+  location                   = azurerm_resource_group.platform.location
+  tags                       = local.common_tags
+  owner_email                = var.owner_email
+  alert_evaluation_frequency = var.alert_evaluation_frequency
+  alert_window_duration      = var.alert_window_duration
 }
 
 module "acr" {
