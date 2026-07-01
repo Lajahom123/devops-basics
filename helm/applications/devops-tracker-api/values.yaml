@@ -78,3 +78,13 @@ serviceAccount:
 
 rbac:
   create: true
+
+keyVault:
+  enabled: false
+  name: ""
+  tenantId: ""
+  clientId: ""
+  mountPath: "/mnt/secrets-store"
+  # Each entry may include an optional envVarName field. When set, the secret is
+  # synced into a Kubernetes Secret and injected into the container as that env var.
+  secrets: []

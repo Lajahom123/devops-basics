@@ -32,6 +32,15 @@ spec:
 
     spec:
       serviceAccountName: {{ include "devops-tracker-api.serviceAccountName" . }}
+      {{- if .Values.keyVault.enabled }}
+      volumes:
+        - name: secrets-store
+          csi:
+            driver: secrets-store.csi.k8s.io
+            readOnly: true
+            volumeAttributes:
+              secretProviderClass: {{ include "devops-tracker-api.fullname" . }}-keyvault
+      {{- end }}
       containers:
         - name: {{ .Values.containerName }}
           image: {{ include "devops-tracker-api.image" . }}
@@ -49,3 +58,26 @@ spec:
 
           livenessProbe:
             {{- toYaml .Values.livenessProbe | nindent 12 }}
+
+          {{- $envSecrets := list }}
+          {{- range .Values.keyVault.secrets }}
+            {{- if .envVarName }}
+              {{- $envSecrets = append $envSecrets . }}
+            {{- end }}
+          {{- end }}
+          {{- if $envSecrets }}
+          env:
+            {{- range $envSecrets }}
+            - name: {{ .envVarName }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "devops-tracker-api.fullname" $ }}-secrets
+                  key: {{ .envVarName }}
+            {{- end }}
+          {{- end }}
+          {{- if .Values.keyVault.enabled }}
+          volumeMounts:
+            - name: secrets-store
+              mountPath: {{ .Values.keyVault.mountPath }}
+              readOnly: true
+          {{- end }}

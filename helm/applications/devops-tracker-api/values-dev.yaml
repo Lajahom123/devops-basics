@@ -16,3 +16,13 @@ podLabels:
 serviceAccount:
   annotations:
     azure.workload.identity/client-id: "540fdb5f-20fa-42ab-9e1c-725f792f593c"
+
+keyVault:
+  enabled: true
+  name: "kv-devops-tracker-dev-vs"
+  tenantId: "75f05cdc-77de-4924-9d34-a77cde302855"
+  clientId: "540fdb5f-20fa-42ab-9e1c-725f792f593c"
+  secrets:
+    - objectName: "applicationinsights-connection-string"
+      objectType: "secret"
+      objectAlias: "applicationinsights-connection-string"
