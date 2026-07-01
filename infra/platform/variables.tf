@@ -56,3 +56,39 @@ variable "alert_window_duration" {
   type        = string
   default     = "PT15M"
 }
+
+variable "kubernetes_namespace" {
+  description = "Kubernetes namespace monitored by Container Insights alerts."
+  type        = string
+  default     = "devops-tracker"
+}
+
+variable "enable_high_latency_alert" {
+  description = "Create the high request latency scheduled query alert."
+  type        = bool
+  default     = true
+}
+
+variable "high_latency_threshold_ms" {
+  description = "Average request duration threshold in milliseconds."
+  type        = number
+  default     = 1000
+}
+
+variable "enable_pod_restart_alert" {
+  description = "Create the pod/container restart scheduled query alert."
+  type        = bool
+  default     = true
+}
+
+variable "pod_restart_threshold" {
+  description = "Total container restart count threshold within the alert window."
+  type        = number
+  default     = 0
+}
+
+variable "enable_failed_pod_alert" {
+  description = "Create the failed Kubernetes pod scheduled query alert."
+  type        = bool
+  default     = true
+}

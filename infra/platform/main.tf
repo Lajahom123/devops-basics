@@ -45,6 +45,12 @@ module "monitoring" {
   owner_email                = var.owner_email
   alert_evaluation_frequency = var.alert_evaluation_frequency
   alert_window_duration      = var.alert_window_duration
+  kubernetes_namespace       = var.kubernetes_namespace
+  enable_high_latency_alert  = var.enable_high_latency_alert
+  high_latency_threshold_ms  = var.high_latency_threshold_ms
+  enable_pod_restart_alert   = var.enable_pod_restart_alert
+  pod_restart_threshold      = var.pod_restart_threshold
+  enable_failed_pod_alert    = var.enable_failed_pod_alert
 }
 
 module "acr" {
