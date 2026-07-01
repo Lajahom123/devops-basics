@@ -1,3 +1,8 @@
+const {
+  initApplicationInsights,
+} = require("./telemetry/applicationInsights");
+initApplicationInsights();
+
 const crypto = require("crypto");
 const express = require("express");
 const {
@@ -8,9 +13,6 @@ const {
   initDatabase,
   listDeployments,
 } = require("./database");
-const {
-  initApplicationInsights,
-} = require("./telemetry/applicationInsights");
 
 const PORT = Number(process.env.PORT) || 3000;
 const APP_VERSION = process.env.APP_VERSION || "0.0.0";
@@ -116,8 +118,6 @@ app.use((err, _req, res, _next) => {
 });
 
 async function start() {
-  initApplicationInsights();
-
   app.listen(PORT, "0.0.0.0", () => {
     console.log(`devops-tracker listening on port ${PORT} (${NODE_ENV})`);
   });

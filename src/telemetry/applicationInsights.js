@@ -36,10 +36,14 @@ function initApplicationInsights(
       .setAutoCollectConsole(true)
       .start();
 
+    process.on("SIGTERM", () => {
+      appInsights.defaultClient?.flush({ callback: () => process.exit(0) });
+    });
+
     console.log("Application Insights telemetry initialized.");
   } catch (error) {
     console.warn(
-      "Application Insights telemetry initialization failed. Continuing without telemetry."
+      `Application Insights telemetry initialization failed (${error.message}). Continuing without telemetry.`
     );
   }
 }
