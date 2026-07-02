@@ -1,0 +1,115 @@
+{
+  "version": "Notebook/1.0",
+  "items": [
+    {
+      "type": 3,
+      "content": {
+        "version": "KqlItem/1.0",
+        "query": "requests\n| where timestamp > ago(1h)\n| summarize Requests = count() by bin(timestamp, 5m)\n| order by timestamp asc",
+        "size": 0,
+        "timeContext": {
+          "durationMs": 3600000
+        },
+        "queryType": 0,
+        "resourceType": "microsoft.insights/components",
+        "crossComponentResources": [
+          "/subscriptions/2edaf6d9-c440-4779-afea-d9342c974029/resourceGroups/rg-devops-tracker-dev-platform/providers/Microsoft.Insights/components/appi-devops-tracker-dev"
+        ],
+        "visualization": "linechart"
+      },
+      "name": "Number of requests"
+    },
+    {
+      "type": 3,
+      "content": {
+        "version": "KqlItem/1.0",
+        "query": "requests\n| where timestamp > ago(1h)\n| where success == false\n| summarize FailedRequests = count() by bin(timestamp, 5m)\n| order by timestamp asc",
+        "size": 0,
+        "timeContext": {
+          "durationMs": 86400000
+        },
+        "queryType": 0,
+        "resourceType": "microsoft.insights/components",
+        "crossComponentResources": [
+          "/subscriptions/2edaf6d9-c440-4779-afea-d9342c974029/resourceGroups/rg-devops-tracker-dev-platform/providers/Microsoft.Insights/components/appi-devops-tracker-dev"
+        ],
+        "visualization": "linechart"
+      },
+      "name": "Failed request"
+    },
+    {
+      "type": 3,
+      "content": {
+        "version": "KqlItem/1.0",
+        "query": "requests\n| where timestamp > ago(1h)\n| summarize AvgDurationMs = avg(duration) by bin(timestamp, 5m)\n| order by timestamp asc",
+        "size": 0,
+        "timeContext": {
+          "durationMs": 86400000
+        },
+        "queryType": 0,
+        "resourceType": "microsoft.insights/components",
+        "crossComponentResources": [
+          "/subscriptions/2edaf6d9-c440-4779-afea-d9342c974029/resourceGroups/rg-devops-tracker-dev-platform/providers/Microsoft.Insights/components/appi-devops-tracker-dev"
+        ],
+        "visualization": "linechart"
+      },
+      "name": "Average request duration"
+    },
+    {
+      "type": 3,
+      "content": {
+        "version": "KqlItem/1.0",
+        "query": "KubePodInventory\n| where TimeGenerated > ago(1h)\n| where Namespace == \"devops-tracker\"\n| summarize Restarts = max(ContainerRestartCount) by Name\n| order by Restarts desc",
+        "size": 0,
+        "timeContext": {
+          "durationMs": 86400000
+        },
+        "queryType": 0,
+        "resourceType": "microsoft.operationalinsights/workspaces",
+        "crossComponentResources": [
+          "/subscriptions/2edaf6d9-c440-4779-afea-d9342c974029/resourceGroups/rg-devops-tracker-dev-platform/providers/Microsoft.OperationalInsights/workspaces/log-devops-tracker-dev"
+        ],
+        "visualization": "table"
+      },
+      "name": "Pod restarts"
+    },
+    {
+      "type": 3,
+      "content": {
+        "version": "KqlItem/1.0",
+        "query": "KubePodInventory\n| where TimeGenerated > ago(1h)\n| where Namespace == \"devops-tracker\"\n| where PodStatus in (\"Failed\", \"Unknown\")\n| summarize FailedPods = count() by PodStatus",
+        "size": 0,
+        "timeContext": {
+          "durationMs": 86400000
+        },
+        "queryType": 0,
+        "resourceType": "microsoft.operationalinsights/workspaces",
+        "crossComponentResources": [
+          "/subscriptions/2edaf6d9-c440-4779-afea-d9342c974029/resourceGroups/rg-devops-tracker-dev-platform/providers/Microsoft.OperationalInsights/workspaces/log-devops-tracker-dev"
+        ]
+      },
+      "name": "Failed and Unknown pod status reports"
+    },
+    {
+      "type": 3,
+      "content": {
+        "version": "KqlItem/1.0",
+        "query": "InsightsMetrics\n| where TimeGenerated > ago(1h)\n| where Namespace == \"container.azm.ms/disk\"\n| where Name == \"used_percent\"\n| summarize AvgUsed = avg(Val) by bin(TimeGenerated, 5m)\n| order by TimeGenerated asc",
+        "size": 0,
+        "timeContext": {
+          "durationMs": 86400000
+        },
+        "queryType": 0,
+        "resourceType": "microsoft.operationalinsights/workspaces",
+        "crossComponentResources": [
+          "/subscriptions/2edaf6d9-c440-4779-afea-d9342c974029/resourceGroups/rg-devops-tracker-dev-platform/providers/Microsoft.OperationalInsights/workspaces/log-devops-tracker-dev"
+        ]
+      },
+      "name": "Average disk usage"
+    }
+  ],
+  "fallbackResourceIds": [
+    "Azure Monitor"
+  ],
+  "$schema": "https://github.com/Microsoft/Application-Insights-Workbooks/blob/master/schema/workbook.json"
+}
