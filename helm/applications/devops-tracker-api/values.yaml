@@ -62,7 +62,7 @@ ingress:
   path: /
   pathType: Prefix
   servicePort: 80
-  clusterIssuer: letsencrypt-staging
+  clusterIssuer: letsencrypt-production
   tls:
     enabled: true
     secretName: api-devopstracker-com-tls
@@ -89,6 +89,4 @@ keyVault:
   tenantId: ""
   clientId: ""
   mountPath: "/mnt/secrets-store"
-  # Each entry may include an optional envVarName field. When set, the secret is
-  # synced into a Kubernetes Secret and injected into the container as that env var.
   secrets: []

@@ -11,9 +11,9 @@ cert-manager:
     replicaCount: 2
 
 clusterIssuer:
-  staging:
-    name: letsencrypt-staging
-    enabled: true
-    email: cert-manager@example.com
-    ingressClass: nginx
-    privateKeySecretName: letsencrypt-staging-account-key
+  name: letsencrypt-production
+  enabled: true
+  server: https://acme-v02.api.letsencrypt.org/directory
+  email: cert-manager@example.com
+  ingressClass: nginx
+  privateKeySecretName: letsencrypt-production-account-key

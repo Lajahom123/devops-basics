@@ -1,3 +1,2 @@
 clusterIssuer:
-  staging:
-    email: cert-manager@devopstracker.com
+  email: cert-manager@devopstracker.com
