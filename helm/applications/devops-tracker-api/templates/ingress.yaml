@@ -5,10 +5,13 @@ kind: Ingress
 metadata:
   name: {{ include "devops-tracker-api.fullname" . }}
   namespace: {{ include "devops-tracker-api.namespace" . }}
-  {{- with .Values.ingress.clusterIssuer }}
   annotations:
+    {{- with .Values.ingress.clusterIssuer }}
     cert-manager.io/cluster-issuer: {{ . | quote }}
-  {{- end }}
+    {{- end }}
+    {{- if and .Values.ingress.sourceWhitelist.enabled .Values.ingress.sourceWhitelist.ranges }}
+    nginx.ingress.kubernetes.io/whitelist-source-range: {{ join "," .Values.ingress.sourceWhitelist.ranges | quote }}
+    {{- end }}
 
 spec:
   ingressClassName: {{ .Values.ingress.className }}

@@ -9,6 +9,8 @@ ingress:
   enabled: true
   className: nginx
   host: api.devopstracker.com
+  sourceWhitelist:
+    enabled: true
 
 podLabels:
   azure.workload.identity/use: "true"
