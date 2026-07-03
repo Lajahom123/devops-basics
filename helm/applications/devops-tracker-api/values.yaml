@@ -62,6 +62,10 @@ ingress:
   path: /
   pathType: Prefix
   servicePort: 80
+  clusterIssuer: letsencrypt-staging
+  tls:
+    enabled: true
+    secretName: api-devopstracker-com-tls
 
 hpa:
   enabled: true

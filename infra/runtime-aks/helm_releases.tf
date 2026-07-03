@@ -22,9 +22,7 @@ resource "helm_release" "cert_manager" {
   namespace        = "cert-manager"
   create_namespace = true
 
-  repository = "https://charts.jetstack.io"
-  chart      = "cert-manager"
-  version    = "v1.20.3"
+  chart = "${path.root}/../../helm/infrastructure/cert-manager"
 
   values = [
     file("${path.root}/../../helm/infrastructure/cert-manager/values.yaml"),
@@ -33,6 +31,7 @@ resource "helm_release" "cert_manager" {
 
   depends_on = [
     module.aks,
+    helm_release.ingress_nginx,
   ]
 }
 

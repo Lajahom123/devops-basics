@@ -1,10 +1,19 @@
-crds:
-  enabled: true
+cert-manager:
+  crds:
+    enabled: true
 
-replicaCount: 2
-
-webhook:
   replicaCount: 2
 
-cainjector:
-  replicaCount: 2
+  webhook:
+    replicaCount: 2
+
+  cainjector:
+    replicaCount: 2
+
+clusterIssuer:
+  staging:
+    name: letsencrypt-staging
+    enabled: true
+    email: cert-manager@example.com
+    ingressClass: nginx
+    privateKeySecretName: letsencrypt-staging-account-key
