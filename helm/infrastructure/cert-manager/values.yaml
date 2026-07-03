@@ -1,0 +1,10 @@
+crds:
+  enabled: true
+
+replicaCount: 2
+
+webhook:
+  replicaCount: 2
+
+cainjector:
+  replicaCount: 2

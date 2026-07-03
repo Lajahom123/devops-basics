@@ -17,9 +17,28 @@ resource "helm_release" "ingress_nginx" {
   ]
 }
 
+resource "helm_release" "cert_manager" {
+  name             = "cert-manager"
+  namespace        = "cert-manager"
+  create_namespace = true
+
+  repository = "https://charts.jetstack.io"
+  chart      = "cert-manager"
+  version    = "v1.20.3"
+
+  values = [
+    file("${path.root}/../../helm/infrastructure/cert-manager/values.yaml"),
+    file("${path.root}/../../helm/infrastructure/cert-manager/values-dev.yaml"),
+  ]
+
+  depends_on = [
+    module.aks,
+  ]
+}
+
 resource "helm_release" "keyvault_csi_driver" {
-  name       = "csi-secrets-store-provider-azure"
-  namespace  = "kube-system"
+  name      = "csi-secrets-store-provider-azure"
+  namespace = "kube-system"
 
   repository = "https://azure.github.io/secrets-store-csi-driver-provider-azure/charts"
   chart      = "csi-secrets-store-provider-azure"
