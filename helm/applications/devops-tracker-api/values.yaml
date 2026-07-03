@@ -58,7 +58,7 @@ service:
 ingress:
   enabled: true
   className: nginx
-  host: devops-tracker.local
+  host: api.devopstracker.com
   path: /
   pathType: Prefix
   servicePort: 80

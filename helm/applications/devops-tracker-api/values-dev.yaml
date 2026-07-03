@@ -8,7 +8,7 @@ image:
 ingress:
   enabled: true
   className: nginx
-  host: devops-tracker.local
+  host: api.devopstracker.com
 
 podLabels:
   azure.workload.identity/use: "true"
