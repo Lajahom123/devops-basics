@@ -1,10 +1,5 @@
 data "azurerm_client_config" "current" {}
 
-locals {
-  entra_administrator_object_id      = coalesce(var.entra_administrator_object_id, data.azurerm_client_config.current.object_id)
-  entra_administrator_principal_name = coalesce(var.entra_administrator_principal_name, local.entra_administrator_object_id)
-}
-
 resource "azurerm_postgresql_flexible_server" "main" {
   name                = var.name
   resource_group_name = var.resource_group_name
@@ -59,7 +54,7 @@ resource "azurerm_postgresql_flexible_server_active_directory_administrator" "ma
   resource_group_name = var.resource_group_name
   tenant_id           = data.azurerm_client_config.current.tenant_id
 
-  object_id      = local.entra_administrator_object_id
-  principal_name = local.entra_administrator_principal_name
+  object_id      = var.entra_administrator_object_id
+  principal_name = var.entra_administrator_principal_name
   principal_type = var.entra_administrator_principal_type
 }

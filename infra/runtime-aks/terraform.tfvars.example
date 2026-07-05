@@ -1,0 +1,32 @@
+# Copy to terraform.tfvars and replace placeholder values before apply.
+#
+# postgres_server_name, aks_cluster_name, aks_dns_prefix, and
+# postgres_app_entra_principal_name are optional. Remove a line to use the
+# platform-derived default for that value.
+
+postgres_server_name = "psql-devops-tracker-12345-swn"
+
+postgres_database_name         = "devops_tracker"
+postgres_administrator_login   = "devopsadmin"
+postgres_administrator_password = "replace-with-a-strong-password"
+postgres_version               = "16"
+postgres_sku_name              = "B_Standard_B1ms"
+postgres_storage_mb            = 32768
+postgres_zone                   = "1"
+postgres_backup_retention_days  = 7
+
+postgres_geo_redundant_backup_enabled = false
+postgres_maintenance_day_of_week      = 0
+postgres_maintenance_start_hour       = 2
+postgres_maintenance_start_minute     = 0
+
+postgres_entra_administrator_object_id      = "00000000-0000-0000-0000-000000000000"
+postgres_entra_administrator_principal_name = "postgres-admin@example.com"
+postgres_entra_administrator_principal_type = "User"
+
+postgres_app_entra_principal_name = "id-devops-tracker-aks-workload"
+
+aks_cluster_name = "aks-devops-tracker-12345-swn"
+aks_dns_prefix   = "aks-devops-tracker-12345"
+aks_node_count   = 2
+aks_node_vm_size = "Standard_B2s_v2"

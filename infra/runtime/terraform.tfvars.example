@@ -1,13 +1,20 @@
-project_name        = "devops-tracker"
-environment         = "dev"
-location            = "swedencentral"
-owner_email         = "owner@example.com"
+# Copy to terraform.tfvars and replace placeholder values before apply.
+
+project_name  = "devops-tracker"
+environment   = "dev"
+location      = "swedencentral"
+owner_email   = "owner@example.com"
 
 web_app_name = "devops-tracker-12345"
 
 app_service_sku   = "B1"
 docker_image_name = "devops-tracker:latest"
 container_port    = "3000"
+
+aks_cluster_name = "aks-devops-tracker-12345-swn"
+aks_dns_prefix   = "aks-devops-tracker-12345"
+aks_node_count   = 2
+aks_node_vm_size = "Standard_B2s"
 
 postgres_server_name           = "psql-devops-tracker-12345-swn"
 postgres_database_name         = "devops_tracker"
@@ -25,7 +32,7 @@ postgres_maintenance_start_hour       = 2
 postgres_maintenance_start_minute     = 0
 postgres_standby_zone                 = "2"
 
-postgres_entra_admin_principal_name = "user@example.com"
+postgres_entra_admin_principal_name = "postgres-admin@example.com"
 
 alert_evaluation_frequency = "PT5M"
 alert_window_duration      = "PT5M"

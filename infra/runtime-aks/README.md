@@ -42,6 +42,22 @@ Cost-bearing runtime resources such as PostgreSQL are created there. Platform
 continues to own the platform resource group, VNet, delegated subnets, private
 DNS zones, shared identities, and monitoring primitives.
 
+## Required PostgreSQL inputs
+
+Before the first apply, copy `terraform.tfvars.example` to `terraform.tfvars`
+and set at least:
+
+- `postgres_administrator_password` — bootstrap PostgreSQL login password
+- `postgres_entra_administrator_object_id` — object ID of the dedicated Entra
+  administrator identity or group (not the Terraform caller)
+- `postgres_entra_administrator_principal_name` — display name or UPN that
+  matches that administrator principal
+
+Use a dedicated service account or security group for PostgreSQL Entra
+administration so deployments stay reproducible regardless of who runs
+Terraform. Set `POSTGRES_ENTRA_ADMIN_USER` to the same principal name when
+running the bootstrap script below.
+
 ## Verification
 
 Run from this directory:

@@ -77,15 +77,23 @@ variable "postgres_maintenance_start_minute" {
 }
 
 variable "postgres_entra_administrator_object_id" {
-  description = "Object ID of the Microsoft Entra administrator for PostgreSQL. Defaults to the current Azure caller."
+  description = "Required object ID of the dedicated Microsoft Entra administrator identity or group for PostgreSQL. Use a service account or security group, not the identity of the person running Terraform."
   type        = string
-  default     = null
+
+  validation {
+    condition     = can(regex("^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$", var.postgres_entra_administrator_object_id))
+    error_message = "postgres_entra_administrator_object_id must be a valid Microsoft Entra object ID (UUID)."
+  }
 }
 
 variable "postgres_entra_administrator_principal_name" {
-  description = "Display name or UPN of the Microsoft Entra administrator for PostgreSQL. Defaults to the administrator object ID when unset."
+  description = "Required display name or UPN of the dedicated Microsoft Entra administrator identity or group for PostgreSQL. Must match the principal identified by postgres_entra_administrator_object_id; do not use the Terraform caller's identity."
   type        = string
-  default     = null
+
+  validation {
+    condition     = trimspace(var.postgres_entra_administrator_principal_name) != ""
+    error_message = "postgres_entra_administrator_principal_name is required and must not be blank."
+  }
 }
 
 variable "postgres_entra_administrator_principal_type" {
