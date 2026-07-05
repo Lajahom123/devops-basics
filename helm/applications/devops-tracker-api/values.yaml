@@ -126,11 +126,10 @@ networkPolicy:
     # See infra/platform/locals.tf (snet-postgres) or runtime-aks postgres outputs.
     cidr: "10.20.2.0/24"
     port: 5432
-  # Entra token acquisition for PostgreSQL managed identity auth (HTTPS).
-  azureActiveDirectory:
-    enabled: false
-    cidrs: []
-  # Azure Monitor ingestion when Application Insights telemetry is enabled (HTTPS).
-  applicationInsights:
-    enabled: false
-    cidrs: []
+  externalHttps:
+    # Allows outbound HTTPS for Azure SDKs, Application Insights, and other required public HTTPS dependencies.
+    # Kubernetes NetworkPolicy cannot filter by FQDN or Azure service tag.
+    # Tighten later using Azure Firewall / controlled egress when that roadmap phase is reached.
+    enabled: true
+    cidrs:
+      - "0.0.0.0/0"

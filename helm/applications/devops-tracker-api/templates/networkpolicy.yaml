@@ -51,18 +51,8 @@ spec:
         - protocol: TCP
           port: {{ .Values.networkPolicy.postgres.port }}
     {{- end }}
-    {{- if .Values.networkPolicy.azureActiveDirectory.enabled }}
-    {{- range .Values.networkPolicy.azureActiveDirectory.cidrs }}
-    - to:
-        - ipBlock:
-            cidr: {{ . | quote }}
-      ports:
-        - protocol: TCP
-          port: 443
-    {{- end }}
-    {{- end }}
-    {{- if .Values.networkPolicy.applicationInsights.enabled }}
-    {{- range .Values.networkPolicy.applicationInsights.cidrs }}
+    {{- if .Values.networkPolicy.externalHttps.enabled }}
+    {{- range .Values.networkPolicy.externalHttps.cidrs }}
     - to:
         - ipBlock:
             cidr: {{ . | quote }}
