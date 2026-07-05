@@ -115,9 +115,4 @@ jobs:
 
       - name: Verify health through cluster service
         run: |
-          kubectl run aks-health-check \
-            --rm -i \
-            --restart=Never \
-            --image=curlimages/curl \
-            -n "$NAMESPACE" \
-            -- curl --fail --silent --show-error http://devops-tracker-api/health
+          curl --fail --silent --show-error https://api.devopstracker.com/health
