@@ -116,3 +116,21 @@ keyVault:
   clientId: ""
   mountPath: "/mnt/secrets-store"
   secrets: []
+
+networkPolicy:
+  enabled: true
+  ingressPort: 3000
+  postgres:
+    enabled: true
+    # PostgreSQL private endpoint IP (/32) or delegated subnet CIDR.
+    # See infra/platform/locals.tf (snet-postgres) or runtime-aks postgres outputs.
+    cidr: "10.20.2.0/24"
+    port: 5432
+  # Entra token acquisition for PostgreSQL managed identity auth (HTTPS).
+  azureActiveDirectory:
+    enabled: false
+    cidrs: []
+  # Azure Monitor ingestion when Application Insights telemetry is enabled (HTTPS).
+  applicationInsights:
+    enabled: false
+    cidrs: []
