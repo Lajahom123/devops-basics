@@ -69,7 +69,7 @@ jobs:
             --tail=-1 || true
 
       - name: Disable bootstrap job
-        if: always()
+        if: success() # TODO: revert to always() when the bootstrap job is stable
         run: |
           helm upgrade "$RELEASE_NAME" "$CHART_PATH" \
             --namespace "$NAMESPACE" \
