@@ -32,8 +32,8 @@ postgresBootstrap:
     # runtime-aks output: postgres_database_name
     database: "devops_tracker"
     port: 5432
-    # runtime-aks output: postgres_bootstrap_identity_name
-    entraAdminUser: "id-devops-tracker-dev-postgres-bootstrap"
+    # admin group managing the postgres server
+    entraAdminUser: "devops-tracker-postgres-admins"
     # the aks workload identity that should bound to the role in postgres
     appPrincipalName: "id-devops-tracker-dev-aks-workload"
 
