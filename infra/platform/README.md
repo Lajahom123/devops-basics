@@ -12,7 +12,8 @@ See `DEFERRED.md` for the full inventory of previously removed resources, includ
 - VNet: `vnet-devops-tracker-dev`.
 - Subnets for private endpoints, PostgreSQL, admin access, labs, GitHub runner, and future AKS nodes.
 - Azure Container Registry using the Basic SKU, public network access enabled, and admin user disabled.
-- Managed identities for GitHub Actions deploy, AKS workload identity, migration jobs, and optional GitHub private runner reuse.
+- Managed identities for GitHub Actions deploy, AKS workload identity, PostgreSQL bootstrap, migration jobs, and optional GitHub private runner reuse.
+- Entra security group `devops-tracker-postgres-admins` for PostgreSQL administrator access.
 - Key Vault with RBAC authorization enabled, public network access enabled, soft delete enabled, and purge protection disabled for dev cleanup.
 - GitHub OIDC federation for the deploy managed identity and a custom ACR build/push role scoped to the registry.
 
@@ -32,7 +33,9 @@ Do not deploy cost-bearing or runtime resources from this root:
 
 ## Operational notes
 
-Apply platform before runtime. For the student subscription, add modules in small checkpoints and inspect every plan before applying.
+Apply platform before runtime. Set `postgres_admin_member_object_id` in `terraform.tfvars`
+to the object ID of the general admin or service principal added to `devops-tracker-postgres-admins`.
+For the student subscription, add modules in small checkpoints and inspect every plan before applying.
 
 ```bash
 terraform init

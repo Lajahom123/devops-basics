@@ -48,15 +48,16 @@ Before the first apply, copy `terraform.tfvars.example` to `terraform.tfvars`
 and set at least:
 
 - `postgres_administrator_password` — bootstrap PostgreSQL login password
-- `postgres_entra_administrator_object_id` — object ID of the dedicated Entra
-  administrator identity or group (not the Terraform caller)
-- `postgres_entra_administrator_principal_name` — display name or UPN that
-  matches that administrator principal
 
-Use a dedicated service account or security group for PostgreSQL Entra
-administration so deployments stay reproducible regardless of who runs
-Terraform. Set `POSTGRES_ENTRA_ADMIN_USER` to the same principal name when
-running the bootstrap script below.
+PostgreSQL Entra administration is owned by the platform layer:
+
+- Entra group: `devops-tracker-postgres-admins`
+- group members: configured general admin and the PostgreSQL bootstrap managed identity
+- PostgreSQL Flexible Server Entra admin: the group above
+
+Set `postgres_admin_member_object_id` in `infra/platform/terraform.tfvars` for
+the general admin or service principal group member. Do not use a personal email as the
+PostgreSQL server administrator principal name.
 
 ## Verification
 
@@ -74,53 +75,37 @@ resources to add, change, or destroy.
 ## PostgreSQL Entra principal bootstrap
 
 After PostgreSQL is applied and verified, create the application Entra principal
-inside PostgreSQL from a host that can reach the private endpoint.
+inside PostgreSQL using the bootstrap managed identity.
 
-```bash
-POSTGRES_ENTRA_ADMIN_USER="<postgres-entra-admin-login>" \
-  ../../scripts/bootstrap-postgres-entra-principal.sh
-```
+Relevant Terraform outputs from this root:
 
-The script is idempotent. It creates the `pgaadauth` extension if needed and
-only calls `pgaadauth_create_principal` when the target PostgreSQL role does not
-already exist.
+- `postgres_server_fqdn`
+- `postgres_database_name`
+- `postgres_app_entra_principal_name`
+- `postgres_bootstrap_identity_name`
+- `postgres_bootstrap_identity_client_id`
+- `postgres_entra_admin_group_name`
+- `azure_tenant_id`
 
-The script uses Terraform outputs for:
+For the Kubernetes bootstrap Job, set `azure.postgresBootstrapClientId` in Helm
+to `postgres_bootstrap_identity_client_id` and `postgresBootstrap.postgres.entraAdminUser`
+to `postgres_bootstrap_identity_name`.
 
-- PostgreSQL host: `postgres_server_fqdn`
-- database name: `postgres_database_name`
-- target Entra principal name: `postgres_app_entra_principal_name`
-
-By default the application principal is the platform AKS workload identity
-name. Override with `POSTGRES_APP_PRINCIPAL_NAME` if a different application
-identity should be mapped.
-
-The script uses Entra token authentication through Azure CLI and does not need
-or accept a PostgreSQL password. It checks for missing Terraform outputs,
-missing `psql`, Azure CLI login problems, DNS failures, and private network
-connectivity failures before running the SQL.
+The bootstrap Job is managed by Helm and disabled by default
+(`postgresBootstrap.enabled: false`). Enable it only for one-time bootstrap or
+repair.
 
 Supported execution paths:
 
-1. Local machine connected through VPN
+1. Kubernetes Job inside AKS (preferred)
 
-   Connect the local machine to a VPN or another approved private network path
-   that can resolve and reach the PostgreSQL private endpoint. Install
-   Terraform, Azure CLI, and `psql`; authenticate with `az login`; then run the
-   script from this repository.
+   Build and push `Dockerfile.postgres-bootstrap`, then enable the Helm bootstrap
+   Job with Workload Identity. The Job ServiceAccount uses the bootstrap managed
+   identity client ID and federated credential.
 
-2. Temporary VM inside the VNet
+2. Local machine connected through VPN
 
-   Create a short-lived admin VM in an approved subnet such as `snet-admin`.
-   Install Terraform, Azure CLI, and `psql`; authenticate with Azure CLI; clone
-   the repository; run the script; then stop or delete the VM when finished.
-
-3. Future Kubernetes Job inside AKS
-
-   A future-use manifest skeleton lives at
-   `k8s/jobs/postgres-entra-bootstrap-job.yaml`. It assumes an operations image
-   containing Terraform, Azure CLI, `psql`, and this repository's bootstrap
-   script. It also assumes AKS Workload Identity will provide Azure
-   authentication. The manifest contains placeholders only, has no secrets, is
-   not referenced by Terraform, and should not be applied until AKS and Workload
-   Identity are ready.
+   Connect through a private network path that can reach PostgreSQL. Authenticate
+   with `az login` as a member of `devops-tracker-postgres-admins`, then run
+   `scripts/bootstrap-postgres-entra-principal.sh` with the Terraform output
+   values above.

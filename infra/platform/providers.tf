@@ -7,6 +7,11 @@ terraform {
       version = "~> 3.100"
     }
 
+    azuread = {
+      source  = "hashicorp/azuread"
+      version = "~> 3.0"
+    }
+
     random = {
       source  = "hashicorp/random"
       version = "~> 3.6"
@@ -16,4 +21,8 @@ terraform {
 
 provider "azurerm" {
   features {}
+}
+
+provider "azuread" {
+  tenant_id = data.azurerm_client_config.current.tenant_id
 }

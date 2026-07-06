@@ -65,10 +65,11 @@ module "acr" {
 module "managed_identities" {
   source = "../modules/managed-identities"
 
-  resource_group_name = azurerm_resource_group.platform.name
-  location            = azurerm_resource_group.platform.location
-  name_prefix         = local.name_prefix
-  tags                = local.common_tags
+  resource_group_name             = azurerm_resource_group.platform.name
+  location                        = azurerm_resource_group.platform.location
+  name_prefix                     = local.name_prefix
+  tags                            = local.common_tags
+  postgres_admin_member_object_id = var.postgres_admin_member_object_id
 }
 
 module "key_vault" {

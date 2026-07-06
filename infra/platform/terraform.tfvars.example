@@ -26,3 +26,6 @@ enable_pod_restart_alert = true
 pod_restart_threshold    = 0
 
 enable_failed_pod_alert = true
+
+# Object ID of the general admin or service principal added to devops-tracker-postgres-admins.
+postgres_admin_member_object_id = "00000000-0000-0000-0000-000000000000"

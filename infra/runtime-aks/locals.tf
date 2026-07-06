@@ -7,6 +7,7 @@ locals {
   platform_resource_group_name = local.platform.resource_group_name
   resource_group_name          = "rg-${local.project}-${local.environment}-runtime"
   location                     = local.platform.location
+  azure_tenant_id              = local.platform.azure_tenant_id
 
   vnet_id            = local.platform.vnet_id
   subnet_ids         = local.platform.subnet_ids
@@ -61,6 +62,18 @@ locals {
     id           = local.platform.private_runner_identity_id
     client_id    = local.platform.private_runner_identity_client_id
     principal_id = local.platform.private_runner_identity_principal_id
+  }
+
+  postgres_bootstrap_identity = {
+    name         = local.platform.postgres_bootstrap_identity_name
+    id           = local.platform.postgres_bootstrap_identity_id
+    client_id    = local.platform.postgres_bootstrap_identity_client_id
+    principal_id = local.platform.postgres_bootstrap_identity_principal_id
+  }
+
+  postgres_entra_admin_group = {
+    object_id = local.platform.postgres_entra_admin_group_object_id
+    name      = local.platform.postgres_entra_admin_group_name
   }
 
   aks_cluster_id      = module.aks.cluster_id

@@ -8,6 +8,11 @@ output "platform_resource_group_name" {
   value       = local.platform_resource_group_name
 }
 
+output "azure_tenant_id" {
+  description = "Microsoft Entra tenant ID."
+  value       = local.azure_tenant_id
+}
+
 output "postgres_server_id" {
   description = "PostgreSQL Flexible Server resource ID."
   value       = module.postgres.server_id
@@ -31,6 +36,31 @@ output "postgres_database_name" {
 output "postgres_app_entra_principal_name" {
   description = "Microsoft Entra principal name to create in PostgreSQL with pgaadauth_create_principal."
   value       = local.postgres_app_entra_principal_name
+}
+
+output "postgres_bootstrap_identity_name" {
+  description = "PostgreSQL bootstrap managed identity name."
+  value       = local.postgres_bootstrap_identity.name
+}
+
+output "postgres_bootstrap_identity_client_id" {
+  description = "PostgreSQL bootstrap managed identity client ID for the bootstrap Job ServiceAccount."
+  value       = local.postgres_bootstrap_identity.client_id
+}
+
+output "postgres_bootstrap_identity_principal_id" {
+  description = "PostgreSQL bootstrap managed identity principal ID."
+  value       = local.postgres_bootstrap_identity.principal_id
+}
+
+output "postgres_entra_admin_group_object_id" {
+  description = "Object ID of the devops-tracker-postgres-admins Entra group."
+  value       = local.postgres_entra_admin_group.object_id
+}
+
+output "postgres_entra_admin_group_name" {
+  description = "Display name of the devops-tracker-postgres-admins Entra group."
+  value       = local.postgres_entra_admin_group.name
 }
 
 output "aks_cluster_id" {

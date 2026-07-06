@@ -30,9 +30,9 @@ module "postgres" {
   database_name       = var.postgres_database_name
   tags                = local.tags
 
-  entra_administrator_object_id      = var.postgres_entra_administrator_object_id
-  entra_administrator_principal_name = var.postgres_entra_administrator_principal_name
-  entra_administrator_principal_type = var.postgres_entra_administrator_principal_type
+  entra_administrator_object_id      = local.platform.postgres_entra_admin_group_object_id
+  entra_administrator_principal_name = local.platform.postgres_entra_admin_group_name
+  entra_administrator_principal_type = "Group"
 }
 
 module "aks" {

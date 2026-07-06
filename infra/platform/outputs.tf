@@ -238,6 +238,36 @@ output "private_runner_identity_principal_id" {
   value       = module.managed_identities.identities.private_runner.principal_id
 }
 
+output "postgres_bootstrap_identity_name" {
+  description = "PostgreSQL bootstrap managed identity name."
+  value       = module.managed_identities.identities.postgres-bootstrap.name
+}
+
+output "postgres_bootstrap_identity_id" {
+  description = "PostgreSQL bootstrap managed identity resource ID."
+  value       = module.managed_identities.identities.postgres-bootstrap.id
+}
+
+output "postgres_bootstrap_identity_client_id" {
+  description = "PostgreSQL bootstrap managed identity client ID."
+  value       = module.managed_identities.identities.postgres-bootstrap.client_id
+}
+
+output "postgres_bootstrap_identity_principal_id" {
+  description = "PostgreSQL bootstrap managed identity principal ID."
+  value       = module.managed_identities.identities.postgres-bootstrap.principal_id
+}
+
+output "postgres_entra_admin_group_object_id" {
+  description = "Object ID of the devops-tracker-postgres-admins Entra group."
+  value       = module.managed_identities.entra_groups.postgres_admins.object_id
+}
+
+output "postgres_entra_admin_group_name" {
+  description = "Display name of the devops-tracker-postgres-admins Entra group."
+  value       = module.managed_identities.entra_groups.postgres_admins.name
+}
+
 output "key_vault_id" {
   description = "Key Vault ID."
   value       = module.key_vault.key_vault_id
