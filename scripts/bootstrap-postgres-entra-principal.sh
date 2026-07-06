@@ -22,6 +22,7 @@ ensure_azure_auth() {
       -u "$AZURE_CLIENT_ID" \
       --tenant "$AZURE_TENANT_ID" \
       --federated-token "$(tr -d '\n' < "$AZURE_FEDERATED_TOKEN_FILE")" \
+      --allow-no-subscriptions \
       --output none
     return
   fi
