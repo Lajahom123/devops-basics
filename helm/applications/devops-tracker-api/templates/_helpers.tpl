@@ -73,6 +73,6 @@ Application AKS workload identity client ID.
 {{/*
 PostgreSQL bootstrap Job workload identity client ID.
 */}}
-{{- define "devops-tracker-api.azurePostgresBootstrapClientId" -}}
-{{- .Values.azure.postgresBootstrapClientId }}
+{{- define "devops-tracker-api.postgresBootstrapClientId" -}}
+{{- .Values.postgresBootstrap.managedIdentityClientId }}
 {{- end }}

@@ -18,10 +18,10 @@ podLabels:
 azure:
   tenantId: ""
   clientId: ""
-  postgresBootstrapClientId: ""
 
 postgresBootstrap:
   enabled: false
+  managedIdentityClientId: ""
   image:
     repository: devopstrackerdevvsh6qw.azurecr.io/devops-tracker-ops
     tag: postgres-entra-bootstrap

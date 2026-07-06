@@ -49,7 +49,7 @@ jobs:
             -f "$VALUES_FILE" \
             --reuse-values \
             --set postgresBootstrap.enabled=true \
-            --set postgresBootstrap.workloadIdentityClientId="${{ vars.AZURE_DEV_POSTGRES_BOOTSTRAP_CLIENT_ID }}"
+            --set postgresBootstrap.managedIdentityClientId="${{ vars.AZURE_DEV_POSTGRES_BOOTSTRAP_CLIENT_ID }}"
 
       - name: Wait for bootstrap job
         run: |

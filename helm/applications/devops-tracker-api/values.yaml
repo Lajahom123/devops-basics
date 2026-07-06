@@ -114,7 +114,6 @@ azure:
   # Application AKS workload identity. Used by the API ServiceAccount and Key Vault CSI.
   clientId: ""
   # PostgreSQL bootstrap Job identity. Must not be the application identity above.
-  postgresBootstrapClientId: ""
 
 keyVault:
   enabled: false
@@ -124,6 +123,7 @@ keyVault:
 
 postgresBootstrap:
   enabled: false
+  managedIdentityClientId: ""
   image:
     repository: devopstrackerdevvsh6qw.azurecr.io/devops-tracker-ops
     tag: postgres-entra-bootstrap

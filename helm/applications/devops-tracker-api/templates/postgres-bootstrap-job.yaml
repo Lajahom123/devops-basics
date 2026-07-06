@@ -1,5 +1,5 @@
 {{- if .Values.postgresBootstrap.enabled }}
-{{- $clientId := required "azure.postgresBootstrapClientId is required when postgresBootstrap.enabled is true" (include "devops-tracker-api.azurePostgresBootstrapClientId" .) }}
+{{- $clientId := required "azure.postgresBootstrapClientId is required when postgresBootstrap.enabled is true" (include "devops-tracker-api.postgresBootstrapClientId" .) }}
 {{- $tenantId := required "azure.tenantId is required when postgresBootstrap.enabled is true" (include "devops-tracker-api.azureTenantId" .) }}
 {{- $host := required "postgresBootstrap.postgres.host is required when postgresBootstrap.enabled is true" .Values.postgresBootstrap.postgres.host }}
 {{- $database := required "postgresBootstrap.postgres.database is required when postgresBootstrap.enabled is true" .Values.postgresBootstrap.postgres.database }}
