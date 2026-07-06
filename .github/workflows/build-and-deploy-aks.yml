@@ -98,6 +98,8 @@ jobs:
             --namespace "$NAMESPACE" \
             --values helm/applications/devops-tracker-api/values-dev.yaml \
             --set image.tag=${{ needs.build.outputs.image_tag }} \
+            --set azure.tenantId="${{ vars.AZURE_TENANT_ID }}" \
+            --set azure.clientId="${{ vars.AZURE_DEV_AKS_WORKLOAD_CLIENT_ID }}" \
             --wait \
             --timeout 3m
 
