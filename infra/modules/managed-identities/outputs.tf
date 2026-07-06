@@ -9,3 +9,13 @@ output "identities" {
     }
   }
 }
+
+output "entra_groups" {
+  description = "Entra group details keyed by logical name."
+  value = {
+    postgres_admins = {
+      object_id = azuread_group.postgres_admins.object_id
+      name      = azuread_group.postgres_admins.display_name
+    }
+  }
+}
