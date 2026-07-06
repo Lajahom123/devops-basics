@@ -7,7 +7,32 @@ set -euo pipefail
 : "${POSTGRES_APP_PRINCIPAL_NAME:?POSTGRES_APP_PRINCIPAL_NAME is required}"
 
 POSTGRES_PORT="${POSTGRES_PORT:-5432}"
-SQL_FILE="${SQL_FILE:-/workspace/devops-tracker/infra/runtime-aks/bootstrap-postgres-entra-principal.sql}"
+SQL_FILE="${SQL_FILE:-/opt/postgres-bootstrap/bootstrap-postgres-entra-principal.sql}"
+
+if [[ ! -f "$SQL_FILE" ]]; then
+  echo "ERROR: SQL file not found at ${SQL_FILE}." >&2
+  exit 1
+fi
+
+ensure_azure_auth() {
+  if [[ -n "${AZURE_FEDERATED_TOKEN_FILE:-}" && -n "${AZURE_CLIENT_ID:-}" ]]; then
+    : "${AZURE_TENANT_ID:?AZURE_TENANT_ID is required for Workload Identity}"
+
+    az login --service-principal \
+      -u "$AZURE_CLIENT_ID" \
+      --tenant "$AZURE_TENANT_ID" \
+      --federated-token "$(tr -d '\n' < "$AZURE_FEDERATED_TOKEN_FILE")" \
+      --output none
+    return
+  fi
+
+  if ! az account show --output none 2>/dev/null; then
+    echo "ERROR: Azure CLI is not authenticated. Log in with 'az login' or run under AKS Workload Identity." >&2
+    exit 1
+  fi
+}
+
+ensure_azure_auth
 
 ACCESS_TOKEN="$(
   az account get-access-token \
@@ -26,6 +51,7 @@ PGPASSWORD="$ACCESS_TOKEN" psql \
   --set=ON_ERROR_STOP=1 \
   --no-psqlrc \
   --set=app_principal_name="$POSTGRES_APP_PRINCIPAL_NAME" \
+  --set=database_name="$POSTGRES_DATABASE" \
   --file="$SQL_FILE"
 
 printf 'PostgreSQL Entra principal bootstrap completed for %s in database %s on %s.\n' \
