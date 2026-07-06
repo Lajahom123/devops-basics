@@ -1,0 +1,77 @@
+name: Postgres Entra bootstrap
+
+on:
+  workflow_dispatch:
+
+permissions:
+  id-token: write
+  contents: read
+
+env:
+  AKS_CLUSTER_NAME: aks-devops-tracker-dev-vsh6qw-swn
+  RESOURCE_GROUP: rg-devops-tracker-dev-runtime
+  RELEASE_NAME: devops-tracker-api
+  NAMESPACE: devops-tracker
+  CHART_PATH: helm/applications/devops-tracker-api
+  VALUES_FILE: helm/applications/devops-tracker-api/values-dev.yaml
+
+jobs:
+  bootstrap:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Azure login
+        uses: azure/login@v2
+        with:
+          client-id: ${{ vars.AZURE_DEV_GITHUB_ACTIONS_DEPLOY_CLIENT_ID }}
+          tenant-id: ${{ vars.AZURE_TENANT_ID }}
+          subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Get AKS credentials
+        run: |
+          az aks get-credentials \
+            --resource-group "$RESOURCE_GROUP" \
+            --name "$AKS_CLUSTER_NAME" \
+            --overwrite-existing
+
+      - name: Delete previous bootstrap job
+        run: |
+          kubectl delete job postgres-entra-bootstrap \
+            -n "$NAMESPACE" \
+            --ignore-not-found
+
+      - name: Enable bootstrap job
+        run: |
+          helm upgrade "$RELEASE_NAME" "$CHART_PATH" \
+            --namespace "$NAMESPACE" \
+            -f "$VALUES_FILE" \
+            --reuse-values \
+            --set postgresBootstrap.enabled=true \
+            --set postgresBootstrap.workloadIdentityClientId="${{ vars.AZURE_DEV_POSTGRES_BOOTSTRAP_CLIENT_ID }}"
+
+      - name: Wait for bootstrap job
+        run: |
+          kubectl wait \
+            --for=condition=complete \
+            --timeout=180s \
+            job/postgres-entra-bootstrap \
+            -n "$NAMESPACE"
+
+      - name: Print bootstrap logs
+        if: always()
+        run: |
+          kubectl logs \
+            -n "$NAMESPACE" \
+            job/postgres-entra-bootstrap \
+            --tail=-1 || true
+
+      - name: Disable bootstrap job
+        if: always()
+        run: |
+          helm upgrade "$RELEASE_NAME" "$CHART_PATH" \
+            --namespace "$NAMESPACE" \
+            -f "$VALUES_FILE" \
+            --reuse-values \
+            --set postgresBootstrap.enabled=false
