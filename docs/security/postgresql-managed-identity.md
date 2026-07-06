@@ -36,15 +36,21 @@ The Web App obtains an access token for Azure PostgreSQL from the instance metad
 
 ## Application implementation shape
 
-The Node.js implementation uses `ManagedIdentityCredential` when `APP_CLIENT_ID` is present and falls back to `DefaultAzureCredential` for other environments. It passes the token into `pg`.
+The Node.js implementation uses `DefaultAzureCredential` with an optional
+`managedIdentityClientId` from `APP_CLIENT_ID`. On AKS, Workload Identity is
+the sole Azure authentication mechanism. See
+[PostgreSQL Entra authentication on AKS](./postgresql-entra-aks.md) for the
+runtime-aks deployment path.
 
 Representative shape:
 
 ```js
-const { ManagedIdentityCredential } = require("@azure/identity");
+const { DefaultAzureCredential } = require("@azure/identity");
 const { Pool } = require("pg");
 
-const credential = new ManagedIdentityCredential(process.env.APP_CLIENT_ID);
+const credential = new DefaultAzureCredential({
+  managedIdentityClientId: process.env.APP_CLIENT_ID,
+});
 const scope = "https://ossrdbms-aad.database.windows.net/.default";
 
 async function createPool() {
@@ -61,7 +67,12 @@ async function createPool() {
 }
 ```
 
-Long-running processes must account for token expiry. The current implementation creates a pool with the access token available at pool creation time. A future hardening step should refresh tokens before creating new connections or rotate the pool when tokens approach expiry.
+Long-running processes must account for token expiry. The implementation
+recreates the pool with a fresh token before expiry (5-minute buffer).
+
+Password authentication remains available through `POSTGRES_AUTH_MODE=password`
+for local development with a plain PostgreSQL instance. It is not used in
+deployed environments.
 
 ## PostgreSQL principal mapping
 
@@ -97,18 +108,15 @@ The exact role name depends on how the principal is created and displayed by Pos
 \du
 ```
 
-## Why password auth remains temporarily enabled
+## Why password auth remains on the server (not the application)
 
-The Terraform configuration currently enables both Entra authentication and password authentication. This is a pragmatic bootstrap state.
+The Terraform configuration enables both Entra authentication and password authentication on the PostgreSQL server. This is a pragmatic bootstrap state for infrastructure operations only:
 
-Reasons to keep password auth temporarily:
+- initial schema/bootstrap tasks use administrator credentials;
+- the migration job uses administrator credentials;
+- recovery access is useful for operational troubleshooting.
 
-- initial schema/bootstrap tasks may still use administrator credentials;
-- the migration job currently uses administrator credentials;
-- recovery access is useful while validating Entra principal creation;
-- Terraform does not cleanly manage all PostgreSQL grants and role mappings over a private endpoint.
-
-The production end state should disable password authentication once the app, migrations, and operational access paths work with Entra authentication.
+The application runtime (Web App and AKS) uses Entra authentication exclusively. Password authentication is not configured for application deployments.
 
 ## Operational implications
 

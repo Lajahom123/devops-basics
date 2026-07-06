@@ -78,11 +78,11 @@ from `infra/runtime-aks` Terraform outputs:
 Helm equivalents in `values-dev.yaml`:
 
 - `azure.tenantId` ← `azure_tenant_id`
-- `azure.postgresBootstrapClientId` ← `postgres_bootstrap_identity_client_id`
-- `postgresBootstrap.postgres.host` ← `postgres_server_fqdn`
-- `postgresBootstrap.postgres.database` ← `postgres_database_name`
-- `postgresBootstrap.postgres.entraAdminUser` ← `postgres_bootstrap_identity_name`
-- `postgresBootstrap.postgres.appPrincipalName` ← `postgres_app_entra_principal_name`
+- `postgres.host` ← `postgres_server_fqdn`
+- `postgres.database` ← `postgres_database_name`
+- `postgres.user` ← `postgres_app_entra_principal_name`
+- `postgresBootstrap.managedIdentityClientId` ← `postgres_bootstrap_identity_client_id`
+- `postgresBootstrap.entraAdminUser` ← `postgres_bootstrap_identity_name`
 
 Enable the Job only for the bootstrap run:
 
@@ -92,5 +92,27 @@ helm upgrade devops-tracker-api helm/applications/devops-tracker-api \
   --namespace devops-tracker \
   --values helm/applications/devops-tracker-api/values-dev.yaml \
   --set postgresBootstrap.enabled=true \
-  --set azure.postgresBootstrapClientId="$(terraform -chdir=infra/runtime-aks output -raw postgres_bootstrap_identity_client_id)"
+  --set postgresBootstrap.managedIdentityClientId="$(terraform -chdir=infra/runtime-aks output -raw postgres_bootstrap_identity_client_id)"
 ```
+
+## AKS application PostgreSQL authentication
+
+The API Helm chart wires PostgreSQL connection settings through `postgres.*` values.
+Production auth mode is `entra`. The deploy workflow sets the Workload Identity
+client ID and tenant ID from repository variables:
+
+```bash
+helm upgrade devops-tracker-api helm/applications/devops-tracker-api \
+  --install \
+  --namespace devops-tracker \
+  --values helm/applications/devops-tracker-api/values-dev.yaml \
+  --set azure.tenantId="${AZURE_TENANT_ID}" \
+  --set azure.clientId="${AZURE_DEV_AKS_WORKLOAD_CLIENT_ID}"
+```
+
+Use the AKS workload identity client ID from platform Terraform outputs
+(`aks_workload_identity_client_id`) or the `AZURE_DEV_AKS_WORKLOAD_CLIENT_ID`
+repository variable in GitHub Actions deploys.
+
+See [PostgreSQL Entra authentication on AKS](../security/postgresql-entra-aks.md) for
+the full flow, token refresh behaviour, and operational guidance.

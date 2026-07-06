@@ -115,6 +115,19 @@ azure:
   clientId: ""
   # PostgreSQL bootstrap Job identity. Must not be the application identity above.
 
+postgres:
+  enabled: false
+  # Production authentication mode. Entra is the only supported mode for deployed environments.
+  authMode: entra
+  host: ""
+  port: 5432
+  database: devops_tracker
+  # PostgreSQL role mapped to the application managed identity (also the bootstrap principal name).
+  user: ""
+  ssl:
+    enabled: true
+    rejectUnauthorized: true
+
 keyVault:
   enabled: false
   name: ""
@@ -124,18 +137,13 @@ keyVault:
 postgresBootstrap:
   enabled: false
   managedIdentityClientId: ""
+  # Bootstrap managed identity or Entra admin group name. Must match the
+  # identity used by the Job token.
+  entraAdminUser: ""
   image:
     repository: devopstrackerdevvsh6qw.azurecr.io/devops-tracker-ops
     tag: postgres-entra-bootstrap
     pullPolicy: Always
-  postgres:
-    host: ""
-    database: "devops_tracker"
-    port: "5432"
-    # Bootstrap managed identity name. Must match the identity used by the Job token.
-    entraAdminUser: ""
-    # Application managed identity principal to create inside PostgreSQL.
-    appPrincipalName: ""
 
 networkPolicy:
   enabled: true

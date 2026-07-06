@@ -106,4 +106,4 @@ NAT Gateway is attached to the runner subnet for centralized outbound internet a
 
 ## Database access
 
-PostgreSQL Flexible Server is private-only. The Web App reaches it through VNet integration and private DNS. The current production authentication target is managed identity to Entra token to PostgreSQL role. Password authentication remains available for bootstrap and migration operations.
+PostgreSQL Flexible Server is private-only. The Web App and AKS API reach it through VNet integration or private networking and private DNS. Production application authentication uses managed identity to Entra token to PostgreSQL role. Password authentication on the server remains available only for bootstrap and migration operations.

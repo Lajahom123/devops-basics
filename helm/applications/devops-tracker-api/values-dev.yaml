@@ -19,23 +19,25 @@ azure:
   tenantId: ""
   clientId: ""
 
+postgres:
+  enabled: true
+  authMode: entra
+  host: "psql-devops-tracker-dev-swdct.postgres.database.azure.com"
+  port: 5432
+  database: devops_tracker
+  user: "id-devops-tracker-dev-aks-workload"
+  ssl:
+    enabled: true
+    rejectUnauthorized: true
+
 postgresBootstrap:
   enabled: false
   managedIdentityClientId: ""
+  entraAdminUser: "devops-tracker-postgres-admins"
   image:
     repository: devopstrackerdevvsh6qw.azurecr.io/devops-tracker-ops
     tag: postgres-entra-bootstrap
     pullPolicy: Always
-  postgres:
-    # runtime-aks output: postgres_server_fqdn
-    host: "psql-devops-tracker-dev-swdct.postgres.database.azure.com"
-    # runtime-aks output: postgres_database_name
-    database: "devops_tracker"
-    port: 5432
-    # admin group managing the postgres server
-    entraAdminUser: "devops-tracker-postgres-admins"
-    # the aks workload identity that should bound to the role in postgres
-    appPrincipalName: "id-devops-tracker-dev-aks-workload"
 
 keyVault:
   enabled: true

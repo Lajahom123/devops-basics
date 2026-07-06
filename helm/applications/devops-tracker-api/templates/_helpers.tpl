@@ -76,3 +76,22 @@ PostgreSQL bootstrap Job workload identity client ID.
 {{- define "devops-tracker-api.postgresBootstrapClientId" -}}
 {{- .Values.postgresBootstrap.managedIdentityClientId }}
 {{- end }}
+
+{{/*
+Shared PostgreSQL connection settings used by the API and bootstrap Job.
+*/}}
+{{- define "devops-tracker-api.postgresHost" -}}
+{{- .Values.postgres.host }}
+{{- end }}
+
+{{- define "devops-tracker-api.postgresPort" -}}
+{{- .Values.postgres.port }}
+{{- end }}
+
+{{- define "devops-tracker-api.postgresDatabase" -}}
+{{- .Values.postgres.database }}
+{{- end }}
+
+{{- define "devops-tracker-api.postgresUser" -}}
+{{- .Values.postgres.user }}
+{{- end }}

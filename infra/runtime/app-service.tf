@@ -2,6 +2,7 @@ locals {
   web_app_shared_settings = {
     DATABASE_SSL                     = "true"
     DATABASE_SSL_REJECT_UNAUTHORIZED = "true"
+    POSTGRES_AUTH_MODE               = "entra"
 
     APP_CLIENT_ID = data.terraform_remote_state.platform.outputs.web_app_identity_client_id
 

@@ -87,9 +87,12 @@ Relevant Terraform outputs from this root:
 - `postgres_entra_admin_group_name`
 - `azure_tenant_id`
 
-For the Kubernetes bootstrap Job, set `azure.postgresBootstrapClientId` in Helm
-to `postgres_bootstrap_identity_client_id` and `postgresBootstrap.postgres.entraAdminUser`
-to `postgres_bootstrap_identity_name`.
+For the Kubernetes bootstrap Job, set `postgresBootstrap.managedIdentityClientId` in Helm
+to `postgres_bootstrap_identity_client_id` and `postgresBootstrap.entraAdminUser`
+to `postgres_bootstrap_identity_name` (or the Entra admin group name).
+
+Connection settings (`postgres.host`, `postgres.database`, `postgres.user`) are shared
+between the API deployment and the bootstrap Job.
 
 The bootstrap Job is managed by Helm and disabled by default
 (`postgresBootstrap.enabled: false`). Enable it only for one-time bootstrap or
@@ -109,3 +112,10 @@ Supported execution paths:
    with `az login` as a member of `devops-tracker-postgres-admins`, then run
    `scripts/bootstrap-postgres-entra-principal.sh` with the Terraform output
    values above.
+
+## Application PostgreSQL authentication
+
+The API connects to PostgreSQL using Helm `postgres.*` values with
+`authMode: entra`. See
+[PostgreSQL Entra authentication on AKS](../../docs/security/postgresql-entra-aks.md)
+for the full authentication flow and operational guidance.

@@ -61,14 +61,33 @@ spec:
           livenessProbe:
             {{- toYaml .Values.livenessProbe | nindent 12 }}
 
-          {{- $envSecrets := list }}
-          {{- range .Values.keyVault.secrets }}
-            {{- if .envVarName }}
-              {{- $envSecrets = append $envSecrets . }}
-            {{- end }}
-          {{- end }}
-          {{- if $envSecrets }}
           env:
+            - name: APP_CLIENT_ID
+              value: {{ include "devops-tracker-api.azureClientId" . | quote }}
+            - name: AZURE_TENANT_ID
+              value: {{ include "devops-tracker-api.azureTenantId" . | quote }}
+            {{- if .Values.postgres.enabled }}
+            - name: DATABASE_SSL
+              value: {{ .Values.postgres.ssl.enabled | quote }}
+            - name: DATABASE_SSL_REJECT_UNAUTHORIZED
+              value: {{ .Values.postgres.ssl.rejectUnauthorized | quote }}
+            - name: POSTGRES_AUTH_MODE
+              value: {{ .Values.postgres.authMode | quote }}
+            - name: POSTGRES_HOST
+              value: {{ include "devops-tracker-api.postgresHost" . | quote }}
+            - name: POSTGRES_PORT
+              value: {{ include "devops-tracker-api.postgresPort" . | quote }}
+            - name: POSTGRES_DB
+              value: {{ include "devops-tracker-api.postgresDatabase" . | quote }}
+            - name: POSTGRES_USER
+              value: {{ include "devops-tracker-api.postgresUser" . | quote }}
+            {{- end }}
+            {{- $envSecrets := list }}
+            {{- range .Values.keyVault.secrets }}
+              {{- if .envVarName }}
+                {{- $envSecrets = append $envSecrets . }}
+              {{- end }}
+            {{- end }}
             {{- range $envSecrets }}
             - name: {{ .envVarName }}
               valueFrom:
@@ -76,7 +95,6 @@ spec:
                   name: {{ include "devops-tracker-api.fullname" $ }}-secrets
                   key: {{ .envVarName }}
             {{- end }}
-          {{- end }}
           {{- if .Values.keyVault.enabled }}
           volumeMounts:
             - name: secrets-store

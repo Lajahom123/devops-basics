@@ -1,10 +1,10 @@
 {{- if .Values.postgresBootstrap.enabled }}
 {{- $clientId := required "postgresBootstrap.managedIdentityClientId is required when postgresBootstrap.enabled is true" (include "devops-tracker-api.postgresBootstrapClientId" .) }}
 {{- $tenantId := required "azure.tenantId is required when postgresBootstrap.enabled is true" (include "devops-tracker-api.azureTenantId" .) }}
-{{- $host := required "postgresBootstrap.postgres.host is required when postgresBootstrap.enabled is true" .Values.postgresBootstrap.postgres.host }}
-{{- $database := required "postgresBootstrap.postgres.database is required when postgresBootstrap.enabled is true" .Values.postgresBootstrap.postgres.database }}
-{{- $entraAdminUser := required "postgresBootstrap.postgres.entraAdminUser is required when postgresBootstrap.enabled is true" .Values.postgresBootstrap.postgres.entraAdminUser }}
-{{- $appPrincipalName := required "postgresBootstrap.postgres.appPrincipalName is required when postgresBootstrap.enabled is true" .Values.postgresBootstrap.postgres.appPrincipalName }}
+{{- $host := required "postgres.host is required when postgresBootstrap.enabled is true" (include "devops-tracker-api.postgresHost" .) }}
+{{- $database := required "postgres.database is required when postgresBootstrap.enabled is true" (include "devops-tracker-api.postgresDatabase" .) }}
+{{- $user := required "postgres.user is required when postgresBootstrap.enabled is true" (include "devops-tracker-api.postgresUser" .) }}
+{{- $entraAdminUser := required "postgresBootstrap.entraAdminUser is required when postgresBootstrap.enabled is true" .Values.postgresBootstrap.entraAdminUser }}
 apiVersion: v1
 kind: ServiceAccount
 metadata:
@@ -67,11 +67,11 @@ spec:
             - name: POSTGRES_DATABASE
               value: {{ $database | quote }}
             - name: POSTGRES_PORT
-              value: {{ .Values.postgresBootstrap.postgres.port | quote }}
+              value: {{ include "devops-tracker-api.postgresPort" . | quote }}
             - name: POSTGRES_ENTRA_ADMIN_USER
               value: {{ $entraAdminUser | quote }}
             - name: POSTGRES_APP_PRINCIPAL_NAME
-              value: {{ $appPrincipalName | quote }}
+              value: {{ $user | quote }}
           volumeMounts:
             - name: tmp
               mountPath: /tmp
