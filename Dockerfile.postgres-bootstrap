@@ -14,6 +14,7 @@ RUN apt-get update \
 COPY scripts/bootstrap-postgres-entra-principal.sh /opt/postgres-bootstrap/bootstrap-postgres-entra-principal.sh
 COPY infra/runtime-aks/sql/bootstrap-postgres-entra-principal.sql /opt/postgres-bootstrap/bootstrap-postgres-entra-principal.sql
 COPY infra/runtime-aks/sql/grant-app-permissions.sql /opt/postgres-bootstrap/grant-app-permissions.sql
+COPY infra/runtime-aks/sql/grant-migration-permissions.sql /opt/postgres-bootstrap/grant-migration-permissions.sql
 
 RUN chmod +x /opt/postgres-bootstrap/bootstrap-postgres-entra-principal.sh \
   && useradd --create-home --shell /usr/sbin/nologin bootstrap \

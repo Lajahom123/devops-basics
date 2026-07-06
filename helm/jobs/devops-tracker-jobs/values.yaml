@@ -38,6 +38,9 @@ bootstrap:
   serviceAccountName: devops-tracker-db-bootstrap
   managedIdentityClientId: ""
   entraAdminUser: ""
+  # Each principal maps a managed identity display name to a PostgreSQL role and grant profile.
+  # grantProfile: app (DML) or migration (DDL for Flyway).
+  principals: []
   image:
     repository: devopstrackerdevvsh6qw.azurecr.io/devops-tracker-ops
     tag: postgres-entra-bootstrap

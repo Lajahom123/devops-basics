@@ -1,23 +1,17 @@
-GRANT CONNECT ON DATABASE :"database_name"
-TO :"migration_principal_name";
+GRANT CONNECT ON DATABASE :"database_name" TO :"principal_name";
 
-GRANT USAGE, CREATE ON SCHEMA public
-TO :"migration_principal_name";
+GRANT USAGE, CREATE ON SCHEMA public TO :"principal_name";
 
-GRANT SELECT, INSERT, UPDATE, DELETE, TRUNCATE, REFERENCES, TRIGGER
-ON ALL TABLES IN SCHEMA public
-TO :"migration_principal_name";
+GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public
+TO :"principal_name";
 
-GRANT USAGE, SELECT, UPDATE
-ON ALL SEQUENCES IN SCHEMA public
-TO :"migration_principal_name";
+GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public
+TO :"principal_name";
 
 ALTER DEFAULT PRIVILEGES IN SCHEMA public
-GRANT SELECT, INSERT, UPDATE, DELETE, TRUNCATE, REFERENCES, TRIGGER
-ON TABLES
-TO :"migration_principal_name";
+GRANT ALL PRIVILEGES ON TABLES
+TO :"principal_name";
 
 ALTER DEFAULT PRIVILEGES IN SCHEMA public
-GRANT USAGE, SELECT, UPDATE
-ON SEQUENCES
-TO :"migration_principal_name";
+GRANT ALL PRIVILEGES ON SEQUENCES
+TO :"principal_name";

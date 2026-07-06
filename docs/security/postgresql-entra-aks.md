@@ -21,7 +21,36 @@ Azure Database for PostgreSQL Flexible Server
   (pgaadauth validates token, maps to PostgreSQL role)
 ```
 
-The PostgreSQL role `id-devops-tracker-dev-aks-workload` is created by the one-time bootstrap Job in `helm/jobs/devops-tracker-jobs` using `pgaadauth_create_principal`. Grants are applied from `infra/runtime-aks/sql/grant-app-permissions.sql`.
+The PostgreSQL roles for managed identities are created by the one-time bootstrap Job in
+`helm/jobs/devops-tracker-jobs` using `pgaadauth_create_principal`. Application grants
+come from `grant-app-permissions.sql`; migration grants come from `grant-migration-permissions.sql`.
+
+## Why every Entra managed identity must be bootstrapped
+
+Microsoft Entra authentication to Azure Database for PostgreSQL is a two-step trust chain:
+
+1. **Entra validates the token** — the managed identity proves itself to Microsoft Entra and
+   receives an access token for scope `https://ossrdbms-aad.database.windows.net/.default`.
+2. **PostgreSQL maps the token to a local role** — the `pgaadauth` extension checks that a
+   PostgreSQL role exists whose name matches the managed identity display name.
+
+Creating the managed identity in Azure (and wiring AKS Workload Identity) satisfies step 1
+only. Until `pgaadauth_create_principal` creates the matching PostgreSQL role, PostgreSQL
+has no local principal to authenticate the token against. The server then rejects the
+connection with `password authentication failed for user "<identity-name>"` even though
+Workload Identity and token acquisition succeeded.
+
+Each managed identity that connects to PostgreSQL therefore needs a one-time bootstrap
+entry in `bootstrap.principals`:
+
+| Identity | PostgreSQL role | Grant profile |
+|---|---|---|
+| Application workload | `id-devops-tracker-dev-aks-workload` | `app` (DML) |
+| Migration job | `id-devops-tracker-dev-migration-job` | `migration` (DDL for Flyway) |
+
+The bootstrap Job itself runs as the **bootstrap** managed identity (PostgreSQL admin
+group member). It does not use the target identities' tokens — it creates their PostgreSQL
+roles and applies the appropriate grants.
 
 ## Why database passwords are no longer required
 

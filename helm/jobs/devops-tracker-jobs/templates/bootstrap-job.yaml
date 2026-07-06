@@ -3,7 +3,7 @@
 {{- $clientId := required "bootstrap.managedIdentityClientId is required when bootstrap.enabled is true" .Values.bootstrap.managedIdentityClientId }}
 {{- $host := required "postgres.host is required when bootstrap.enabled is true" (include "devops-tracker-jobs.postgresHost" .) }}
 {{- $database := required "postgres.database is required when bootstrap.enabled is true" (include "devops-tracker-jobs.postgresDatabase" .) }}
-{{- $appUser := required "postgres.appUser is required when bootstrap.enabled is true" (include "devops-tracker-jobs.postgresAppUser" .) }}
+{{- $principals := required "bootstrap.principals is required when bootstrap.enabled is true" .Values.bootstrap.principals }}
 {{- $entraAdminUser := required "bootstrap.entraAdminUser is required when bootstrap.enabled is true" .Values.bootstrap.entraAdminUser }}
 {{- $jobCtx := dict "root" . "jobName" $jobName "clientId" $clientId }}
 apiVersion: batch/v1
@@ -40,7 +40,10 @@ spec:
               value: {{ include "devops-tracker-jobs.postgresPort" . | quote }}
             - name: POSTGRES_ENTRA_ADMIN_USER
               value: {{ $entraAdminUser | quote }}
-            - name: POSTGRES_APP_PRINCIPAL_NAME
-              value: {{ $appUser | quote }}
+            - name: POSTGRES_BOOTSTRAP_PRINCIPALS
+              value: |-
+                {{- range $principal := $principals }}
+                {{ required "bootstrap.principals[].roleName is required" $principal.roleName }}:{{ required "bootstrap.principals[].grantProfile is required" $principal.grantProfile }}
+                {{- end }}
           {{- include "devops-tracker-jobs.job.tmpVolumeMount" . | nindent 10 }}
 {{- end }}

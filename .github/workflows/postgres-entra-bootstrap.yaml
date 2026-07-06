@@ -15,6 +15,8 @@ env:
   CHART_PATH: helm/jobs/devops-tracker-jobs
   VALUES_FILE: helm/jobs/devops-tracker-jobs/values-dev.yaml
   BOOTSTRAP_JOB_NAME: devops-tracker-db-bootstrap
+  ACR_NAME: devopstrackerdevvsh6qw
+  ACR_LOGIN_SERVER: devopstrackerdevvsh6qw.azurecr.io
 
 jobs:
   bootstrap:
@@ -31,7 +33,7 @@ jobs:
           subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
 
       - name: ACR login
-        run: az acr login --name devopstrackerdevvsh6qw
+        run: az acr login --name "$ACR_NAME"
 
       - name: Build and push bootstrap image
         run: |
@@ -41,7 +43,7 @@ jobs:
           docker buildx build \
             --platform linux/amd64 \
             -f Dockerfile.postgres-bootstrap \
-            -t devopstrackerdevvsh6qw.azurecr.io/devops-tracker-ops:$IMAGE_TAG \
+            -t "$ACR_LOGIN_SERVER/devops-tracker-ops:$IMAGE_TAG" \
             --push \
             .
 
@@ -64,17 +66,20 @@ jobs:
             --install \
             --namespace "$NAMESPACE" \
             -f "$VALUES_FILE" \
+            --wait \
+            --timeout 2m \
             --set migrations.enabled=false \
             --set bootstrap.enabled=true \
-            --set bootstrap.image.tag="$IMAGE_TAG" \
-            --set global.tenantId="${{ vars.AZURE_TENANT_ID }}" \
-            --set bootstrap.managedIdentityClientId="${{ vars.AZURE_DEV_POSTGRES_BOOTSTRAP_CLIENT_ID }}"
+            --set-string bootstrap.image.tag="$IMAGE_TAG" \
+            --set-string bootstrap.image.pullPolicy=Always \
+            --set-string global.tenantId="${{ vars.AZURE_TENANT_ID }}" \
+            --set-string bootstrap.managedIdentityClientId="${{ vars.AZURE_DEV_POSTGRES_BOOTSTRAP_CLIENT_ID }}"
 
       - name: Wait for bootstrap job
         run: |
           kubectl wait \
             --for=condition=complete \
-            --timeout=30s \
+            --timeout=2m \
             "job/$BOOTSTRAP_JOB_NAME" \
             -n "$NAMESPACE"
 
@@ -93,6 +98,8 @@ jobs:
             --install \
             --namespace "$NAMESPACE" \
             -f "$VALUES_FILE" \
+            --wait \
+            --timeout 2m \
             --set bootstrap.enabled=false \
             --set migrations.enabled=false \
-            --set global.tenantId="${{ vars.AZURE_TENANT_ID }}"
+            --set-string global.tenantId="${{ vars.AZURE_TENANT_ID }}"

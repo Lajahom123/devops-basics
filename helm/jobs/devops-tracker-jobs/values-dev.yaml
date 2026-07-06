@@ -8,6 +8,13 @@ postgres:
 bootstrap:
   enabled: false
   entraAdminUser: "devops-tracker-postgres-admins"
+  principals:
+    - roleName: "id-devops-tracker-dev-aks-workload"
+      managedIdentityClientId: ""
+      grantProfile: app
+    - roleName: "id-devops-tracker-dev-migration-job"
+      managedIdentityClientId: ""
+      grantProfile: migration
   image:
     repository: devopstrackerdevvsh6qw.azurecr.io/devops-tracker-ops
     tag: postgres-entra-bootstrap

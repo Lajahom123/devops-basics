@@ -92,6 +92,26 @@ For the Kubernetes bootstrap Job, set `bootstrap.managedIdentityClientId` in
 `bootstrap.entraAdminUser` to `postgres_bootstrap_identity_name` (or the Entra
 admin group name).
 
+Configure `bootstrap.principals` with each managed identity that will connect through
+Entra. Each entry needs:
+
+- `roleName` — managed identity display name (PostgreSQL role name)
+- `managedIdentityClientId` — Azure client ID (for traceability in logs; set from GitHub variables at deploy time)
+- `grantProfile` — `app` for runtime DML, or `migration` for Flyway DDL
+
+Example in `values-dev.yaml`:
+
+```yaml
+bootstrap:
+  principals:
+    - roleName: "id-devops-tracker-dev-aks-workload"
+      managedIdentityClientId: ""
+      grantProfile: app
+    - roleName: "id-devops-tracker-dev-migration-job"
+      managedIdentityClientId: ""
+      grantProfile: migration
+```
+
 Connection settings for operational Jobs live in `helm/jobs/devops-tracker-jobs`:
 
 - `postgres.host`, `postgres.port`, `postgres.database` ← shared by bootstrap and migration Jobs
@@ -106,7 +126,8 @@ The bootstrap Job is managed by the jobs chart and disabled by default
 
 ## Database schema migrations (Flyway Job)
 
-After the application Entra principal exists, run Flyway migrations through the
+After all required Entra principals exist in PostgreSQL (including the migration
+identity via `bootstrap.principals`), run Flyway migrations through the
 `devops-tracker-jobs` Helm release and Job `devops-tracker-db-migrate`. Migrations
 are part of the normal AKS deploy workflow (`.github/workflows/build-and-deploy-aks.yml`),
 not a manual step.
@@ -115,15 +136,9 @@ Relevant Terraform outputs:
 
 - `migration_job_identity_name` — migration managed identity (`id-devops-tracker-dev-migration-job`)
 - `migration_job_identity_client_id` — client ID for the Flyway Job ServiceAccount
-- `migration_job_identity_principal_id` — principal ID for PostgreSQL Entra principal creation
 
-Before the first migration run:
-
-1. Create the migration Entra principal with `bootstrap-postgres-entra-principal.sql`
-   (principal name = `migration_job_identity_name`).
-2. Apply `grant-migration-permissions.sql` for DDL on the application database.
-3. Set the GitHub repository variable `AZURE_DEV_MIGRATION_JOB_CLIENT_ID` from
-   `migration_job_identity_client_id`.
+Before the first migration run, bootstrap the migration identity by including it in
+`bootstrap.principals` with `grantProfile: migration` and rerun the bootstrap workflow.
 
 Supported execution paths:
 

@@ -78,11 +78,11 @@ from `infra/runtime-aks` Terraform outputs:
 Helm equivalents in `helm/jobs/devops-tracker-jobs/values-dev.yaml`:
 
 - `global.tenantId` ← `azure_tenant_id`
-- `postgres.host`, `postgres.port`, `postgres.database` ← shared by bootstrap and migration Jobs
-- `postgres.appUser` ← bootstrap PostgreSQL role
-- `postgres.migrationUser` ← migration PostgreSQL role
+- `postgres.host`, `postgres.port`, `postgres.database` ← shared connection settings
+- `postgres.appUser`, `postgres.migrationUser` ← principal role names
 - `bootstrap.managedIdentityClientId` ← `postgres_bootstrap_identity_client_id`
 - `bootstrap.entraAdminUser` ← `postgres_bootstrap_identity_name`
+- `bootstrap.principals[]` ← one entry per managed identity (`roleName`, `grantProfile`, `managedIdentityClientId`)
 
 Enable the Job only for the bootstrap run:
 
@@ -94,8 +94,12 @@ helm upgrade devops-tracker-jobs helm/jobs/devops-tracker-jobs \
   --set migrations.enabled=false \
   --set bootstrap.enabled=true \
   --set bootstrap.managedIdentityClientId="$(terraform -chdir=infra/runtime-aks output -raw postgres_bootstrap_identity_client_id)" \
+  --set bootstrap.principals[0].managedIdentityClientId="${AZURE_DEV_AKS_WORKLOAD_CLIENT_ID}" \
+  --set bootstrap.principals[1].managedIdentityClientId="${AZURE_DEV_MIGRATION_JOB_CLIENT_ID}" \
   --set global.tenantId="${AZURE_TENANT_ID}"
 ```
+
+Or run `.github/workflows/postgres-entra-bootstrap.yaml` from GitHub Actions.
 
 ## AKS application PostgreSQL authentication
 
