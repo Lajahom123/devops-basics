@@ -39,7 +39,7 @@ jobs:
 
           docker buildx build \
             --platform linux/amd64 \
-            -f ops/postgres-entra-bootstrap/Dockerfile \
+            -f Dockerfile.postgres-bootstrap \
             -t devopstrackerdevvsh6qw.azurecr.io/devops-tracker-ops:$IMAGE_TAG \
             --push \
             .
