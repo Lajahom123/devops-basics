@@ -56,7 +56,7 @@ jobs:
         run: |
           kubectl wait \
             --for=condition=complete \
-            --timeout=180s \
+            --timeout=30s \
             job/postgres-entra-bootstrap \
             -n "$NAMESPACE"
 
