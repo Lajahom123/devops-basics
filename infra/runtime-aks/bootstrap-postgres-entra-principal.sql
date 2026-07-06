@@ -1,5 +1,3 @@
-CREATE EXTENSION IF NOT EXISTS pgaadauth;
-
 SELECT *
 FROM pgaadauth_create_principal(:'app_principal_name', false, false)
 WHERE NOT EXISTS (
