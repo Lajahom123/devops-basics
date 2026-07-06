@@ -109,13 +109,33 @@ serviceAccount:
 rbac:
   create: true
 
+azure:
+  tenantId: ""
+  # Application AKS workload identity. Used by the API ServiceAccount and Key Vault CSI.
+  clientId: ""
+  # PostgreSQL bootstrap Job identity. Must not be the application identity above.
+  postgresBootstrapClientId: ""
+
 keyVault:
   enabled: false
   name: ""
-  tenantId: ""
-  clientId: ""
   mountPath: "/mnt/secrets-store"
   secrets: []
+
+postgresBootstrap:
+  enabled: false
+  image:
+    repository: devopstrackerdevvsh6qw.azurecr.io/devops-tracker-ops
+    tag: postgres-entra-bootstrap
+    pullPolicy: IfNotPresent
+  postgres:
+    host: ""
+    database: "devops_tracker"
+    port: "5432"
+    # Bootstrap managed identity name. Must match the identity used by the Job token.
+    entraAdminUser: ""
+    # Application managed identity principal to create inside PostgreSQL.
+    appPrincipalName: ""
 
 networkPolicy:
   enabled: true

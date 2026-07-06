@@ -12,7 +12,7 @@ The staging slot is not a separate environment. It is a deployment slot used to 
 The platform layer creates the Entra applications, service principals, and federated credentials used by GitHub Actions. Repository secrets hold identifiers, not Azure passwords:
 
 ```text
-AZURE_DEPLOY_CLIENT_ID
+AZURE_DEV_GITHUB_ACTIONS_DEPLOY_CLIENT_ID
 AZURE_DEV_OPERATOR_CLIENT_ID
 AZURE_TENANT_ID
 AZURE_SUBSCRIPTION_ID
@@ -59,3 +59,38 @@ Both use the shared App Service private DNS zone `privatelink.azurewebsites.net`
 ## Rollback
 
 Rollback is modeled as a slot swap through `.github/workflows/rollback-production.yml`. It uses OIDC to perform the Azure operation and then validates production. Because rollback is slot based, staging must still hold the previously known-good production version for rollback to be meaningful.
+
+## PostgreSQL Entra bootstrap workflow
+
+The bootstrap Job is not part of normal deploys. Run it manually when bootstrapping
+or repairing PostgreSQL Entra principals. Populate workflow or repository variables
+from `infra/runtime-aks` Terraform outputs:
+
+| Variable | Terraform output |
+|---|---|
+| `AZURE_TENANT_ID` | `azure_tenant_id` |
+| `POSTGRES_BOOTSTRAP_IDENTITY_CLIENT_ID` | `postgres_bootstrap_identity_client_id` |
+| `POSTGRES_HOST` | `postgres_server_fqdn` |
+| `POSTGRES_DATABASE` | `postgres_database_name` |
+| `POSTGRES_ENTRA_ADMIN_USER` | `postgres_bootstrap_identity_name` |
+| `POSTGRES_APP_PRINCIPAL_NAME` | `postgres_app_entra_principal_name` |
+
+Helm equivalents in `values-dev.yaml`:
+
+- `azure.tenantId` ← `azure_tenant_id`
+- `azure.postgresBootstrapClientId` ← `postgres_bootstrap_identity_client_id`
+- `postgresBootstrap.postgres.host` ← `postgres_server_fqdn`
+- `postgresBootstrap.postgres.database` ← `postgres_database_name`
+- `postgresBootstrap.postgres.entraAdminUser` ← `postgres_bootstrap_identity_name`
+- `postgresBootstrap.postgres.appPrincipalName` ← `postgres_app_entra_principal_name`
+
+Enable the Job only for the bootstrap run:
+
+```bash
+helm upgrade devops-tracker-api helm/applications/devops-tracker-api \
+  --install \
+  --namespace devops-tracker \
+  --values helm/applications/devops-tracker-api/values-dev.yaml \
+  --set postgresBootstrap.enabled=true \
+  --set azure.postgresBootstrapClientId="$(terraform -chdir=infra/runtime-aks output -raw postgres_bootstrap_identity_client_id)"
+```

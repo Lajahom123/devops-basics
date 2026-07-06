@@ -55,3 +55,24 @@ Service account name.
 {{- define "devops-tracker-api.serviceAccountName" -}}
 {{- default (include "devops-tracker-api.fullname" .) .Values.serviceAccount.name }}
 {{- end }}
+
+{{/*
+Microsoft Entra tenant ID shared by Workload Identity and Key Vault CSI.
+*/}}
+{{- define "devops-tracker-api.azureTenantId" -}}
+{{- .Values.azure.tenantId }}
+{{- end }}
+
+{{/*
+Application AKS workload identity client ID.
+*/}}
+{{- define "devops-tracker-api.azureClientId" -}}
+{{- .Values.azure.clientId }}
+{{- end }}
+
+{{/*
+PostgreSQL bootstrap Job workload identity client ID.
+*/}}
+{{- define "devops-tracker-api.azurePostgresBootstrapClientId" -}}
+{{- .Values.azure.postgresBootstrapClientId }}
+{{- end }}
