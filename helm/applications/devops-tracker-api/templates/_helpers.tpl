@@ -71,14 +71,7 @@ Application AKS workload identity client ID.
 {{- end }}
 
 {{/*
-PostgreSQL bootstrap Job workload identity client ID.
-*/}}
-{{- define "devops-tracker-api.postgresBootstrapClientId" -}}
-{{- .Values.postgresBootstrap.managedIdentityClientId }}
-{{- end }}
-
-{{/*
-Shared PostgreSQL connection settings used by the API and bootstrap Job.
+PostgreSQL connection settings for the API deployment.
 */}}
 {{- define "devops-tracker-api.postgresHost" -}}
 {{- .Values.postgres.host }}

@@ -11,8 +11,12 @@ on:
       - "package.json"
       - "package-lock.json"
       - "Dockerfile"
+      - "Dockerfile.migrations"
+      - "migrations/**"
+      - "scripts/run-flyway-migrations.sh"
       - ".dockerignore"
       - "helm/applications/devops-tracker-api/**"
+      - "helm/jobs/devops-tracker-jobs/**"
       - ".github/workflows/build-and-deploy-aks.yml"
 
 permissions:
@@ -22,14 +26,17 @@ permissions:
 env:
   ACR_NAME: devopstrackerdevvsh6qw
   IMAGE_NAME: devops-tracker-api
+  MIGRATION_IMAGE_NAME: devops-tracker-migrations
   AKS_CLUSTER_NAME: aks-devops-tracker-dev-vsh6qw-swn
   RESOURCE_GROUP: rg-devops-tracker-dev-runtime
   NAMESPACE: devops-tracker
-  HELM_RELEASE_NAME: devops-tracker-api
+  APP_HELM_RELEASE_NAME: devops-tracker-api
+  JOBS_HELM_RELEASE_NAME: devops-tracker-jobs
+  MIGRATION_JOB_NAME: devops-tracker-db-migrate
 
 jobs:
   build:
-    name: Build image
+    name: Build images
     runs-on: ubuntu-latest
 
     outputs:
@@ -50,7 +57,7 @@ jobs:
         run: |
           az acr login --name "$ACR_NAME"
 
-      - name: Build and push image
+      - name: Build and push application image
         id: image
         run: |
           IMAGE_TAG=${{ github.sha }}
@@ -61,10 +68,87 @@ jobs:
 
           echo "image_tag=$IMAGE_TAG" >> "$GITHUB_OUTPUT"
 
+      - name: Build and push migration image
+        run: |
+          IMAGE_TAG=${{ github.sha }}
+          IMAGE="${ACR_NAME}.azurecr.io/${MIGRATION_IMAGE_NAME}:${IMAGE_TAG}"
+
+          docker build \
+            -f Dockerfile.migrations \
+            -t "$IMAGE" \
+            .
+
+          docker push "$IMAGE"
+
+  migrate:
+    name: Run database migrations
+    runs-on: ubuntu-latest
+    needs: build
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Azure login
+        uses: azure/login@v2
+        with:
+          client-id: ${{ vars.AZURE_DEV_GITHUB_ACTIONS_DEPLOY_CLIENT_ID }}
+          tenant-id: ${{ vars.AZURE_TENANT_ID }}
+          subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Install kubectl
+        uses: azure/setup-kubectl@v4
+
+      - name: Install helm
+        uses: azure/setup-helm@v4
+
+      - name: Get AKS credentials
+        run: |
+          az aks get-credentials \
+            --resource-group "$RESOURCE_GROUP" \
+            --name "$AKS_CLUSTER_NAME" \
+            --overwrite-existing
+
+      - name: Delete previous migration job
+        run: |
+          kubectl delete job "$MIGRATION_JOB_NAME" \
+            --namespace "$NAMESPACE" \
+            --ignore-not-found
+
+      - name: Run migration job
+        run: |
+          helm upgrade "$JOBS_HELM_RELEASE_NAME" helm/jobs/devops-tracker-jobs \
+            --install \
+            --namespace "$NAMESPACE" \
+            --values helm/jobs/devops-tracker-jobs/values-dev.yaml \
+            --set bootstrap.enabled=false \
+            --set migrations.enabled=true \
+            --set migrations.image.tag=${{ needs.build.outputs.image_tag }} \
+            --set migrations.managedIdentityClientId="${{ vars.AZURE_DEV_MIGRATION_JOB_CLIENT_ID }}" \
+            --set global.tenantId="${{ vars.AZURE_TENANT_ID }}"
+
+      - name: Wait for migration job
+        run: |
+          kubectl wait \
+            --for=condition=complete \
+            --timeout=1m \
+            "job/$MIGRATION_JOB_NAME" \
+            --namespace "$NAMESPACE"
+
+      - name: Print migration logs
+        if: always()
+        run: |
+          kubectl logs \
+            --namespace "$NAMESPACE" \
+            "job/$MIGRATION_JOB_NAME" \
+            --tail=-1 || true
+
   deploy:
     name: Deploy to AKS
     runs-on: ubuntu-latest
-    needs: build
+    needs:
+      - build
+      - migrate
 
     steps:
       - name: Checkout
@@ -93,7 +177,7 @@ jobs:
       - name: Deploy application
         id: deploy
         run: |
-          helm upgrade "$HELM_RELEASE_NAME" helm/applications/devops-tracker-api \
+          helm upgrade "$APP_HELM_RELEASE_NAME" helm/applications/devops-tracker-api \
             --install \
             --namespace "$NAMESPACE" \
             --values helm/applications/devops-tracker-api/values-dev.yaml \
@@ -106,8 +190,15 @@ jobs:
       - name: Rollback on failed deploy
         if: failure() && steps.deploy.outcome == 'failure'
         run: |
-          if helm history "$HELM_RELEASE_NAME" --namespace "$NAMESPACE" | grep -q deployed; then
-            helm rollback "$HELM_RELEASE_NAME" \
+          LAST_SUCCESSFUL_REVISION="$(
+            helm history "$APP_HELM_RELEASE_NAME" \
+              --namespace "$NAMESPACE" \
+              --output json \
+            | jq -r '[.[] | select(.status == "deployed" or .status == "superseded")] | last | .revision // empty'
+          )"
+
+          if [[ -n "$LAST_SUCCESSFUL_REVISION" ]]; then
+            helm rollback "$APP_HELM_RELEASE_NAME" "$LAST_SUCCESSFUL_REVISION" \
               --namespace "$NAMESPACE" \
               --wait \
               --timeout 3m
@@ -115,6 +206,6 @@ jobs:
             echo "No previous successful release to roll back to."
           fi
 
-      - name: Verify health through cluster service
+      - name: Verify health through public endpoint
         run: |
           curl --fail --silent --show-error https://api.devopstracker.com/health

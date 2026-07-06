@@ -30,15 +30,6 @@ postgres:
     enabled: true
     rejectUnauthorized: true
 
-postgresBootstrap:
-  enabled: false
-  managedIdentityClientId: ""
-  entraAdminUser: "devops-tracker-postgres-admins"
-  image:
-    repository: devopstrackerdevvsh6qw.azurecr.io/devops-tracker-ops
-    tag: postgres-entra-bootstrap
-    pullPolicy: Always
-
 keyVault:
   enabled: true
   name: "kv-devops-tracker-dev-vs"

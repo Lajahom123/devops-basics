@@ -10,10 +10,11 @@ permissions:
 env:
   AKS_CLUSTER_NAME: aks-devops-tracker-dev-vsh6qw-swn
   RESOURCE_GROUP: rg-devops-tracker-dev-runtime
-  RELEASE_NAME: devops-tracker-api
+  JOBS_RELEASE_NAME: devops-tracker-jobs
   NAMESPACE: devops-tracker
-  CHART_PATH: helm/applications/devops-tracker-api
-  VALUES_FILE: helm/applications/devops-tracker-api/values-dev.yaml
+  CHART_PATH: helm/jobs/devops-tracker-jobs
+  VALUES_FILE: helm/jobs/devops-tracker-jobs/values-dev.yaml
+  BOOTSTRAP_JOB_NAME: devops-tracker-db-bootstrap
 
 jobs:
   bootstrap:
@@ -53,27 +54,28 @@ jobs:
 
       - name: Delete previous bootstrap job
         run: |
-          kubectl delete job postgres-entra-bootstrap \
+          kubectl delete job "$BOOTSTRAP_JOB_NAME" \
             -n "$NAMESPACE" \
             --ignore-not-found
 
       - name: Enable bootstrap job
         run: |
-          helm upgrade "$RELEASE_NAME" "$CHART_PATH" \
+          helm upgrade "$JOBS_RELEASE_NAME" "$CHART_PATH" \
+            --install \
             --namespace "$NAMESPACE" \
             -f "$VALUES_FILE" \
-            --reuse-values \
-            --set postgresBootstrap.enabled=true \
-            --set postgresBootstrap.image.tag="$IMAGE_TAG" \
-            --set azure.tenantId="${{ vars.AZURE_TENANT_ID }}" \
-            --set postgresBootstrap.managedIdentityClientId="${{ vars.AZURE_DEV_POSTGRES_BOOTSTRAP_CLIENT_ID }}"
+            --set migrations.enabled=false \
+            --set bootstrap.enabled=true \
+            --set bootstrap.image.tag="$IMAGE_TAG" \
+            --set global.tenantId="${{ vars.AZURE_TENANT_ID }}" \
+            --set bootstrap.managedIdentityClientId="${{ vars.AZURE_DEV_POSTGRES_BOOTSTRAP_CLIENT_ID }}"
 
       - name: Wait for bootstrap job
         run: |
           kubectl wait \
             --for=condition=complete \
             --timeout=30s \
-            job/postgres-entra-bootstrap \
+            "job/$BOOTSTRAP_JOB_NAME" \
             -n "$NAMESPACE"
 
       - name: Print bootstrap logs
@@ -81,14 +83,16 @@ jobs:
         run: |
           kubectl logs \
             -n "$NAMESPACE" \
-            job/postgres-entra-bootstrap \
+            "job/$BOOTSTRAP_JOB_NAME" \
             --tail=-1 || true
 
       - name: Disable bootstrap job
-        if: success() # TODO: revert to always() when the bootstrap job is stable
+        if: always()
         run: |
-          helm upgrade "$RELEASE_NAME" "$CHART_PATH" \
+          helm upgrade "$JOBS_RELEASE_NAME" "$CHART_PATH" \
+            --install \
             --namespace "$NAMESPACE" \
             -f "$VALUES_FILE" \
-            --reuse-values \
-            --set postgresBootstrap.enabled=false
+            --set bootstrap.enabled=false \
+            --set migrations.enabled=false \
+            --set global.tenantId="${{ vars.AZURE_TENANT_ID }}"

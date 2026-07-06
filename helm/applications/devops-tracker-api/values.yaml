@@ -113,7 +113,6 @@ azure:
   tenantId: ""
   # Application AKS workload identity. Used by the API ServiceAccount and Key Vault CSI.
   clientId: ""
-  # PostgreSQL bootstrap Job identity. Must not be the application identity above.
 
 postgres:
   enabled: false
@@ -122,7 +121,6 @@ postgres:
   host: ""
   port: 5432
   database: devops_tracker
-  # PostgreSQL role mapped to the application managed identity (also the bootstrap principal name).
   user: ""
   ssl:
     enabled: true
@@ -133,17 +131,6 @@ keyVault:
   name: ""
   mountPath: "/mnt/secrets-store"
   secrets: []
-
-postgresBootstrap:
-  enabled: false
-  managedIdentityClientId: ""
-  # Bootstrap managed identity or Entra admin group name. Must match the
-  # identity used by the Job token.
-  entraAdminUser: ""
-  image:
-    repository: devopstrackerdevvsh6qw.azurecr.io/devops-tracker-ops
-    tag: postgres-entra-bootstrap
-    pullPolicy: Always
 
 networkPolicy:
   enabled: true

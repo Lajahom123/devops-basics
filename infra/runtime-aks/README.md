@@ -87,24 +87,52 @@ Relevant Terraform outputs from this root:
 - `postgres_entra_admin_group_name`
 - `azure_tenant_id`
 
-For the Kubernetes bootstrap Job, set `postgresBootstrap.managedIdentityClientId` in Helm
-to `postgres_bootstrap_identity_client_id` and `postgresBootstrap.entraAdminUser`
-to `postgres_bootstrap_identity_name` (or the Entra admin group name).
+For the Kubernetes bootstrap Job, set `bootstrap.managedIdentityClientId` in
+`helm/jobs/devops-tracker-jobs` to `postgres_bootstrap_identity_client_id` and
+`bootstrap.entraAdminUser` to `postgres_bootstrap_identity_name` (or the Entra
+admin group name).
 
-Connection settings (`postgres.host`, `postgres.database`, `postgres.user`) are shared
-between the API deployment and the bootstrap Job.
+Connection settings for operational Jobs live in `helm/jobs/devops-tracker-jobs`:
 
-The bootstrap Job is managed by Helm and disabled by default
-(`postgresBootstrap.enabled: false`). Enable it only for one-time bootstrap or
-repair.
+- `postgres.host`, `postgres.port`, `postgres.database` ← shared by bootstrap and migration Jobs
+- `postgres.appUser` ← bootstrap Job
+- `postgres.migrationUser` ← migration Job
+
+The application chart (`helm/applications/devops-tracker-api`) keeps its own
+`postgres.*` values for the API deployment only.
+
+The bootstrap Job is managed by the jobs chart and disabled by default
+(`bootstrap.enabled: false`). Enable it only for one-time bootstrap or repair.
+
+## Database schema migrations (Flyway Job)
+
+After the application Entra principal exists, run Flyway migrations through the
+`devops-tracker-jobs` Helm release and Job `devops-tracker-db-migrate`. Migrations
+are part of the normal AKS deploy workflow (`.github/workflows/build-and-deploy-aks.yml`),
+not a manual step.
+
+Relevant Terraform outputs:
+
+- `migration_job_identity_name` — migration managed identity (`id-devops-tracker-dev-migration-job`)
+- `migration_job_identity_client_id` — client ID for the Flyway Job ServiceAccount
+- `migration_job_identity_principal_id` — principal ID for PostgreSQL Entra principal creation
+
+Before the first migration run:
+
+1. Create the migration Entra principal with `bootstrap-postgres-entra-principal.sql`
+   (principal name = `migration_job_identity_name`).
+2. Apply `grant-migration-permissions.sql` for DDL on the application database.
+3. Set the GitHub repository variable `AZURE_DEV_MIGRATION_JOB_CLIENT_ID` from
+   `migration_job_identity_client_id`.
 
 Supported execution paths:
 
 1. Kubernetes Job inside AKS (preferred)
 
-   Build and push `Dockerfile.postgres-bootstrap`, then enable the Helm bootstrap
-   Job with Workload Identity. The Job ServiceAccount uses the bootstrap managed
-   identity client ID and federated credential.
+   Build and push `Dockerfile.postgres-bootstrap`, then enable the bootstrap Job
+   in `helm/jobs/devops-tracker-jobs` with Workload Identity. The Job
+   ServiceAccount uses the bootstrap managed identity client ID and federated
+   credential.
 
 2. Local machine connected through VPN
 

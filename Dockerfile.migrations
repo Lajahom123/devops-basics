@@ -1,0 +1,30 @@
+FROM ubuntu:24.04
+
+ARG FLYWAY_VERSION=10.15.2
+
+RUN apt-get update \
+  && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+    ca-certificates \
+    curl \
+    gnupg \
+    lsb-release \
+    openjdk-17-jre-headless \
+  && curl -sL https://aka.ms/InstallAzureCLIDeb | bash \
+  && curl -fsSL "https://github.com/flyway/flyway/releases/download/flyway-${FLYWAY_VERSION}/flyway-commandline-${FLYWAY_VERSION}-linux-x64.tar.gz" \
+    | tar xz -C /opt \
+  && ln -s "/opt/flyway-${FLYWAY_VERSION}/flyway" /usr/local/bin/flyway \
+  && apt-get clean \
+  && rm -rf /var/lib/apt/lists/*
+
+COPY migrations /flyway/sql
+COPY scripts/run-flyway-migrations.sh /opt/migrations/run-flyway-migrations.sh
+
+RUN chmod +x /opt/migrations/run-flyway-migrations.sh \
+  && useradd --create-home --shell /usr/sbin/nologin migrate \
+  && chown -R migrate:migrate /flyway /opt/migrations
+
+USER migrate
+
+WORKDIR /opt/migrations
+
+ENTRYPOINT ["/opt/migrations/run-flyway-migrations.sh"]

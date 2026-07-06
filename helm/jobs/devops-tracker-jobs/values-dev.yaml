@@ -1,0 +1,17 @@
+postgres:
+  host: "psql-devops-tracker-dev-swdct.postgres.database.azure.com"
+  port: 5432
+  database: devops_tracker
+  appUser: "id-devops-tracker-dev-aks-workload"
+  migrationUser: "id-devops-tracker-dev-migration-job"
+
+bootstrap:
+  enabled: false
+  entraAdminUser: "devops-tracker-postgres-admins"
+  image:
+    repository: devopstrackerdevvsh6qw.azurecr.io/devops-tracker-ops
+    tag: postgres-entra-bootstrap
+    pullPolicy: Always
+
+migrations:
+  enabled: false

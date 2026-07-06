@@ -1,0 +1,54 @@
+global:
+  namespace: devops-tracker
+  tenantId: ""
+
+jobs:
+  partOf: devops-tracker
+  ttlSecondsAfterFinished: 300
+  backoffLimit: 0
+  restartPolicy: Never
+  workloadIdentity:
+    use: "true"
+  podSecurityContext:
+    runAsNonRoot: true
+    runAsUser: 10001
+    runAsGroup: 10001
+    fsGroup: 10001
+  containerSecurityContext:
+    allowPrivilegeEscalation: false
+    readOnlyRootFilesystem: false
+    capabilities:
+      drop:
+        - ALL
+  azure:
+    configDir: /tmp/.azure
+  tmpVolume:
+    name: tmp
+    mountPath: /tmp
+
+postgres:
+  host: ""
+  port: 5432
+  database: devops_tracker
+  appUser: ""
+  migrationUser: ""
+
+bootstrap:
+  enabled: false
+  serviceAccountName: devops-tracker-db-bootstrap
+  managedIdentityClientId: ""
+  entraAdminUser: ""
+  image:
+    repository: devopstrackerdevvsh6qw.azurecr.io/devops-tracker-ops
+    tag: postgres-entra-bootstrap
+    pullPolicy: IfNotPresent
+
+migrations:
+  enabled: false
+  serviceAccountName: devops-tracker-db-migrate
+  jobName: devops-tracker-db-migrate
+  managedIdentityClientId: ""
+  image:
+    repository: devopstrackerdevvsh6qw.azurecr.io/devops-tracker-migrations
+    tag: ""
+    pullPolicy: IfNotPresent

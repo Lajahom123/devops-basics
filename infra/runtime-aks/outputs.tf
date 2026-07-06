@@ -88,6 +88,21 @@ output "aks_node_resource_group" {
   value       = module.aks.node_resource_group
 }
 
+output "migration_job_identity_name" {
+  description = "Database migration managed identity name for Flyway Job Workload Identity."
+  value       = local.migration_job_identity.name
+}
+
+output "migration_job_identity_client_id" {
+  description = "Database migration managed identity client ID for the Flyway Job ServiceAccount."
+  value       = local.migration_job_identity.client_id
+}
+
+output "migration_job_identity_principal_id" {
+  description = "Database migration managed identity principal ID."
+  value       = local.migration_job_identity.principal_id
+}
+
 output "aks_oidc_issuer_url" {
   description = "AKS OIDC issuer URL."
   value       = local.aks_oidc_issuer_url

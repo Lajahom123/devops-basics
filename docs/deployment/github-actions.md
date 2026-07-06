@@ -75,24 +75,26 @@ from `infra/runtime-aks` Terraform outputs:
 | `POSTGRES_ENTRA_ADMIN_USER` | `postgres_bootstrap_identity_name` |
 | `POSTGRES_APP_PRINCIPAL_NAME` | `postgres_app_entra_principal_name` |
 
-Helm equivalents in `values-dev.yaml`:
+Helm equivalents in `helm/jobs/devops-tracker-jobs/values-dev.yaml`:
 
-- `azure.tenantId` ← `azure_tenant_id`
-- `postgres.host` ← `postgres_server_fqdn`
-- `postgres.database` ← `postgres_database_name`
-- `postgres.user` ← `postgres_app_entra_principal_name`
-- `postgresBootstrap.managedIdentityClientId` ← `postgres_bootstrap_identity_client_id`
-- `postgresBootstrap.entraAdminUser` ← `postgres_bootstrap_identity_name`
+- `global.tenantId` ← `azure_tenant_id`
+- `postgres.host`, `postgres.port`, `postgres.database` ← shared by bootstrap and migration Jobs
+- `postgres.appUser` ← bootstrap PostgreSQL role
+- `postgres.migrationUser` ← migration PostgreSQL role
+- `bootstrap.managedIdentityClientId` ← `postgres_bootstrap_identity_client_id`
+- `bootstrap.entraAdminUser` ← `postgres_bootstrap_identity_name`
 
 Enable the Job only for the bootstrap run:
 
 ```bash
-helm upgrade devops-tracker-api helm/applications/devops-tracker-api \
+helm upgrade devops-tracker-jobs helm/jobs/devops-tracker-jobs \
   --install \
   --namespace devops-tracker \
-  --values helm/applications/devops-tracker-api/values-dev.yaml \
-  --set postgresBootstrap.enabled=true \
-  --set postgresBootstrap.managedIdentityClientId="$(terraform -chdir=infra/runtime-aks output -raw postgres_bootstrap_identity_client_id)"
+  --values helm/jobs/devops-tracker-jobs/values-dev.yaml \
+  --set migrations.enabled=false \
+  --set bootstrap.enabled=true \
+  --set bootstrap.managedIdentityClientId="$(terraform -chdir=infra/runtime-aks output -raw postgres_bootstrap_identity_client_id)" \
+  --set global.tenantId="${AZURE_TENANT_ID}"
 ```
 
 ## AKS application PostgreSQL authentication
@@ -116,3 +118,32 @@ repository variable in GitHub Actions deploys.
 
 See [PostgreSQL Entra authentication on AKS](../security/postgresql-entra-aks.md) for
 the full flow, token refresh behaviour, and operational guidance.
+
+## AKS database migrations (Flyway Job)
+
+Schema migrations run through the separate `devops-tracker-jobs` Helm release
+before each application deploy.
+
+| Variable | Purpose |
+|---|---|
+| `AZURE_TENANT_ID` | Microsoft Entra tenant ID |
+| `AZURE_DEV_MIGRATION_JOB_CLIENT_ID` | Migration Job workload identity client ID |
+| `AZURE_DEV_AKS_WORKLOAD_CLIENT_ID` | Application workload identity client ID |
+
+Helm equivalents in `helm/jobs/devops-tracker-jobs/values-dev.yaml`:
+
+- `postgres.host`, `postgres.port`, `postgres.database` ← shared connection settings
+- `postgres.migrationUser` ← migration PostgreSQL role (`migration_job_identity_name`)
+- `migrations.managedIdentityClientId` ← `AZURE_DEV_MIGRATION_JOB_CLIENT_ID`
+- `global.tenantId` ← `AZURE_TENANT_ID`
+
+Deploy workflow order (`.github/workflows/build-and-deploy-aks.yml`):
+
+1. Build and push application and migration images.
+2. Delete any previous `devops-tracker-db-migrate` Job.
+3. `helm upgrade devops-tracker-jobs` with `migrations.enabled=true` and the migration image tag.
+4. Wait for Job completion and print logs.
+5. Deploy `devops-tracker-api` with the new application image tag.
+
+If the migration Job fails, the deploy job does not run. The application chart does
+not manage migration Jobs.

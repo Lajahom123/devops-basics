@@ -21,7 +21,7 @@ Azure Database for PostgreSQL Flexible Server
   (pgaadauth validates token, maps to PostgreSQL role)
 ```
 
-The PostgreSQL role `id-devops-tracker-dev-aks-workload` is created by the one-time bootstrap Job (`postgresBootstrap`) using `pgaadauth_create_principal`. Grants are applied from `infra/runtime-aks/sql/grant-app-permissions.sql`.
+The PostgreSQL role `id-devops-tracker-dev-aks-workload` is created by the one-time bootstrap Job in `helm/jobs/devops-tracker-jobs` using `pgaadauth_create_principal`. Grants are applied from `infra/runtime-aks/sql/grant-app-permissions.sql`.
 
 ## Why database passwords are no longer required
 
@@ -107,6 +107,36 @@ The API pod uses AKS Workload Identity exclusively:
 - No pod-managed identity, no legacy aad-pod-identity
 
 Key Vault CSI uses the same application identity client ID for secret mounts (Application Insights connection string only — no database credentials).
+
+## Database schema migrations
+
+Flyway migrations run as a one-shot Kubernetes Job (`devops-tracker-db-migrate`)
+managed by the `devops-tracker-jobs` Helm release before each application deploy.
+The Job uses Workload Identity to acquire a Microsoft Entra access token and passes
+it to Flyway as the PostgreSQL password.
+
+| Component | Value |
+|---|---|
+| Job name | `devops-tracker-db-migrate` |
+| ServiceAccount | `devops-tracker-db-migrate` |
+| Token scope | `https://ossrdbms-aad.database.windows.net/.default` |
+| Migration image | `Dockerfile.migrations` (Flyway + Azure CLI) |
+| SQL files | `migrations/V*.sql` |
+
+### Identity model
+
+| Workload | Managed identity | PostgreSQL role | Federated credential subject |
+|---|---|---|---|
+| Application | `id-devops-tracker-dev-aks-workload` | Same name as identity | `system:serviceaccount:devops-tracker:devops-tracker-api` |
+| Flyway migrations | `id-devops-tracker-dev-migration-job` | Same name as identity | `system:serviceaccount:devops-tracker:devops-tracker-db-migrate` |
+
+Each workload has its own managed identity and federated credential. The
+identities are not shared.
+
+- Migration identity: DDL via `grant-migration-permissions.sql`
+- Application identity: DML only via `grant-app-permissions.sql`
+
+Do not use the bootstrap identity or Entra admin group for routine migrations.
 
 ## Operational considerations
 

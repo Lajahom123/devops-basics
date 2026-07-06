@@ -1,0 +1,41 @@
+{{- if .Values.migrations.enabled }}
+{{- $jobName := .Values.migrations.jobName }}
+{{- $clientId := required "migrations.managedIdentityClientId is required when migrations.enabled is true" .Values.migrations.managedIdentityClientId }}
+{{- $host := required "postgres.host is required when migrations.enabled is true" (include "devops-tracker-jobs.postgresHost" .) }}
+{{- $database := required "postgres.database is required when migrations.enabled is true" (include "devops-tracker-jobs.postgresDatabase" .) }}
+{{- $user := required "postgres.migrationUser is required when migrations.enabled is true" (include "devops-tracker-jobs.postgresMigrationUser" .) }}
+{{- $jobCtx := dict "root" . "jobName" $jobName "clientId" $clientId }}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ $jobName }}
+  namespace: {{ include "devops-tracker-jobs.namespace" . }}
+  labels:
+    {{- include "devops-tracker-jobs.job.labels" $jobCtx | nindent 4 }}
+spec:
+  ttlSecondsAfterFinished: {{ .Values.jobs.ttlSecondsAfterFinished }}
+  backoffLimit: {{ .Values.jobs.backoffLimit }}
+  template:
+    metadata:
+      labels:
+        {{- include "devops-tracker-jobs.job.podLabels" $jobCtx | nindent 8 }}
+    spec:
+      serviceAccountName: {{ .Values.migrations.serviceAccountName }}
+      {{- include "devops-tracker-jobs.job.podSpec" . | nindent 6 }}
+      containers:
+        - name: migrate
+          image: {{ printf "%s:%s" .Values.migrations.image.repository .Values.migrations.image.tag | quote }}
+          imagePullPolicy: {{ .Values.migrations.image.pullPolicy | quote }}
+          {{- include "devops-tracker-jobs.job.containerSecurityContext" . | nindent 10 }}
+          env:
+            {{- include "devops-tracker-jobs.job.azureEnv" $jobCtx | nindent 12 }}
+            - name: POSTGRES_HOST
+              value: {{ $host | quote }}
+            - name: POSTGRES_PORT
+              value: {{ include "devops-tracker-jobs.postgresPort" . | quote }}
+            - name: POSTGRES_DATABASE
+              value: {{ $database | quote }}
+            - name: POSTGRES_USER
+              value: {{ $user | quote }}
+          {{- include "devops-tracker-jobs.job.tmpVolumeMount" . | nindent 10 }}
+{{- end }}

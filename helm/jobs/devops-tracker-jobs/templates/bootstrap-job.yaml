@@ -1,0 +1,46 @@
+{{- if .Values.bootstrap.enabled }}
+{{- $jobName := .Values.bootstrap.serviceAccountName }}
+{{- $clientId := required "bootstrap.managedIdentityClientId is required when bootstrap.enabled is true" .Values.bootstrap.managedIdentityClientId }}
+{{- $host := required "postgres.host is required when bootstrap.enabled is true" (include "devops-tracker-jobs.postgresHost" .) }}
+{{- $database := required "postgres.database is required when bootstrap.enabled is true" (include "devops-tracker-jobs.postgresDatabase" .) }}
+{{- $appUser := required "postgres.appUser is required when bootstrap.enabled is true" (include "devops-tracker-jobs.postgresAppUser" .) }}
+{{- $entraAdminUser := required "bootstrap.entraAdminUser is required when bootstrap.enabled is true" .Values.bootstrap.entraAdminUser }}
+{{- $jobCtx := dict "root" . "jobName" $jobName "clientId" $clientId }}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ $jobName }}
+  namespace: {{ include "devops-tracker-jobs.namespace" . }}
+  labels:
+    {{- include "devops-tracker-jobs.job.labels" $jobCtx | nindent 4 }}
+  annotations:
+    devops-tracker/one-time-operation: "true"
+spec:
+  ttlSecondsAfterFinished: {{ .Values.jobs.ttlSecondsAfterFinished }}
+  backoffLimit: {{ .Values.jobs.backoffLimit }}
+  template:
+    metadata:
+      labels:
+        {{- include "devops-tracker-jobs.job.podLabels" $jobCtx | nindent 8 }}
+    spec:
+      serviceAccountName: {{ .Values.bootstrap.serviceAccountName }}
+      {{- include "devops-tracker-jobs.job.podSpec" . | nindent 6 }}
+      containers:
+        - name: bootstrap
+          image: {{ printf "%s:%s" .Values.bootstrap.image.repository .Values.bootstrap.image.tag | quote }}
+          imagePullPolicy: {{ .Values.bootstrap.image.pullPolicy | quote }}
+          {{- include "devops-tracker-jobs.job.containerSecurityContext" . | nindent 10 }}
+          env:
+            {{- include "devops-tracker-jobs.job.azureEnv" $jobCtx | nindent 12 }}
+            - name: POSTGRES_HOST
+              value: {{ $host | quote }}
+            - name: POSTGRES_DATABASE
+              value: {{ $database | quote }}
+            - name: POSTGRES_PORT
+              value: {{ include "devops-tracker-jobs.postgresPort" . | quote }}
+            - name: POSTGRES_ENTRA_ADMIN_USER
+              value: {{ $entraAdminUser | quote }}
+            - name: POSTGRES_APP_PRINCIPAL_NAME
+              value: {{ $appUser | quote }}
+          {{- include "devops-tracker-jobs.job.tmpVolumeMount" . | nindent 10 }}
+{{- end }}

@@ -1,0 +1,23 @@
+GRANT CONNECT ON DATABASE :"database_name"
+TO :"migration_principal_name";
+
+GRANT USAGE, CREATE ON SCHEMA public
+TO :"migration_principal_name";
+
+GRANT SELECT, INSERT, UPDATE, DELETE, TRUNCATE, REFERENCES, TRIGGER
+ON ALL TABLES IN SCHEMA public
+TO :"migration_principal_name";
+
+GRANT USAGE, SELECT, UPDATE
+ON ALL SEQUENCES IN SCHEMA public
+TO :"migration_principal_name";
+
+ALTER DEFAULT PRIVILEGES IN SCHEMA public
+GRANT SELECT, INSERT, UPDATE, DELETE, TRUNCATE, REFERENCES, TRIGGER
+ON TABLES
+TO :"migration_principal_name";
+
+ALTER DEFAULT PRIVILEGES IN SCHEMA public
+GRANT USAGE, SELECT, UPDATE
+ON SEQUENCES
+TO :"migration_principal_name";
