@@ -7,10 +7,16 @@ set -euo pipefail
 : "${POSTGRES_APP_PRINCIPAL_NAME:?POSTGRES_APP_PRINCIPAL_NAME is required}"
 
 POSTGRES_PORT="${POSTGRES_PORT:-5432}"
-SQL_FILE="${SQL_FILE:-/opt/postgres-bootstrap/bootstrap-postgres-entra-principal.sql}"
+CREATE_PRINCIPAL_SQL_FILE="${CREATE_PRINCIPAL_SQL_FILE:-/opt/postgres-bootstrap/bootstrap-postgres-entra-principal.sql}"
+GRANT_PERMISSIONS_SQL_FILE="${GRANT_PERMISSIONS_SQL_FILE:-/opt/postgres-bootstrap/grant-app-permissions.sql}"
 
-if [[ ! -f "$SQL_FILE" ]]; then
-  echo "ERROR: SQL file not found at ${SQL_FILE}." >&2
+if [[ ! -f "$CREATE_PRINCIPAL_SQL_FILE" ]]; then
+  echo "ERROR: SQL file not found at ${CREATE_PRINCIPAL_SQL_FILE}." >&2
+  exit 1
+fi
+
+if [[ ! -f "$GRANT_PERMISSIONS_SQL_FILE" ]]; then
+  echo "ERROR: SQL file not found at ${GRANT_PERMISSIONS_SQL_FILE}." >&2
   exit 1
 fi
 
@@ -47,13 +53,24 @@ if [[ -z "$ACCESS_TOKEN" ]]; then
   exit 1
 fi
 
+echo "Creating PostgreSQL Entra principal '${POSTGRES_APP_PRINCIPAL_NAME}' via database 'postgres'."
+
+PGPASSWORD="$ACCESS_TOKEN" psql \
+  "host=$POSTGRES_HOST port=$POSTGRES_PORT dbname=postgres user=$POSTGRES_ENTRA_ADMIN_USER sslmode=require connect_timeout=10" \
+  --set=ON_ERROR_STOP=1 \
+  --no-psqlrc \
+  --set=app_principal_name="$POSTGRES_APP_PRINCIPAL_NAME" \
+  --file="$CREATE_PRINCIPAL_SQL_FILE"
+
+echo "Granting application permissions on database '${POSTGRES_DATABASE}'."
+
 PGPASSWORD="$ACCESS_TOKEN" psql \
   "host=$POSTGRES_HOST port=$POSTGRES_PORT dbname=$POSTGRES_DATABASE user=$POSTGRES_ENTRA_ADMIN_USER sslmode=require connect_timeout=10" \
   --set=ON_ERROR_STOP=1 \
   --no-psqlrc \
   --set=app_principal_name="$POSTGRES_APP_PRINCIPAL_NAME" \
   --set=database_name="$POSTGRES_DATABASE" \
-  --file="$SQL_FILE"
+  --file="$GRANT_PERMISSIONS_SQL_FILE"
 
 printf 'PostgreSQL Entra principal bootstrap completed for %s in database %s on %s.\n' \
   "$POSTGRES_APP_PRINCIPAL_NAME" \
