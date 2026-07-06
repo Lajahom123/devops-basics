@@ -127,7 +127,7 @@ postgresBootstrap:
   image:
     repository: devopstrackerdevvsh6qw.azurecr.io/devops-tracker-ops
     tag: postgres-entra-bootstrap
-    pullPolicy: IfNotPresent
+    pullPolicy: Always
   postgres:
     host: ""
     database: "devops_tracker"

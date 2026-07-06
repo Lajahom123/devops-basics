@@ -25,7 +25,7 @@ postgresBootstrap:
   image:
     repository: devopstrackerdevvsh6qw.azurecr.io/devops-tracker-ops
     tag: postgres-entra-bootstrap
-    pullPolicy: IfNotPresent
+    pullPolicy: Always
   postgres:
     # runtime-aks output: postgres_server_fqdn
     host: "psql-devops-tracker-dev-swdct.postgres.database.azure.com"
