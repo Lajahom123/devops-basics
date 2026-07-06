@@ -14,12 +14,11 @@ RUN apt-get update \
 
 COPY migrations /flyway/sql
 COPY scripts/run-flyway-migrations.sh /opt/migrations/run-flyway-migrations.sh
-
-RUN chmod +x /opt/migrations/run-flyway-migrations.sh \
+  
+RUN useradd --create-home --shell /usr/sbin/nologin flyway \
+  && chmod +x /opt/migrations/run-flyway-migrations.sh \
   && chown -R flyway:flyway /flyway /opt/migrations
-
+  
 USER flyway
-
-WORKDIR /opt/migrations
-
+  
 ENTRYPOINT ["/opt/migrations/run-flyway-migrations.sh"]
