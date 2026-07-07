@@ -8,10 +8,10 @@ TO :"principal_name";
 GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public
 TO :"principal_name";
 
-ALTER DEFAULT PRIVILEGES IN SCHEMA public
+ALTER DEFAULT PRIVILEGES FOR ROLE "id-devops-tracker-dev-migration-job" IN SCHEMA public
 GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES
 TO :"principal_name";
 
-ALTER DEFAULT PRIVILEGES IN SCHEMA public
+ALTER DEFAULT PRIVILEGES FOR ROLE "id-devops-tracker-dev-migration-job" IN SCHEMA public
 GRANT USAGE, SELECT ON SEQUENCES
 TO :"principal_name";
